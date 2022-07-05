@@ -23,6 +23,7 @@ type Client struct {
 func NewClient(url, apiToken string) *Client {
 	// token := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: apiToken})
 	// client := oauth2.NewClient(context.Background(), token)
+	apiToken = "Bearer " + apiToken
 	client := &http.Client{Transport: &myTransport{apiToken: apiToken}}
 
 	return &Client{

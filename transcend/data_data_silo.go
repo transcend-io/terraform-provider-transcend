@@ -78,7 +78,9 @@ func DataDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{
 	client := m.(*Client)
 
 	var query struct {
-		dataSilos DataSilo `graphql:"dataSilos(filterBy: { text: $text }, first: $first, offset: $offset)"`
+		dataSilos struct {
+			nodes DataSilo
+		} `graphql:"dataSilos(filterBy: { text: $text }, first: $first, offset: $offset)"`
 	}
 
 	vars := map[string]interface{}{
