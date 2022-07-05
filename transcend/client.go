@@ -1,11 +1,19 @@
 package transcend
 
 import (
-	"context"
+	"net/http"
 
 	"github.com/shurcooL/graphql"
-	"golang.org/x/oauth2"
 )
+
+type myTransport struct {
+	apiToken string
+}
+
+func (t *myTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Authorization", t.apiToken)
+	return http.DefaultTransport.RoundTrip(req)
+}
 
 type Client struct {
 	graphql *graphql.Client
@@ -13,8 +21,9 @@ type Client struct {
 }
 
 func NewClient(url, apiToken string) *Client {
-	token := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: apiToken})
-	client := oauth2.NewClient(context.Background(), token)
+	// token := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: apiToken})
+	// client := oauth2.NewClient(context.Background(), token)
+	client := &http.Client{Transport: &myTransport{apiToken: apiToken}}
 
 	return &Client{
 		graphql: graphql.NewClient(url, client),
