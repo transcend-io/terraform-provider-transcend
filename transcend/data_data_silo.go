@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	"github.com/machinebox/graphql"
 )
 
 func dataDataSilo() *schema.Resource {
@@ -77,17 +77,34 @@ func dataDataSilo() *schema.Resource {
 func DataDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
-	var query struct {
-		dataSilos DataSilo `graphql:"dataSilos(filterBy: { text: $text }, first: $first, offset: $offset)"`
-	}
+	// var query struct {
+	// 	dataSilos DataSilo `graphql:"dataSilos(filterBy: { text: $text }, first: $first, offset: $offset)"`
+	// }
 
-	vars := map[string]interface{}{
-		"text":   graphql.String(d.Get("text").(string)),
-		"first":  graphql.Int(d.Get("first").(int)),
-		"offset": graphql.Int(d.Get("offset").(int)),
-	}
+	req := graphql.NewRequest(`
+		dataSilos(
+			filterBy: { text: $title }
+			first: $first
+			offset: $offset
+		) {
+			nodes {
+			id
+			title
+			link
+			type
+			catalog {
+				hasAvcFunctionality
+			}
+		}
+	  }`)
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	req.Var("text", d.Get("text").(string))
+	req.Var("first", d.Get("first").(int))
+	req.Var("offset", d.Get("offset").(int))
+	req.Header.Set("Authorization", client.apiToken)
+
+	err := client.graphql.Run(context.Background(), req, nil)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}

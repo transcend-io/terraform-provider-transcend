@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
 )
 
 func resourceDataSilos() *schema.Resource {
@@ -102,23 +101,23 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*Client)
+	// client := m.(*Client)
 
-	var query struct {
-		dataSilos DataSilo `graphql:"dataSilos(filterBy: { text: $title, ids: $ids }, first: $first, offset: $offset)"`
-	}
+	// var query struct {
+	// 	dataSilos DataSilo `graphql:"dataSilos(filterBy: { text: $title, ids: $ids }, first: $first, offset: $offset)"`
+	// }
 
-	vars := map[string]interface{}{
-		"id":     graphql.String(d.Get("id").(string)),
-		"title":  graphql.String(d.Get("title").(string)),
-		"first":  graphql.Int(d.Get("first").(int)),
-		"offset": graphql.Int(d.Get("offset").(int)),
-	}
+	// // vars := map[string]interface{}{
+	// // 	"id":     graphql.String(d.Get("id").(string)),
+	// // 	"title":  graphql.String(d.Get("title").(string)),
+	// // 	"first":  graphql.Int(d.Get("first").(int)),
+	// // 	"offset": graphql.Int(d.Get("offset").(int)),
+	// // }
 
-	err := client.graphql.Query(context.Background(), &query, vars)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	// // err := client.graphql.Query(context.Background(), &query, vars)
+	// if err != nil {
+	// 	return diag.FromErr(err)
+	// }
 
 	return nil
 }
