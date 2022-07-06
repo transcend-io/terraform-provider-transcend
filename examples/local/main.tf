@@ -12,12 +12,12 @@ provider "transcend" {
     key = "5ab54b35263d9165fddd2f95a7646eeb63dd37c387d0ca2d4be448750fb43163"
 }
 
-data "transcend_data_silo" "all" {
+data "transcend_data_silo" "data_silos" {
     text = ""
     first = 15
     offset = 0
 }
 
-output "all" {
-  value = data.transcend_data_silo.all
+output "data_silos" {
+  value = data.transcend_data_silo.data_silos
 }

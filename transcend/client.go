@@ -3,6 +3,7 @@ package transcend
 import (
 	"net/http"
 
+	genqlient "github.com/Khan/genqlient/graphql"
 	"github.com/shurcooL/graphql"
 )
 
@@ -16,8 +17,9 @@ func (t *myTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 type Client struct {
-	graphql *graphql.Client
-	url     string
+	graphql   *graphql.Client
+	genqlient genqlient.Client
+	url       string
 }
 
 func NewClient(url, apiToken string) *Client {
@@ -27,7 +29,8 @@ func NewClient(url, apiToken string) *Client {
 	client := &http.Client{Transport: &myTransport{apiToken: apiToken}}
 
 	return &Client{
-		graphql: graphql.NewClient(url, client),
-		url:     url,
+		graphql:   graphql.NewClient(url, client),
+		genqlient: genqlient.NewClient(url, client),
+		url:       url,
 	}
 }

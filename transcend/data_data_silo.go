@@ -14,61 +14,59 @@ func dataDataSilo() *schema.Resource {
 		// UpdateContext: resourceDataSilosUpdate,
 		// DeleteContext: resourceDataSilosDelete,
 		Schema: map[string]*schema.Schema{
-			// "last_updated": &schema.Schema{
-			// 	Type:     schema.TypeString,
-			// 	Optional: true,
-			// 	Computed: true,
-			// },
-			// "data_silos": &schema.Schema{
-			// 	Type:     schema.TypeList,
-			// 	Required: true,
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"id": &schema.Schema{
-			// 				Type:     schema.TypeString,
-			// 				Optional: true,
-			// 				Computed: true,
-			// 			},
-			// 			"title": &schema.Schema{
-			// 				Type:     schema.TypeString,
-			// 				Optional: true,
-			// 				Computed: true,
-			// 			},
-			// 			"type": &schema.Schema{
-			// 				Type:     schema.TypeString,
-			// 				Optional: true,
-			// 				Computed: true,
-			// 			},
-			// 			"link": &schema.Schema{
-			// 				Type:     schema.TypeString,
-			// 				Optional: true,
-			// 				Computed: true,
-			// 			},
-			// 			"catalog": &schema.Schema{
-			// 				Type:     schema.TypeMap,
-			// 				Optional: true,
-			// 				Computed: true,
-			// 				Elem: &schema.Schema{
-			// 					Type: schema.TypeBool,
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// },
-			"text": &schema.Schema{
+			"id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
+			"data_silos": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"title": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"type": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"link": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"catalog": &schema.Schema{
+							Type:     schema.TypeMap,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeBool,
+							},
+						},
+					},
+				},
+			},
+			"text": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"first": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"offset": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 		},
 	}
@@ -77,10 +75,10 @@ func dataDataSilo() *schema.Resource {
 func DataDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
-	var query struct {
-		dataSilos struct {
-			nodes DataSilo
-		} `graphql:"dataSilos(filterBy: { text: $text }, first: $first, offset: $offset)"`
+	var data struct {
+		DataSilos struct {
+			Nodes []DataSilo
+		} `graphql:"dataSilos(filterBy: { text: $text } first: $first offset: $offset)"`
 	}
 
 	vars := map[string]interface{}{
@@ -89,10 +87,33 @@ func DataDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{
 		"offset": graphql.Int(d.Get("offset").(int)),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &data, vars)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	res := flattenItems(&data.DataSilos.Nodes)
+	d.Set("data_silos", res)
+
+	d.SetId("datasilo")
 	return nil
+}
+
+func flattenItems(items *[]DataSilo) []interface{} {
+	if items == nil {
+		return make([]interface{}, 0)
+	}
+
+	ret := make([]interface{}, len(*items), len(*items))
+
+	for i, item := range *items {
+		itemMap := make(map[string]interface{})
+		itemMap["id"] = item.ID
+		itemMap["title"] = item.Title
+		itemMap["link"] = item.Link
+
+		ret[i] = itemMap
+	}
+
+	return ret
 }
