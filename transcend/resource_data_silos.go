@@ -3,7 +3,6 @@ package transcend
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,95 +17,61 @@ func resourceDataSilos() *schema.Resource {
 		UpdateContext: resourceDataSilosUpdate,
 		DeleteContext: resourceDataSilosDelete,
 		Schema: map[string]*schema.Schema{
-			"last_updated": &schema.Schema{
+			"id": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"title": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"silos": &schema.Schema{
-				Type:     schema.TypeList,
+			"type": &schema.Schema{
+				Type:     schema.TypeString,
 				Required: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"input": &schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Required: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": &schema.Schema{
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"title": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"type": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"catalog": &schema.Schema{
-										Type:     schema.TypeMap,
-										Computed: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeBool,
-										},
-									},
-									"description": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"url": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-										ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
-											value := v.(string)
-
-											var diags diag.Diagnostics
-											if !strings.HasPrefix(value, "https://") && !strings.HasPrefix(value, "http://") {
-												diags = append(diags, diag.Diagnostic{
-													Severity: diag.Error,
-													Summary:  "Invalid URL",
-													Detail:   "URL did not start with 'https://' or 'https://'",
-												})
-											}
-											return diags
-										},
-									},
-									"notify_email_address": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"is_live": &schema.Schema{
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-									"api_key_id": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"link": &schema.Schema{
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-								},
-							},
-						},
-					},
+			},
+			"catalog": &schema.Schema{
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeBool,
 				},
 			},
-			"text": &schema.Schema{
+			"description": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"first": &schema.Schema{
-				Type:     schema.TypeInt,
+			"url": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+					value := v.(string)
+
+					var diags diag.Diagnostics
+					if !strings.HasPrefix(value, "https://") && !strings.HasPrefix(value, "http://") {
+						diags = append(diags, diag.Diagnostic{
+							Severity: diag.Error,
+							Summary:  "Invalid URL",
+							Detail:   "URL did not start with 'https://' or 'https://'",
+						})
+					}
+					return diags
+				},
+			},
+			"notify_email_address": &schema.Schema{
+				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"offset": &schema.Schema{
-				Type:     schema.TypeInt,
+			"is_live": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"api_key_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"link": &schema.Schema{
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 		},
@@ -127,38 +92,29 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 		} `graphql:"connectDataSilo(input: {name: $type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
 	}
 
-	silos := d.Get("silos").([]interface{})
-
-	for _, item := range silos {
-		i := item.(map[string]interface{})
-
-		in := i["input"].([]interface{})[0]
-		input := in.(map[string]interface{})
-
-		vars := map[string]interface{}{
-			"type":                 graphql.String(input["type"].(string)),
-			"title":                graphql.String(input["title"].(string)),
-			"description":          graphql.String(input["description"].(string)),
-			"url":                  graphql.String(input["url"].(string)),
-			"notify_email_address": graphql.String(input["notify_email_address"].(string)),
-			"is_live":              graphql.Boolean(input["is_live"].(bool)),
-			"api_key_id":           graphql.ID(input["api_key_id"].(string)),
-		}
-
-		err := client.graphql.Mutate(context.Background(), &mutation, vars)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Error connecting data silos",
-				Detail:   "Error when connecting to data silos: " + err.Error(),
-			})
-			return diags
-		}
+	vars := map[string]interface{}{
+		"type":                 graphql.String(d.Get("type").(string)),
+		"title":                graphql.String(d.Get("title").(string)),
+		"description":          graphql.String(d.Get("description").(string)),
+		"url":                  graphql.String(d.Get("url").(string)),
+		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
 	}
 
-	resourceDataSilosRead(ctx, d, m)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error connecting to " + d.Get("type").(string),
+			Detail:   "Error when connecting to data silo: " + err.Error(),
+		})
+		return diags
+	}
 
 	d.SetId(string(mutation.ConnectDataSilo.DataSilo.ID))
+
+	resourceDataSilosRead(ctx, d, m)
 
 	return nil
 }
@@ -166,19 +122,22 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
-	var data struct {
-		DataSilos struct {
-			Nodes []DataSilo
-		}
+	var query struct {
+		DataSilo DataSilo `graphql:"dataSilo(id: $id)"`
 	}
 
-	err := client.graphql.Query(context.Background(), &data, nil)
+	vars := map[string]interface{}{
+		"id": graphql.ID(d.Get("id").(string)),
+	}
+
+	err := client.graphql.Query(context.Background(), &query, vars)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	res := flattenItems(&data.DataSilos.Nodes)
-	d.Set("silos", res)
+	d.Set("title", query.DataSilo.Title)
+	d.Set("link", query.DataSilo.Link)
+	d.Set("type", query.DataSilo.Type)
 
 	return nil
 }
@@ -194,37 +153,26 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
 	}
 
-	if d.HasChange("silos") {
-		silos := d.Get("silos").([]interface{})
-
-		for _, item := range silos {
-			i := item.(map[string]interface{})
-
-			in := i["input"].([]interface{})[0]
-			input := in.(map[string]interface{})
-
-			vars := map[string]interface{}{
-				"id":                   graphql.ID(input["id"].(string)),
-				"title":                graphql.String(input["title"].(string)),
-				"description":          graphql.String(input["description"].(string)),
-				"url":                  graphql.String(input["url"].(string)),
-				"notify_email_address": graphql.String(input["notify_email_address"].(string)),
-				"is_live":              graphql.Boolean(input["is_live"].(bool)),
-				"api_key_id":           graphql.ID(input["api_key_id"].(string)),
-			}
-
-			err := client.graphql.Mutate(context.Background(), &mutation, vars)
-			if err != nil {
-				diags = append(diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  "Error updating data silos",
-					Detail:   "Error when updating data silo: " + err.Error(),
-				})
-				return diags
-			}
-		}
-		d.Set("last_updated", time.Now().Format(time.RFC850))
+	vars := map[string]interface{}{
+		"id":                   graphql.ID(d.Get("id").(string)),
+		"title":                graphql.String(d.Get("title").(string)),
+		"description":          graphql.String(d.Get("description").(string)),
+		"url":                  graphql.String(d.Get("url").(string)),
+		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
 	}
+
+	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error updating data silos",
+			Detail:   "Error when updating data silo: " + err.Error(),
+		})
+		return diags
+	}
+
 	return resourceDataSilosRead(ctx, d, m)
 }
 

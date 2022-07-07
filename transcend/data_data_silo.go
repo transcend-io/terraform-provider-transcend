@@ -98,22 +98,3 @@ func DataDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{
 	d.SetId("datasilo")
 	return nil
 }
-
-func flattenItems(items *[]DataSilo) []interface{} {
-	if items == nil {
-		return make([]interface{}, 0)
-	}
-
-	ret := make([]interface{}, len(*items), len(*items))
-
-	for i, item := range *items {
-		itemMap := make(map[string]interface{})
-		itemMap["id"] = item.ID
-		itemMap["title"] = item.Title
-		itemMap["link"] = item.Link
-
-		ret[i] = itemMap
-	}
-
-	return ret
-}
