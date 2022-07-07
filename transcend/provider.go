@@ -23,7 +23,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			// "data_silos": resourceDataSilos(),
+			"transcend_data_silo": resourceDataSilos(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_data_silo": dataDataSilo(),

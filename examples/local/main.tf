@@ -22,3 +22,13 @@ data "transcend_data_silo" "data_silos" {
 output "data_silos" {
   value = data.transcend_data_silo.data_silos
 }
+
+resource "transcend_data_silo" "data_silos" {
+  silos{
+    input{
+      type = "amazonS3"
+      title = " Amazon"
+      url = "https://"
+    }
+  }
+}
