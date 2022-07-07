@@ -19,6 +19,12 @@ data "transcend_data_silo" "data_silos" {
     offset = 0
 }
 
-output "data_silos" {
-  value = data.transcend_data_silo.data_silos
+resource "transcend_data_silo" "amazon" {
+  type = "amazonS3"
+  title = "Amazon"
+  url = "https://"
+}
+
+output "amazon" {
+  value = resource.transcend_data_silo.amazon
 }
