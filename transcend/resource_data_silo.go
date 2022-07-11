@@ -10,7 +10,7 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
-func resourceDataSilos() *schema.Resource {
+func resourceDataSilo() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataSilosCreate,
 		ReadContext:   resourceDataSilosRead,
@@ -127,7 +127,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	vars := map[string]interface{}{
-		"id": graphql.ID(d.Get("id").(string)),
+		"id": graphql.String(d.Get("id").(string)),
 	}
 
 	err := client.graphql.Query(context.Background(), &query, vars)
