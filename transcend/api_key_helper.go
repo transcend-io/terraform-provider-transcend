@@ -12,3 +12,9 @@ type APIKey struct {
 	}
 	DataSilos []DataSilo
 }
+
+type ScopeName string
+
+const (
+	fullAdmin ScopeName = "fullAdmin"
+)

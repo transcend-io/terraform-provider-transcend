@@ -10,7 +10,7 @@ terraform {
 provider "transcend" {
     // this is key for local dev environment
     url = "https://yo.com:4001/"
-    key = "8a7a93d488eca202cf00d1e71f818df4fc10453f8671ee81381f751f37c86b27"
+    key = "97ced11a53792dd210427191eb12e137d5ade1cd0bb7fc2ba0d5bccf343d2250"
 }
 
 data "transcend_data_silo" "data_silos" {
@@ -32,4 +32,5 @@ data "transcend_data_silo" "data_silos" {
 resource "transcend_api_key" "test" {
   title = "test!"
   data_silos = ["09bae972-a340-4cc9-a590-51715ee6d413"]
+  scopes = ["fullAdmin"]
 }
