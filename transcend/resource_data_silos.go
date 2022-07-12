@@ -37,7 +37,15 @@ func resourceDataSilos() *schema.Resource {
 					Type: schema.TypeBool,
 				},
 			},
+			"outer_type": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"prompt_email_template_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -74,6 +82,62 @@ func resourceDataSilos() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"identifiers": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"depended_on_data_silo_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"depended_on_data_silo_titles": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"data_subject_block_list_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"owner_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"owner_emails": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"teams": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"team_names": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -89,17 +153,19 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		ConnectDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"connectDataSilo(input: {name: $type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
+		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames, $teamNames, })"`
 	}
 
 	vars := map[string]interface{}{
 		"type":                 graphql.String(d.Get("type").(string)),
+		"outer_type":           graphql.String(d.Get("outer_type").(string)),
 		"title":                graphql.String(d.Get("title").(string)),
 		"description":          graphql.String(d.Get("description").(string)),
 		"url":                  graphql.String(d.Get("url").(string)),
 		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
 		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
 		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
+		"identifiers":          graphql.String(d.Get("identifiers").(string)),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
