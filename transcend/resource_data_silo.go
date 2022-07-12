@@ -153,19 +153,26 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		ConnectDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames, $teamNames, })"`
+		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames: $team_names})"`
 	}
 
 	vars := map[string]interface{}{
-		"type":                 graphql.String(d.Get("type").(string)),
-		"outer_type":           graphql.String(d.Get("outer_type").(string)),
-		"title":                graphql.String(d.Get("title").(string)),
-		"description":          graphql.String(d.Get("description").(string)),
-		"url":                  graphql.String(d.Get("url").(string)),
-		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
-		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
-		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
-		"identifiers":          graphql.String(d.Get("identifiers").(string)),
+		"type":                         graphql.String(d.Get("type").(string)),
+		"outer_type":                   graphql.String(d.Get("outer_type").(string)),
+		"title":                        graphql.String(d.Get("title").(string)),
+		"description":                  graphql.String(d.Get("description").(string)),
+		"url":                          graphql.String(d.Get("url").(string)),
+		"notify_email_address":         graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
+		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
+		"depended_on_data_silo_ids":    toStringList(d.Get("depended_on_data_silo_ids").([]interface{})),
+		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
+		"data_subject_block_list_ids":  toStringList(d.Get("data_subject_block_list_ids").([]interface{})),
+		"owner_ids":                    toStringList(d.Get("owner_ids").([]interface{})),
+		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
+		"teams":                        toStringList(d.Get("teams").([]interface{})),
+		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -216,17 +223,25 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		UpdateDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
+		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames: $team_names})"`
 	}
 
 	vars := map[string]interface{}{
-		"id":                   graphql.ID(d.Get("id").(string)),
-		"title":                graphql.String(d.Get("title").(string)),
-		"description":          graphql.String(d.Get("description").(string)),
-		"url":                  graphql.String(d.Get("url").(string)),
-		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
-		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
-		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
+		"id":                           graphql.ID(d.Get("id").(string)),
+		"title":                        graphql.String(d.Get("title").(string)),
+		"description":                  graphql.String(d.Get("description").(string)),
+		"url":                          graphql.String(d.Get("url").(string)),
+		"notify_email_address":         graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
+		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
+		"depended_on_data_silo_ids":    toStringList(d.Get("depended_on_data_silo_ids").([]interface{})),
+		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
+		"data_subject_block_list_ids":  toStringList(d.Get("data_subject_block_list_ids").([]interface{})),
+		"owner_ids":                    toStringList(d.Get("owner_ids").([]interface{})),
+		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
+		"teams":                        toStringList(d.Get("teams").([]interface{})),
+		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
