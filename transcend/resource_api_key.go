@@ -8,6 +8,8 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
+// TODO: add support for scopes
+
 func resourceAPIKey() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAPIKeyCreate,
