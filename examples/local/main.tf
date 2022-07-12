@@ -10,7 +10,7 @@ terraform {
 provider "transcend" {
     // this is key for local dev environment
     url = "https://yo.com:4001/"
-    key = "5ab54b35263d9165fddd2f95a7646eeb63dd37c387d0ca2d4be448750fb43163"
+    key = "8a7a93d488eca202cf00d1e71f818df4fc10453f8671ee81381f751f37c86b27"
 }
 
 data "transcend_data_silo" "data_silos" {
@@ -19,12 +19,17 @@ data "transcend_data_silo" "data_silos" {
     offset = 0
 }
 
-resource "transcend_data_silo" "amazon" {
-  type = "amazonS3"
-  title = "Amazon"
-  url = "https://"
-}
+# resource "transcend_data_silo" "amazon" {
+#   type = "amazonS3"
+#   title = "Amazon"
+#   url = "https://"
+# }
 
-output "amazon" {
-  value = resource.transcend_data_silo.amazon
+# output "amazon" {
+#   value = resource.transcend_data_silo.amazon
+# }
+
+resource "transcend_api_key" "test" {
+  title = "test!"
+  data_silos = ["09bae972-a340-4cc9-a590-51715ee6d413"]
 }
