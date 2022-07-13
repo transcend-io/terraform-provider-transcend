@@ -32,5 +32,5 @@ data "transcend_data_silo" "data_silos" {
 resource "transcend_api_key" "test" {
   title = "test!"
   data_silos = ["09bae972-a340-4cc9-a590-51715ee6d413"]
-  scopes = ["fullAdmin"]
+  scopes = ["makeDataSubjectRequest", "connectDataSilos"]
 }

@@ -67,22 +67,17 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	// 	}
 	// 	query += `]})"`
 	// }
+
 	silos := d.Get("data_silos").([]interface{})
-
 	data_silos := make([]string, len(silos))
-
 	for i, silo := range silos {
 		data_silos[i] = silo.(string)
 	}
 
 	sc := d.Get("scopes").([]interface{})
-
 	scopes := make([]ScopeName, len(sc))
-
-	for i, scope := range scopes {
-		if scope == fullAdmin {
-			scopes[i] = fullAdmin
-		}
+	for i, scope := range sc {
+		scopes[i] = ScopeName(scope.(string))
 	}
 
 	vars := map[string]interface{}{

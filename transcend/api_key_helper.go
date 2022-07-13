@@ -14,7 +14,3 @@ type APIKey struct {
 }
 
 type ScopeName string
-
-const (
-	fullAdmin ScopeName = "fullAdmin"
-)
