@@ -46,6 +46,26 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
+			"headers": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"value": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"is_secret": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"outer_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -158,11 +178,27 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		ConnectDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
+		} `graphql:"connectDataSilo(input: {name: $type, headers: $headers, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
+	}
+
+	heads := d.Get("headers").([]interface{})
+
+	headers := make([]CustomHeaderInput, len(heads))
+
+	for i, head := range heads {
+
+		newHead := head.(map[string]interface{})
+
+		headers[i] = CustomHeaderInput{
+			graphql.String(newHead["name"].(string)),
+			graphql.String(newHead["value"].(string)),
+			graphql.Boolean(newHead["is_secret"].(bool)),
+		}
 	}
 
 	vars := map[string]interface{}{
 		"type":                         graphql.String(d.Get("type").(string)),
+		"headers":                      headers,
 		"outer_type":                   graphql.String(d.Get("outer_type").(string)),
 		"title":                        graphql.String(d.Get("title").(string)),
 		"description":                  graphql.String(d.Get("description").(string)),

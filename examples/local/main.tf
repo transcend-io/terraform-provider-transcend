@@ -23,6 +23,11 @@ resource "transcend_data_silo" "amazon" {
   type = "amazonS3"
   title = "Amazon"
   url = "https://"
+  headers {
+    name = "test"
+    value = "what"
+    is_secret = true
+  }
 }
 
 output "amazon" {
