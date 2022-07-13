@@ -4,11 +4,18 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
+type Resource struct {
+	HasAvcFunctionality graphql.Boolean
+}
+
 type DataSilo struct {
-	ID    graphql.String
-	Title graphql.String
-	Link  graphql.String
-	Type  graphql.String
+	ID      graphql.String
+	Title   graphql.String
+	Link    graphql.String
+	Type    graphql.String
+	Catalog struct {
+		HasAvcFunctionality graphql.Boolean
+	}
 }
 
 func flattenItems(items *[]DataSilo) []interface{} {

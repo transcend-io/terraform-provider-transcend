@@ -26,15 +26,24 @@ func resourceDataSilo() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"link": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"catalog": &schema.Schema{
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeBool,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"has_avc_functionality": &schema.Schema{
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
 				},
 			},
 			"outer_type": &schema.Schema{
@@ -75,10 +84,6 @@ func resourceDataSilo() *schema.Resource {
 				Optional: true,
 			},
 			"api_key_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"link": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -153,7 +158,7 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		ConnectDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames: $team_names})"`
+		} `graphql:"connectDataSilo(input: {name: $type, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
 	}
 
 	vars := map[string]interface{}{
@@ -166,12 +171,8 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
 		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
 		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
-		"depended_on_data_silo_ids":    toStringList(d.Get("depended_on_data_silo_ids").([]interface{})),
 		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
-		"data_subject_block_list_ids":  toStringList(d.Get("data_subject_block_list_ids").([]interface{})),
-		"owner_ids":                    toStringList(d.Get("owner_ids").([]interface{})),
 		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
-		"teams":                        toStringList(d.Get("teams").([]interface{})),
 		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
@@ -212,6 +213,11 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("link", query.DataSilo.Link)
 	d.Set("type", query.DataSilo.Type)
 
+	set := make(map[string]interface{})
+	set["has_avc_functionaility"] = query.DataSilo.Catalog.HasAvcFunctionality
+
+	d.Set("catalog", set)
+
 	return nil
 }
 
@@ -223,7 +229,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		UpdateDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id identifiers: $identifiers, dependedOnDataSiloIds: $depended_on_data_silo_ids, dependedOnDataSiloTitles: $depended_on_data_silo_titles, dataSubjectBlockListIds: $data_subject_block_list_ids, ownerIds: $owner_ids, ownerEmails: $owner_emails, teams: $teams, teamNames: $team_names})"`
+		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
 	}
 
 	vars := map[string]interface{}{
@@ -235,12 +241,8 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
 		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
 		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
-		"depended_on_data_silo_ids":    toStringList(d.Get("depended_on_data_silo_ids").([]interface{})),
 		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
-		"data_subject_block_list_ids":  toStringList(d.Get("data_subject_block_list_ids").([]interface{})),
-		"owner_ids":                    toStringList(d.Get("owner_ids").([]interface{})),
 		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
-		"teams":                        toStringList(d.Get("teams").([]interface{})),
 		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
