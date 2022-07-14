@@ -26,18 +26,55 @@ func resourceDataSilo() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"link": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"catalog": &schema.Schema{
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeBool,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"has_avc_functionality": &schema.Schema{
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
 				},
 			},
+			"headers": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"value": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"is_secret": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"outer_type": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"prompt_email_template_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -70,9 +107,61 @@ func resourceDataSilo() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"link": &schema.Schema{
-				Type:     schema.TypeString,
+			"identifiers": &schema.Schema{
+				Type:     schema.TypeList,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"depended_on_data_silo_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"depended_on_data_silo_titles": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"data_subject_block_list_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"owner_ids": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"owner_emails": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"teams": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"team_names": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		Importer: &schema.ResourceImporter{
@@ -89,17 +178,38 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		ConnectDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"connectDataSilo(input: {name: $type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
+		} `graphql:"connectDataSilo(input: {name: $type, headers: $headers, outerType: $outer_type, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id, identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
+	}
+
+	heads := d.Get("headers").([]interface{})
+
+	headers := make([]CustomHeaderInput, len(heads))
+
+	for i, head := range heads {
+
+		newHead := head.(map[string]interface{})
+
+		headers[i] = CustomHeaderInput{
+			graphql.String(newHead["name"].(string)),
+			graphql.String(newHead["value"].(string)),
+			graphql.Boolean(newHead["is_secret"].(bool)),
+		}
 	}
 
 	vars := map[string]interface{}{
-		"type":                 graphql.String(d.Get("type").(string)),
-		"title":                graphql.String(d.Get("title").(string)),
-		"description":          graphql.String(d.Get("description").(string)),
-		"url":                  graphql.String(d.Get("url").(string)),
-		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
-		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
-		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
+		"type":                         graphql.String(d.Get("type").(string)),
+		"headers":                      headers,
+		"outer_type":                   graphql.String(d.Get("outer_type").(string)),
+		"title":                        graphql.String(d.Get("title").(string)),
+		"description":                  graphql.String(d.Get("description").(string)),
+		"url":                          graphql.String(d.Get("url").(string)),
+		"notify_email_address":         graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
+		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
+		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
+		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
+		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -139,6 +249,11 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("link", query.DataSilo.Link)
 	d.Set("type", query.DataSilo.Type)
 
+	set := make(map[string]interface{})
+	set["has_avc_functionaility"] = query.DataSilo.Catalog.HasAvcFunctionality
+
+	d.Set("catalog", set)
+
 	return nil
 }
 
@@ -150,17 +265,21 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var mutation struct {
 		UpdateDataSilo struct {
 			DataSilo DataSilo
-		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id})"`
+		} `graphql:"updateDataSilo(input: {id: $id, title: $title, description: $description, url: $url, notifyEmailAddress: $notify_email_address, isLive: $is_live, apiKeyId: $api_key_id identifiers: $identifiers, dependedOnDataSiloTitles: $depended_on_data_silo_titles, ownerEmails: $owner_emails, teamNames: $team_names})"`
 	}
 
 	vars := map[string]interface{}{
-		"id":                   graphql.ID(d.Get("id").(string)),
-		"title":                graphql.String(d.Get("title").(string)),
-		"description":          graphql.String(d.Get("description").(string)),
-		"url":                  graphql.String(d.Get("url").(string)),
-		"notify_email_address": graphql.String(d.Get("notify_email_address").(string)),
-		"is_live":              graphql.Boolean(d.Get("is_live").(bool)),
-		"api_key_id":           graphql.ID(d.Get("api_key_id").(string)),
+		"id":                           graphql.ID(d.Get("id").(string)),
+		"title":                        graphql.String(d.Get("title").(string)),
+		"description":                  graphql.String(d.Get("description").(string)),
+		"url":                          graphql.String(d.Get("url").(string)),
+		"notify_email_address":         graphql.String(d.Get("notify_email_address").(string)),
+		"is_live":                      graphql.Boolean(d.Get("is_live").(bool)),
+		"api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
+		"identifiers":                  toStringList(d.Get("identifiers").([]interface{})),
+		"depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
+		"owner_emails":                 toStringList(d.Get("owner_emails").([]interface{})),
+		"team_names":                   toStringList(d.Get("team_names").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
