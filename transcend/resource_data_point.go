@@ -157,33 +157,31 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*Client)
+	// client := m.(*Client)
 
-	var query struct {
-		DataPoint struct {
-			Title struct {
-				DefaultMessage graphql.String
-			}
-			Description struct {
-				DefaultMessage graphql.String
-			}
-		} `graphql:"dataPoint(id: $id)"`
-	}
+	// var query struct {
+	// 	DataPoint struct {
+	// 		Title struct {
+	// 			DefaultMessage graphql.String
+	// 		}
+	// 		Description struct {
+	// 			DefaultMessage graphql.String
+	// 		}
+	// 	} `graphql:"dataPoint(id: $id)"`
+	// }
 
-	vars := map[string]interface{}{
-		"id": graphql.ID(d.Get("id").(string)),
-	}
+	// vars := map[string]interface{}{
+	// 	"id": graphql.ID(d.Get("id").(string)),
+	// }
 
-	err := client.graphql.Query(context.Background(), &query, vars)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	// err := client.graphql.Query(context.Background(), &query, vars)
+	// if err != nil {
+	// 	return diag.FromErr(err)
+	// }
 
-	// TODO: sync up all fields
-	d.Set("title", query.DataPoint.Title.DefaultMessage)
-	d.Set("description", query.DataPoint.Description.DefaultMessage)
-
-	return nil
+	// // TODO: sync up all fields
+	// d.Set("title", query.DataPoint.Title.DefaultMessage)
+	// d.Set("description", query.DataPoint.Description.DefaultMessage)
 
 	return nil
 }
