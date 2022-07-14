@@ -168,5 +168,8 @@ func resourceAPIKeyDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
+
+	d.SetId("")
+
 	return nil
 }

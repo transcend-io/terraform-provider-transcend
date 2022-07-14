@@ -30,8 +30,23 @@ resource "transcend_data_silo" "amazon" {
   }
 }
 
+resource "transcend_data_point" "customer" {
+  data_silo_id = resource.transcend_data_silo.amazon.id
+  name = "customer"
+  title = "test"
+  query_suggestions {
+    suggested_query = "testing"
+    request_type = "ACCESS"
+  }
+
+}
+
 output "amazon" {
   value = resource.transcend_data_silo.amazon
+}
+
+output "customer" {
+  value = resource.transcend_data_point.customer.id
 }
 
 # resource "transcend_api_key" "test" {
@@ -39,11 +54,11 @@ output "amazon" {
 #   data_silos = []
 # }
 
-resource "transcend_api_key" "test" {
-  title = "test!"
-  data_silos = ["09bae972-a340-4cc9-a590-51715ee6d413"]
-  scopes = ["makeDataSubjectRequest", "connectDataSilos"]
-}
+# resource "transcend_api_key" "test" {
+#   title = "test!"
+#   data_silos = ["09bae972-a340-4cc9-a590-51715ee6d413"]
+#   scopes = ["makeDataSubjectRequest", "connectDataSilos"]
+# }
   
 # output "test" {
 #   value = resource.transcend_api_key.test

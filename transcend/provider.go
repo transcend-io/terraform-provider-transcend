@@ -23,8 +23,9 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"transcend_data_silo": resourceDataSilo(),
-			"transcend_api_key":   resourceAPIKey(),
+			"transcend_data_silo":  resourceDataSilo(),
+			"transcend_api_key":    resourceAPIKey(),
+			"transcend_data_point": resourceDataPoint(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_data_silo": dataDataSilo(),
