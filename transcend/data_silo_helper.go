@@ -4,11 +4,20 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
+type CustomHeaderInput struct {
+	Name     graphql.String  `json:"name"`
+	Value    graphql.String  `json:"value"`
+	IsSecret graphql.Boolean `json:"isSecret"`
+}
+
 type DataSilo struct {
-	ID    graphql.String
-	Title graphql.String
-	Link  graphql.String
-	Type  graphql.String
+	ID      graphql.String `json:"id"`
+	Title   graphql.String `json:"title"`
+	Link    graphql.String `json:"link"`
+	Type    graphql.String `json:"type"`
+	Catalog struct {
+		HasAvcFunctionality graphql.Boolean `json:"hasAvcFunctionality"`
+	} `json:"catalog"`
 }
 
 func flattenItems(items *[]DataSilo) []interface{} {
