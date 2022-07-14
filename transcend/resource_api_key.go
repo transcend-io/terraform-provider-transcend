@@ -54,7 +54,7 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	var mutation struct {
 		CreateApiKey struct {
 			APIKey APIKey
-		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos})"`
+		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos, scopes: $scopes})"`
 	}
 
 	// scopes := d.Get("scopes").([]interface{})
@@ -68,9 +68,16 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	// 	query += `]})"`
 	// }
 
+	sc := d.Get("scopes").([]interface{})
+	scopes := make([]ScopeName, len(sc))
+	for i, scope := range sc {
+		scopes[i] = ScopeName(scope.(string))
+	}
+
 	vars := map[string]interface{}{
 		"title":      graphql.String(d.Get("title").(string)),
 		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
+		"scopes":     scopes,
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)

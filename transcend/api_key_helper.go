@@ -12,3 +12,5 @@ type APIKey struct {
 	}
 	DataSilos []DataSilo
 }
+
+type ScopeName string
