@@ -34,21 +34,14 @@ func resourceDataSilo() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"catalog": &schema.Schema{
-				Type:     schema.TypeList,
+			"has_avc_functionality": &schema.Schema{
+				Type:     schema.TypeBool,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"has_avc_functionality": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"headers": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
@@ -248,11 +241,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("title", query.DataSilo.Title)
 	d.Set("link", query.DataSilo.Link)
 	d.Set("type", query.DataSilo.Type)
-
-	set := make(map[string]interface{})
-	set["has_avc_functionaility"] = query.DataSilo.Catalog.HasAvcFunctionality
-
-	d.Set("catalog", set)
+	d.Set("has_avc_functionality", query.DataSilo.Catalog.HasAvcFunctionality)
 
 	return nil
 }
