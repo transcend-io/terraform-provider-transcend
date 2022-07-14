@@ -34,15 +34,6 @@ resource "transcend_data_point" "customer" {
   data_silo_id = resource.transcend_data_silo.amazon.id
   name = "customer"
   title = "test"
-  enabled_actions = ["ACCESS", "ERASURE"]
-  sub_data_points {
-    name = "test"
-    description = "testing subdatapoints"
-  }
-  sub_data_points {
-    name = "another one"
-    description = "testing subdatapoints"
-  }
   query_suggestions {
     suggested_query = "testing"
     request_type = "ACCESS"
@@ -52,6 +43,10 @@ resource "transcend_data_point" "customer" {
 
 output "amazon" {
   value = resource.transcend_data_silo.amazon
+}
+
+output "customer" {
+  value = resource.transcend_data_point.customer.id
 }
 
 # resource "transcend_api_key" "test" {
