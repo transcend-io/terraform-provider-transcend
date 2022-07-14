@@ -167,7 +167,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 			Description struct {
 				DefaultMessage graphql.String
 			}
-		}
+		} `graphql:"dataPoint(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
