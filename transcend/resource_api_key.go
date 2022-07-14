@@ -77,7 +77,7 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	vars := map[string]interface{}{
 		"title":      graphql.String(d.Get("title").(string)),
 		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
-    "scopes":     scopes,
+		"scopes":     scopes,
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
