@@ -159,6 +159,8 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
+	var diags diag.Diagnostics
+
 	var query struct {
 		DataPoints struct {
 			Nodes []DataPoint
@@ -174,7 +176,21 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	err := client.graphql.Query(context.Background(), &query, vars)
 	if err != nil {
-		return diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading datapoint " + d.Get("name").(string),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+
+	if len(query.DataPoints.Nodes) == 0 {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading datapoint " + d.Get("name").(string),
+			Detail:   "Cannot find datapoint.",
+		})
+		return diags
 	}
 
 	// TODO: sync up all fields
