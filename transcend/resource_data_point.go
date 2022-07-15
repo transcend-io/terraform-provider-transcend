@@ -157,31 +157,45 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// client := m.(*Client)
+	client := m.(*Client)
 
-	// var query struct {
-	// 	DataPoint struct {
-	// 		Title struct {
-	// 			DefaultMessage graphql.String
-	// 		}
-	// 		Description struct {
-	// 			DefaultMessage graphql.String
-	// 		}
-	// 	} `graphql:"dataPoint(id: $id)"`
-	// }
+	var diags diag.Diagnostics
 
-	// vars := map[string]interface{}{
-	// 	"id": graphql.ID(d.Get("id").(string)),
-	// }
+	var query struct {
+		DataPoints struct {
+			Nodes []DataPoint
+		} `graphql:"dataPoints(filterBy: { ids: $ids })"`
+	}
 
-	// err := client.graphql.Query(context.Background(), &query, vars)
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
+	ids := make([]graphql.ID, 1)
+	ids[0] = graphql.ID(d.Get("id").(string))
 
-	// // TODO: sync up all fields
-	// d.Set("title", query.DataPoint.Title.DefaultMessage)
-	// d.Set("description", query.DataPoint.Description.DefaultMessage)
+	vars := map[string]interface{}{
+		"ids": ids,
+	}
+
+	err := client.graphql.Query(context.Background(), &query, vars)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading datapoint " + d.Get("name").(string),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+
+	if len(query.DataPoints.Nodes) == 0 {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading datapoint " + d.Get("name").(string),
+			Detail:   "Cannot find datapoint.",
+		})
+		return diags
+	}
+
+	// TODO: sync up all fields
+	d.Set("title", query.DataPoints.Nodes[0].Title.DefaultMessage)
+	d.Set("description", query.DataPoints.Nodes[0].Description.DefaultMessage)
 
 	return nil
 }
