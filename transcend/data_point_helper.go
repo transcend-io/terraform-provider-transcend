@@ -2,6 +2,15 @@ package transcend
 
 import "github.com/shurcooL/graphql"
 
+type DataPoint struct {
+	Title struct {
+		DefaultMessage graphql.String
+	}
+	Description struct {
+		DefaultMessage graphql.String
+	}
+}
+
 type DbIntegrationQuerySuggestionInput string
 
 type RequestActionObjectResolver string
