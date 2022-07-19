@@ -20,12 +20,12 @@ func toIDList(origs []interface{}) []graphql.ID {
 	return vals
 }
 
-func toHeadersList(origs []interface{}) []Header {
-	vals := make([]Header, len(origs))
+func toCustomHeaderInputList(origs []interface{}) []CustomHeaderInput {
+	vals := make([]CustomHeaderInput, len(origs))
 	for i, orig := range origs {
 		newHead := orig.(map[string]interface{})
 
-		vals[i] = Header{
+		vals[i] = CustomHeaderInput{
 			graphql.String(newHead["name"].(string)),
 			graphql.String(newHead["value"].(string)),
 			graphql.Boolean(newHead["is_secret"].(bool)),
@@ -42,4 +42,18 @@ func toRequestActionList(origs []interface{}) []RequestAction {
 	}
 
 	return vals
+}
+
+func flattenHeaders(headers *[]Header) []interface{} {
+	ret := make([]interface{}, len(*headers))
+
+	for i, header := range *headers {
+		itemMap := make(map[string]interface{})
+		itemMap["name"] = header.Name
+		itemMap["value"] = header.Value
+		itemMap["is_secret"] = header.IsSecret
+		ret[i] = itemMap
+	}
+
+	return ret
 }

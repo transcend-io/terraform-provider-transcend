@@ -12,10 +12,10 @@ type Enricher struct {
 	Description     graphql.String
 	Url             graphql.String
 	InputIdentifier struct {
-		Name graphql.String
+		ID graphql.String
 	}
 	Identifiers []struct {
-		Name graphql.String
+		ID graphql.String
 	}
 	Actions []RequestAction
 	Headers []Header
