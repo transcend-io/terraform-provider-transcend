@@ -4,13 +4,11 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
-type Header struct {
+type CustomHeaderInput struct {
 	Name     graphql.String  `json:"name"`
 	Value    graphql.String  `json:"value"`
 	IsSecret graphql.Boolean `json:"isSecret"`
 }
-
-type CustomHeaderInput Header
 
 type DataSilo struct {
 	ID      graphql.String `json:"id"`

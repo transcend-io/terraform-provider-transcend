@@ -62,73 +62,71 @@ func resourceDataPoint() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"sub_data_points": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"categories": &schema.Schema{
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"category": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-						"purposes": &schema.Schema{
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"purpose": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-						"attributes": &schema.Schema{
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"values": &schema.Schema{
-										Type:     schema.TypeList,
-										Required: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			// TODO: schema for subdatapoint
+			// "sub_data_points": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"name": &schema.Schema{
+			// 				Type:     schema.TypeString,
+			// 				Required: true,
+			// 			},
+			// 			"description": &schema.Schema{
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
+			// 			"categories": &schema.Schema{
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"name": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"category": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"purposes": &schema.Schema{
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"name": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"purpose": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"attributes": &schema.Schema{
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"key": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"values": &schema.Schema{
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -260,7 +258,7 @@ func mutateDataPoint(client *Client, d *schema.ResourceData, diags diag.Diagnost
 				ID   graphql.String
 				Name graphql.String
 			}
-		} `graphql:"updateOrCreateDataPoint(input: {dataSiloId: $dataSiloId, name: $name, title: $title, dataCollectionTag: $dataCollectionTag, description: $description, enabledActions: $enabledActions, subDataPoints: $subDataPoints})"`
+		} `graphql:"updateOrCreateDataPoint(input: {dataSiloId: $dataSiloId, name: $name, title: $title, dataCollectionTag: $dataCollectionTag, description: $description, enabledActions: $enabledActions})"`
 	}
 
 	vars := map[string]interface{}{
@@ -270,7 +268,6 @@ func mutateDataPoint(client *Client, d *schema.ResourceData, diags diag.Diagnost
 		"dataCollectionTag": graphql.String(d.Get("data_collection_tag").(string)),
 		"description":       graphql.String(d.Get("description").(string)),
 		"enabledActions":    toRequestActionObjectResolverList(d.Get("enabled_actions").([]interface{})),
-		"subDataPoints":     toDataPointSubDataPointInputList(d.Get("sub_data_points").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
