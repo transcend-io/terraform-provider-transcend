@@ -285,6 +285,33 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceDataSilosDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Client)
 
+	var diags diag.Diagnostics
+
+	var mutation struct {
+		DeleteDataSilos struct {
+			Success graphql.Boolean
+		} `graphql:"deleteDataSilos(input: { ids: $ids })"`
+	}
+
+	ids := make([]graphql.ID, 1)
+	ids[0] = graphql.ID(d.Get("id").(string))
+
+	vars := map[string]interface{}{
+		"ids": ids,
+	}
+
+	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error deleting data silo " + d.Get("type").(string),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+
+	d.SetId("")
 	return nil
 }
