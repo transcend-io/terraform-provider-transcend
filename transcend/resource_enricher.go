@@ -154,7 +154,7 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	var mutation struct {
 		UpdateEnricher struct {
 			Enricher Enricher
-		} `graphql:"updateEnricher(input: {id: $id, title: $title, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $output_identifiers, actions: $actions})"`
+		} `graphql:"updateEnricher(input: {id: $id, title: $title, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
 	}
 
 	vars := map[string]interface{}{
