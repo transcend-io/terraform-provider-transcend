@@ -196,8 +196,10 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// TODO: sync up all fields
+	d.Set("name", query.DataPoints.Nodes[0].Name)
 	d.Set("title", query.DataPoints.Nodes[0].Title.DefaultMessage)
 	d.Set("description", query.DataPoints.Nodes[0].Description.DefaultMessage)
+	d.Set("data_collection_tag", query.DataPoints.Nodes[0].DataCollection.VisualID)
 
 	return nil
 }
@@ -260,10 +262,11 @@ func mutateDataPoint(client *Client, d *schema.ResourceData, diags diag.Diagnost
 				ID   graphql.String
 				Name graphql.String
 			}
-		} `graphql:"updateOrCreateDataPoint(input: {dataSiloId: $dataSiloId, name: $name, title: $title, dataCollectionTag: $dataCollectionTag, description: $description, enabledActions: $enabledActions, subDataPoints: $subDataPoints})"`
+		} `graphql:"updateOrCreateDataPoint(input: {id: $id, dataSiloId: $dataSiloId, name: $name, title: $title, dataCollectionTag: $dataCollectionTag, description: $description, enabledActions: $enabledActions, subDataPoints: $subDataPoints})"`
 	}
 
 	vars := map[string]interface{}{
+		"id":                graphql.ID(d.Get("id").(string)),
 		"dataSiloId":        graphql.ID(d.Get("data_silo_id").(string)),
 		"name":              graphql.String(d.Get("name").(string)),
 		"title":             graphql.String(d.Get("title").(string)),
