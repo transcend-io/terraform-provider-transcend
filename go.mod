@@ -62,14 +62,17 @@ require (
 )
 
 require (
-	github.com/Microsoft/go-winio v0.5.0 // indirect
-	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/go-test/deep v1.0.7 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
-	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/stretchr/testify v1.8.0 // indirect
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
+)
+
+require (
+	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/go-test/deep v1.0.7 // indirect
+	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 )
