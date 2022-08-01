@@ -22,58 +22,71 @@ func resourceDataSilo() *schema.Resource {
 				Computed: true,
 			},
 			"title": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The title of the data silo",
 			},
 			"link": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The link to the data silo",
 			},
 			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Type of silo",
 			},
 			"has_avc_functionality": &schema.Schema{
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether the data silo supports automated vendor coordination",
 			},
 			"headers": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Custom headers to include in outbound webhook",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the custom header",
 						},
 						"value": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Sensitive:   true,
+							Description: "The value of the custom header",
 						},
 						"is_secret": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When true, the value of this header will be considered sensitive",
 						},
 					},
 				},
 			},
 			"outer_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)",
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the data silo",
 			},
 			"prompt_email_template_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The id of template to use when prompting via email",
 			},
 			"url": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The URL of the server to post to if a server silo",
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 					value := v.(string)
 
@@ -89,16 +102,19 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"notify_email_address": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The email address that should be notified whenever new requests are made",
 			},
 			"is_live": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether the data silo should be live",
 			},
 			"api_key_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The id of the existing api key to attach to",
 			},
 			"identifiers": &schema.Schema{
 				Type:     schema.TypeList,
@@ -106,6 +122,7 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The names of the identifiers that the data silo should be connected to",
 			},
 			"depended_on_data_silo_ids": &schema.Schema{
 				Type:     schema.TypeList,
@@ -113,6 +130,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The IDs of the data silo that this data silo depends on during a deletion request.",
+				ConflictsWith: []string{"depended_on_data_silo_titles"},
 			},
 			"depended_on_data_silo_titles": &schema.Schema{
 				Type:     schema.TypeList,
@@ -120,6 +139,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The titles of the data silo that this data silo depends on during a deletion request",
+				ConflictsWith: []string{"depended_on_data_silo_ids"},
 			},
 			"data_subject_block_list_ids": &schema.Schema{
 				Type:     schema.TypeList,
@@ -127,6 +148,7 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The list of subject IDs to block list from this data silo",
 			},
 			"owner_ids": &schema.Schema{
 				Type:     schema.TypeList,
@@ -134,6 +156,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The unique ids of the users to assign as owners of this data silo",
+				ConflictsWith: []string{"owner_emails"},
 			},
 			"owner_emails": &schema.Schema{
 				Type:     schema.TypeList,
@@ -141,6 +165,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.",
+				ConflictsWith: []string{"owner_ids"},
 			},
 			"teams": &schema.Schema{
 				Type:     schema.TypeList,
@@ -148,6 +174,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The ids of the teams that should be responsible for this data silo",
+				ConflictsWith: []string{"team_names"},
 			},
 			"team_names": &schema.Schema{
 				Type:     schema.TypeList,
@@ -155,6 +183,8 @@ func resourceDataSilo() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description:   "The names of the teams that should be responsible for this data silo",
+				ConflictsWith: []string{"teams"},
 			},
 		},
 		Importer: &schema.ResourceImporter{

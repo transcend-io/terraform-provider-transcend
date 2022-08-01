@@ -20,20 +20,24 @@ func resourceEnricher() *schema.Resource {
 				Computed: true,
 			},
 			"title": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The enricher's title",
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The enricher's description",
 			},
 			"url": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The url that the enricher should post to",
 			},
 			"input_identifier": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The ID of the identifier that will be the input to the enricher",
 			},
 			"output_identifiers": &schema.Schema{
 				Type:     schema.TypeList,
@@ -41,6 +45,7 @@ func resourceEnricher() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The IDs of the identifiers that can possibly be output from the enricher",
 			},
 			"actions": &schema.Schema{
 				Type:     schema.TypeList,
@@ -48,6 +53,7 @@ func resourceEnricher() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The action types that the enricher should run for",
 			},
 			"headers": &schema.Schema{
 				Type:     schema.TypeList,
@@ -56,19 +62,24 @@ func resourceEnricher() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The name of the custom header",
 						},
 						"value": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Sensitive:   true,
+							Description: "The value of the custom header",
 						},
 						"is_secret": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When true, the value of this header will be considered sensitive",
 						},
 					},
 				},
+				Description: "Custom headers to include in outbound webhook",
 			},
 		},
 		Importer: &schema.ResourceImporter{

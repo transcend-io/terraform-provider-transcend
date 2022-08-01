@@ -22,8 +22,9 @@ func resourceAPIKey() *schema.Resource {
 				Computed: true,
 			},
 			"title": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The title used to identify the API key",
 			},
 			"scopes": &schema.Schema{
 				Type:     schema.TypeList,
@@ -31,6 +32,7 @@ func resourceAPIKey() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The names of the scopes to add",
 			},
 			"data_silos": &schema.Schema{
 				Type:     schema.TypeList,
@@ -38,6 +40,7 @@ func resourceAPIKey() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "The ids of the data silos to assign to",
 			},
 		},
 		Importer: &schema.ResourceImporter{
