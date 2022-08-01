@@ -28,9 +28,7 @@ func Provider() *schema.Provider {
 			"transcend_data_point": resourceDataPoint(),
 			"transcend_enricher":   resourceEnricher(),
 		},
-		DataSourcesMap: map[string]*schema.Resource{
-			"transcend_data_silo": dataDataSilo(),
-		},
+		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
 	}
 }

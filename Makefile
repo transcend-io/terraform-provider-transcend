@@ -1,9 +1,9 @@
 default: testacc
 HOSTNAME=transcend.com
 NAMESPACE=cli
-NAME=transcend-io
+NAME=transcend
 BINARY=terraform-provider-${NAME}
-VERSION=0.1
+VERSION=0.2
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 
@@ -18,3 +18,8 @@ build:
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/$(GOOS)_$(GOARCH)
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/$(GOOS)_$(GOARCH)
+
+.PHONY: docs
+docs:
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+	tfplugindocs generate

@@ -1,4 +1,4 @@
-module github.com/transcend-io/terraform-provider-transcend-io
+module github.com/transcend-io/terraform-provider-transcend
 
 go 1.17
 
