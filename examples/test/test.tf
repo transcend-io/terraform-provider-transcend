@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.0.2"
+      version = "0.3.0"
       source  = "transcend.com/cli/transcend"
     }
   }
