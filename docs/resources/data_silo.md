@@ -24,7 +24,6 @@ description: |-
 - `api_key_id` (String) The id of the existing api key to attach to
 - `data_subject_block_list_ids` (List of String) The list of subject IDs to block list from this data silo
 - `depended_on_data_silo_ids` (List of String) The IDs of the data silo that this data silo depends on during a deletion request.
-- `depended_on_data_silo_titles` (List of String) The titles of the data silo that this data silo depends on during a deletion request
 - `description` (String) The description of the data silo
 - `headers` (Block List, Max: 1) Custom headers to include in outbound webhook (see [below for nested schema](#nestedblock--headers))
 - `identifiers` (List of String) The names of the identifiers that the data silo should be connected to
@@ -32,15 +31,14 @@ description: |-
 - `notify_email_address` (String) The email address that should be notified whenever new requests are made
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
-- `owner_ids` (List of String) The unique ids of the users to assign as owners of this data silo
 - `prompt_email_template_id` (String) The id of template to use when prompting via email
 - `team_names` (List of String) The names of the teams that should be responsible for this data silo
-- `teams` (List of String) The ids of the teams that should be responsible for this data silo
 - `title` (String) The title of the data silo
 - `url` (String) The URL of the server to post to if a server silo
 
 ### Read-Only
 
+- `aws_external_id` (String) The external ID for the AWS IAM Role for AWS data silos
 - `has_avc_functionality` (Boolean) Whether the data silo supports automated vendor coordination
 - `id` (String) The ID of this resource.
 - `link` (String) The link to the data silo

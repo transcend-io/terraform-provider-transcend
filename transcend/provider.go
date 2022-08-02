@@ -14,12 +14,14 @@ func Provider() *schema.Provider {
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_URL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_URL", "https://api.transcend.io/"),
+				Description: "The custom Transcend backend URL to talk to. Typically can be left to the default production URL.",
 			},
 			"key": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_KEY", nil),
+				Description: "The API Key to use to talk to Transcend. Ensure it has the scopes to perform whatever actions you need. Can be set using the TRANSCEND_KEY environment variable.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -34,7 +36,6 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-
 	url := d.Get("url").(string)
 	key := d.Get("key").(string)
 
