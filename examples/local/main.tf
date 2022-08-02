@@ -11,7 +11,9 @@ terraform {
 }
 
 # Set TRANSCEND_KEY and TRANSCEND_URL locally, or define in this block
-provider "transcend" {}
+provider "transcend" {
+  url = "https://api.dev.trancsend.com/"
+}
 
 // TODO: Add identifier data source and maybe resource
 # resource "transcend_enricher" "test" {
