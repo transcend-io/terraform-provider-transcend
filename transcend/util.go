@@ -2,13 +2,24 @@ package transcend
 
 import "github.com/shurcooL/graphql"
 
-func toStringList(origs []interface{}) []graphql.String {
+func toStringList(raw interface{}) []graphql.String {
+	if raw == nil {
+		return []graphql.String{}
+	}
+	origs := raw.([]interface{})
 	vals := make([]graphql.String, len(origs))
 	for i, orig := range origs {
 		vals[i] = graphql.String(orig.(string))
 	}
 
 	return vals
+}
+
+func toString(raw interface{}) graphql.String {
+	if raw == nil {
+		return ""
+	}
+	return graphql.String(raw.(string))
 }
 
 func toIDList(origs []interface{}) []graphql.ID {
@@ -26,9 +37,9 @@ func toCustomHeaderInputList(origs []interface{}) []CustomHeaderInput {
 		newHead := orig.(map[string]interface{})
 
 		vals[i] = CustomHeaderInput{
-			graphql.String(newHead["name"].(string)),
-			graphql.String(newHead["value"].(string)),
-			graphql.Boolean(newHead["is_secret"].(bool)),
+			Name:     graphql.String(newHead["name"].(string)),
+			Value:    graphql.String(newHead["value"].(string)),
+			IsSecret: graphql.Boolean(newHead["is_secret"].(bool)),
 		}
 	}
 
@@ -44,23 +55,21 @@ func toRequestActionList(origs []interface{}) []RequestAction {
 	return vals
 }
 
-func flattenItems(items *[]DataSilo) []interface{} {
-	if items == nil {
-		return make([]interface{}, 0)
+func flattenDataSiloBlockList(dataSilo DataSilo) []interface{} {
+	owners := dataSilo.SubjectBlocklist
+	ret := make([]interface{}, len(owners))
+	for i, owner := range owners {
+		ret[i] = owner.ID
 	}
+	return ret
+}
 
-	ret := make([]interface{}, len(*items))
-
-	for i, item := range *items {
-		itemMap := make(map[string]interface{})
-		itemMap["id"] = item.ID
-		itemMap["title"] = item.Title
-		itemMap["link"] = item.Link
-		itemMap["type"] = item.Type
-
-		ret[i] = itemMap
+func flattenOwners(dataSilo DataSilo) []interface{} {
+	owners := dataSilo.Owners
+	ret := make([]interface{}, len(owners))
+	for i, owner := range owners {
+		ret[i] = owner.Email
 	}
-
 	return ret
 }
 
@@ -76,15 +85,6 @@ func flattenHeaders(headers *[]Header) []interface{} {
 	}
 
 	return ret
-}
-
-func toDbIntegrationQuerySuggestionInputList(origs []interface{}) []DbIntegrationQuerySuggestionInput {
-	vals := make([]DbIntegrationQuerySuggestionInput, len(origs))
-	for i, orig := range origs {
-		vals[i] = DbIntegrationQuerySuggestionInput(orig.(string))
-	}
-
-	return vals
 }
 
 func toRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {

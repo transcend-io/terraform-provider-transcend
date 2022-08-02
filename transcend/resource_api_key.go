@@ -60,17 +60,6 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos, scopes: $scopes})"`
 	}
 
-	// scopes := d.Get("scopes").([]interface{})
-
-	// if len(scopes) > 0 {
-	// 	query := `graphql:"createApiKey(input: {title: $title, scopes:[` + scopes[0].(string)
-	// 	for _, sc := range scopes[1:] {
-	// 		scope := sc.(string)
-	// 		query += "," + scope
-	// 	}
-	// 	query += `]})"`
-	// }
-
 	sc := d.Get("scopes").([]interface{})
 	scopes := make([]ScopeName, len(sc))
 	for i, scope := range sc {
@@ -95,7 +84,7 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.SetId(string(mutation.CreateApiKey.APIKey.ID))
 	d.Set("title", mutation.CreateApiKey.APIKey.Title)
-	d.Set("data_silos", mutation.CreateApiKey.APIKey.DataSilos)
+	// TODO: Set scopes/data_silos
 
 	return nil
 }
