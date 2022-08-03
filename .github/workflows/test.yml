@@ -82,4 +82,5 @@ jobs:
         timeout-minutes: 10
         env:
           TF_ACC: "1"
+          TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
         run: make gotestsum
