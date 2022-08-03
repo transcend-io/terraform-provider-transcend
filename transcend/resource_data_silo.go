@@ -12,16 +12,16 @@ import (
 
 func createDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {
 	return DataSiloUpdatableFields{
-		Title:                   graphql.String(d.Get("title").(string)),
-		Description:             graphql.String(d.Get("description").(string)),
-		URL:                     graphql.String(d.Get("url").(string)),
-		NotifyEmailAddress:      graphql.String(d.Get("notify_email_address").(string)),
-		IsLive:                  graphql.Boolean(d.Get("is_live").(bool)),
-		OwnerEmails:             toStringList(d.Get("owner_emails").([]interface{})),
-		DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
-		Headers:                 toCustomHeaderInputList((d.Get("headers").([]interface{}))),
+		Title:              graphql.String(d.Get("title").(string)),
+		Description:        graphql.String(d.Get("description").(string)),
+		URL:                graphql.String(d.Get("url").(string)),
+		NotifyEmailAddress: graphql.String(d.Get("notify_email_address").(string)),
+		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
+		OwnerEmails:        toStringList(d.Get("owner_emails").([]interface{})),
+		Headers:            toCustomHeaderInputList((d.Get("headers").([]interface{}))),
 
 		// TODO: Add more fields
+		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
 		// Identifiers:             toStringList(d.Get("identifiers").([]interface{})),
 		// "outer_type":                   graphql.String(d.Get("outer_type").(string)),
 		// "api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
@@ -165,14 +165,14 @@ func resourceDataSilo() *schema.Resource {
 				},
 				Description: "The IDs of the data silo that this data silo depends on during a deletion request.",
 			},
-			"data_subject_block_list_ids": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The list of subject IDs to block list from this data silo",
-			},
+			// "data_subject_block_list_ids": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// 	Description: "The list of subject IDs to block list from this data silo",
+			// },
 			"owner_emails": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
@@ -253,12 +253,12 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("url", query.DataSilo.URL)
 	d.Set("notify_email_address", query.DataSilo.NotifyEmailAddress)
 	d.Set("is_live", query.DataSilo.IsLive)
-	// d.Set("identifiers", query.DataSilo.Identifiers)
 	d.Set("owner_emails", flattenOwners(query.DataSilo))
-	d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
 	d.Set("headers", flattenHeaders(&query.DataSilo.Headers))
 
 	// TODO: Support these fields being read
+	// d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
+	// d.Set("identifiers", query.DataSilo.Identifiers)
 	// d.Set("outer_type", query.DataSilo.OuterType)
 	// d.Set("prompt_email_template_id", query.DataSilo.PromptEmailTemplate.ID)
 	// d.Set("team_names", ...)

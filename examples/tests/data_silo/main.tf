@@ -28,10 +28,10 @@ variable "notify_email_address" { default = null }
 #   type = list(string)
 #   default = []
 # }
-variable "data_subject_block_list_ids" {
-  type = list(string)
-  default = []
-}
+# variable "data_subject_block_list_ids" {
+#   type = list(string)
+#   default = []
+# }
 variable "headers" {
   type = list(object({
     name = string
@@ -61,7 +61,7 @@ resource "transcend_data_silo" "silo" {
   url = var.url
   notify_email_address = var.notify_email_address
   # identifiers = var.data_silo_identifiers
-  data_subject_block_list_ids = var.data_subject_block_list_ids
+  # data_subject_block_list_ids = var.data_subject_block_list_ids
 }
 
 
