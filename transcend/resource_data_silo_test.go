@@ -38,6 +38,7 @@ func deployDataSilo(t *testing.T, vars map[string]interface{}) (DataSilo, *terra
 	})
 	terraform.InitAndApply(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "awsExternalId"))
+	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	return silo, terraformOptions
 }
@@ -48,73 +49,73 @@ func TestCanCreateAndDestroyDataSilo(t *testing.T) {
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 }
 
-// func TestCanChangeTitle(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"title": t.Name()})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+func TestCanChangeTitle(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"title": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"title": t.Name() + "_2"})
-// 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Title)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"title": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Title)
+}
 
-// func TestCanChangeDescription(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"description": t.Name()})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+func TestCanChangeDescription(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"description": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"description": t.Name() + "_2"})
-// 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Description)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"description": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Description)
+}
 
-// func TestCanChangeOwners(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"owner_emails": []string{"david@transcend.io"}})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String("david@transcend.io"), silo.Owners[0].Email)
+func TestCanChangeOwners(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"owner_emails": []string{"david@transcend.io"}})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("david@transcend.io"), silo.Owners[0].Email)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}})
-// 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.Owners[0].Email)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}})
+	assert.Equal(t, graphql.String("mike@transcend.io"), silo.Owners[0].Email)
+}
 
-// func TestCanChangeIsLive(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"is_live": false})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
+func TestCanChangeIsLive(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"is_live": false})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"is_live": true})
-// 	assert.Equal(t, graphql.Boolean(true), silo.IsLive)
+	silo, _ = deployDataSilo(t, map[string]interface{}{"is_live": true})
+	assert.Equal(t, graphql.Boolean(true), silo.IsLive)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"is_live": false})
-// 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"is_live": false})
+	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
+}
 
-// func TestCanChangeUrl(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"url": "https://some.webhook", "type": "server"})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String("https://some.webhook"), silo.URL)
+func TestCanChangeUrl(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"url": "https://some.webhook", "type": "server"})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("https://some.webhook"), silo.URL)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"})
-// 	assert.Equal(t, graphql.String("https://some.other.webhook"), silo.URL)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"})
+	assert.Equal(t, graphql.String("https://some.other.webhook"), silo.URL)
+}
 
-// func TestCanChangeHeaders(t *testing.T) {
-// 	silo, options := deployDataSilo(t, map[string]interface{}{"headers": []map[string]interface{}{
-// 		{
-// 			"name":      "someHeader",
-// 			"value":     "someHeaderValue",
-// 			"is_secret": "false",
-// 		},
-// 	}})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String("someHeader"), silo.Headers[0].Name)
-// 	assert.Equal(t, graphql.String("someHeaderValue"), silo.Headers[0].Value)
+func TestCanChangeHeaders(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"headers": []map[string]interface{}{
+		{
+			"name":      "someHeader",
+			"value":     "someHeaderValue",
+			"is_secret": "false",
+		},
+	}})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("someHeader"), silo.Headers[0].Name)
+	assert.Equal(t, graphql.String("someHeaderValue"), silo.Headers[0].Value)
 
-// 	silo, _ = deployDataSilo(t, map[string]interface{}{"headers": []map[string]interface{}{
-// 		{
-// 			"name":      "someOtherHeader",
-// 			"value":     "someOtherHeaderValue",
-// 			"is_secret": "false",
-// 		},
-// 	}})
-// 	assert.Equal(t, graphql.String("someOtherHeader"), silo.Headers[0].Name)
-// 	assert.Equal(t, graphql.String("someOtherHeaderValue"), silo.Headers[0].Value)
-// }
+	silo, _ = deployDataSilo(t, map[string]interface{}{"headers": []map[string]interface{}{
+		{
+			"name":      "someOtherHeader",
+			"value":     "someOtherHeaderValue",
+			"is_secret": "false",
+		},
+	}})
+	assert.Equal(t, graphql.String("someOtherHeader"), silo.Headers[0].Name)
+	assert.Equal(t, graphql.String("someOtherHeaderValue"), silo.Headers[0].Value)
+}
