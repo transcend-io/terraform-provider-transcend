@@ -135,10 +135,10 @@ type DataSilo struct {
 	SubjectBlocklist []struct {
 		ID graphql.String `json:"id"`
 	} `json:"subjectBlocklist"`
-	Headers []Header `json:"headers"`
+	Headers   []Header       `json:"headers"`
+	OuterType graphql.String `json:"outerType"`
 
 	// TODO: Add support to DataSiloInput first
-	// OuterType           graphql.String `json:"outerType"`
 	// PromptEmailTemplate struct {
 	// 	ID graphql.String `json:"id,omitempty"`
 	// } `json:"promptEmailTemplate,omitempty"`

@@ -37,7 +37,6 @@ func deployDataSilo(t *testing.T, vars map[string]interface{}) (DataSilo, *terra
 		Vars:         defaultVars,
 	})
 	terraform.InitAndApply(t, terraformOptions)
-	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "awsExternalId"))
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	return silo, terraformOptions
@@ -47,6 +46,7 @@ func TestCanCreateAndDestroyDataSilo(t *testing.T) {
 	silo, options := deployDataSilo(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 }
 
 func TestCanChangeTitle(t *testing.T) {
@@ -127,4 +127,28 @@ func TestCanChangeHeaders(t *testing.T) {
 	}})
 	assert.Equal(t, graphql.String("someOtherHeader"), silo.Headers[0].Name)
 	assert.Equal(t, graphql.String("someOtherHeaderValue"), silo.Headers[0].Value)
+}
+
+func TestCanCreatePromptAPersonSilo(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{
+		"type":       "promptAPerson",
+		"outer_type": "coupa",
+	})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("coupa"), silo.OuterType)
+	assert.Equal(t, graphql.String("promptAPerson"), silo.Type)
+	assert.Equal(t, graphql.Boolean(true), silo.Catalog.HasAvcFunctionality)
+	assert.Equal(t, graphql.String("dpo@coupa.com"), silo.NotifyEmailAddress)
+}
+
+func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{
+		"type":                 "promptAPerson",
+		"notify_email_address": "not.real.email@transcend.io",
+	})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("promptAPerson"), silo.Type)
+	assert.Equal(t, graphql.Boolean(true), silo.Catalog.HasAvcFunctionality)
+	assert.Equal(t, graphql.String("not.real.email@transcend.io"), silo.NotifyEmailAddress)
+	assert.Empty(t, silo.OuterType)
 }

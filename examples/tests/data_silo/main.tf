@@ -12,6 +12,7 @@ provider "transcend" {
 }
 
 variable "title" {}
+variable "outer_type" { default = null }
 variable "type" { default = "amazonWebServices" }
 variable "description" { default = "some description" }
 variable "owner_emails" {
@@ -56,10 +57,11 @@ resource "transcend_data_silo" "silo" {
       is_secret = headers.value["is_secret"]
     }
   }
-
-  // TODO: Add tests for changing these
   url = var.url
   notify_email_address = var.notify_email_address
+  outer_type = var.outer_type
+
+  // TODO: Add tests for changing these
   # identifiers = var.data_silo_identifiers
   # data_subject_block_list_ids = var.data_subject_block_list_ids
 }
