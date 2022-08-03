@@ -75,12 +75,12 @@ type DataSiloUpdatableFields struct {
 	URL                     graphql.String      `json:"url,omitempty"`
 	NotifyEmailAddress      graphql.String      `json:"notifyEmailAddress,omitempty"`
 	IsLive                  graphql.Boolean     `json:"isLive"`
-	Identifiers             []graphql.String    `json:"identifiers"`
 	OwnerEmails             []graphql.String    `json:"ownerEmails"`
 	DataSubjectBlockListIds []graphql.String    `json:"dataSubjectBlockListIds"`
 	Headers                 []CustomHeaderInput `json:"headers"`
 
 	// TODO: Support more fields
+	// Identifiers             []graphql.String    `json:"identifiers"`
 	// dependedOnDataSiloIds
 	// dependedOnDataSiloTitles
 	// ownerIds
@@ -125,9 +125,9 @@ type DataSilo struct {
 	URL                graphql.String  `json:"url,omitempty"`
 	NotifyEmailAddress graphql.String  `json:"notifyEmailAddress,omitempty"`
 	IsLive             graphql.Boolean `json:"isLive"`
-	Identifiers        []struct {
-		Name graphql.String `json:"name"`
-	} `json:"identifiers"`
+	// Identifiers        []struct {
+	// 	Name graphql.String `json:"name"`
+	// } `json:"identifiers"`
 	Owners []struct {
 		ID    graphql.String `json:"id"`
 		Email graphql.String `json:"email"`

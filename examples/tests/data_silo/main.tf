@@ -24,10 +24,10 @@ variable "is_live" {
 }
 variable "url" { default = null }
 variable "notify_email_address" { default = null }
-variable "data_silo_identifiers" {
-  type = list(string)
-  default = []
-}
+# variable "data_silo_identifiers" {
+#   type = list(string)
+#   default = []
+# }
 variable "data_subject_block_list_ids" {
   type = list(string)
   default = []
@@ -60,7 +60,7 @@ resource "transcend_data_silo" "silo" {
   // TODO: Add tests for changing these
   url = var.url
   notify_email_address = var.notify_email_address
-  identifiers = var.data_silo_identifiers
+  # identifiers = var.data_silo_identifiers
   data_subject_block_list_ids = var.data_subject_block_list_ids
 }
 

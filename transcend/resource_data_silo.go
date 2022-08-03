@@ -17,12 +17,12 @@ func createDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		URL:                     graphql.String(d.Get("url").(string)),
 		NotifyEmailAddress:      graphql.String(d.Get("notify_email_address").(string)),
 		IsLive:                  graphql.Boolean(d.Get("is_live").(bool)),
-		Identifiers:             toStringList(d.Get("identifiers").([]interface{})),
 		OwnerEmails:             toStringList(d.Get("owner_emails").([]interface{})),
 		DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
 		Headers:                 toCustomHeaderInputList((d.Get("headers").([]interface{}))),
 
 		// TODO: Add more fields
+		// Identifiers:             toStringList(d.Get("identifiers").([]interface{})),
 		// "outer_type":                   graphql.String(d.Get("outer_type").(string)),
 		// "api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
 		// "depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
@@ -149,14 +149,14 @@ func resourceDataSilo() *schema.Resource {
 				Optional:    true,
 				Description: "The id of the existing api key to attach to",
 			},
-			"identifiers": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The names of the identifiers that the data silo should be connected to",
-			},
+			// "identifiers": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// 	Description: "The names of the identifiers that the data silo should be connected to",
+			// },
 			"depended_on_data_silo_ids": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
@@ -253,7 +253,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("url", query.DataSilo.URL)
 	d.Set("notify_email_address", query.DataSilo.NotifyEmailAddress)
 	d.Set("is_live", query.DataSilo.IsLive)
-	d.Set("identifiers", query.DataSilo.Identifiers)
+	// d.Set("identifiers", query.DataSilo.Identifiers)
 	d.Set("owner_emails", flattenOwners(query.DataSilo))
 	d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
 	d.Set("headers", flattenHeaders(&query.DataSilo.Headers))
