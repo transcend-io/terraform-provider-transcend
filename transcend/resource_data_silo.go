@@ -101,21 +101,21 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"outer_type": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)",
-			},
+			// "outer_type": &schema.Schema{
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Description: "The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)",
+			// },
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The description of the data silo",
 			},
-			"prompt_email_template_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The id of template to use when prompting via email",
-			},
+			// "prompt_email_template_id": &schema.Schema{
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Description: "The id of template to use when prompting via email",
+			// },
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -144,11 +144,11 @@ func resourceDataSilo() *schema.Resource {
 				Optional:    true,
 				Description: "Whether the data silo should be live",
 			},
-			"api_key_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The id of the existing api key to attach to",
-			},
+			// "api_key_id": &schema.Schema{
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Description: "The id of the existing api key to attach to",
+			// },
 			// "identifiers": &schema.Schema{
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,
@@ -157,14 +157,14 @@ func resourceDataSilo() *schema.Resource {
 			// 	},
 			// 	Description: "The names of the identifiers that the data silo should be connected to",
 			// },
-			"depended_on_data_silo_ids": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The IDs of the data silo that this data silo depends on during a deletion request.",
-			},
+			// "depended_on_data_silo_ids": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// 	Description: "The IDs of the data silo that this data silo depends on during a deletion request.",
+			// },
 			// "data_subject_block_list_ids": &schema.Schema{
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,
@@ -181,14 +181,14 @@ func resourceDataSilo() *schema.Resource {
 				},
 				Description: "The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.",
 			},
-			"team_names": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The names of the teams that should be responsible for this data silo",
-			},
+			// "team_names": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// 	Description: "The names of the teams that should be responsible for this data silo",
+			// },
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
