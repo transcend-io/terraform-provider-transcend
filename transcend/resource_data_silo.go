@@ -256,7 +256,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("owner_emails", flattenOwners(query.DataSilo))
 	d.Set("headers", flattenHeaders(&query.DataSilo.Headers))
 
-	// TODO: Support these fields being read
+	// TODO: Support these fields being read in
 	// d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
 	// d.Set("identifiers", query.DataSilo.Identifiers)
 	// d.Set("outer_type", query.DataSilo.OuterType)
