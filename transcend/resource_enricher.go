@@ -106,9 +106,9 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 		"description":     graphql.String(d.Get("description").(string)),
 		"url":             graphql.String(d.Get("url").(string)),
 		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         toCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     toIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         toRequestActionList(d.Get("actions").([]interface{})),
+		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
+		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
+		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -154,7 +154,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("input_identifier", query.Enricher.InputIdentifier.ID)
 	d.Set("identifiers", query.Enricher.Identifiers)
 	d.Set("actions", query.Enricher.Actions)
-	d.Set("headers", flattenHeaders(&query.Enricher.Headers))
+	d.Set("headers", types.FlattenHeaders(&query.Enricher.Headers))
 
 	return nil
 }
@@ -176,9 +176,9 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		"description":     graphql.String(d.Get("description").(string)),
 		"url":             graphql.String(d.Get("url").(string)),
 		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         toCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     toIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         toRequestActionList(d.Get("actions").([]interface{})),
+		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
+		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
+		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)

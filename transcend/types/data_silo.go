@@ -1,6 +1,9 @@
 package types
 
-import "github.com/shurcooL/graphql"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/shurcooL/graphql"
+)
 
 type DataSiloUpdatableFields struct {
 	Title                   graphql.String      `json:"title,omitempty"`
@@ -78,4 +81,48 @@ type DataSilo struct {
 	// Teams   []struct{} `json:"teams"`
 	// ApiKeys []struct{} `json:"apiKeys"`
 	// DependentDataSilos []struct{} `json:"dependentDataSilos"`
+}
+
+func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {
+	return DataSiloUpdatableFields{
+		Title:              graphql.String(d.Get("title").(string)),
+		Description:        graphql.String(d.Get("description").(string)),
+		URL:                graphql.String(d.Get("url").(string)),
+		NotifyEmailAddress: graphql.String(d.Get("notify_email_address").(string)),
+		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
+		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
+		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
+
+		// TODO: Add more fields
+		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
+		// Identifiers:             toStringList(d.Get("identifiers").([]interface{})),
+		// "api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
+		// "depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
+		// "team_names":                   toStringList(d.Get("team_names").([]interface{})),
+	}
+}
+
+func createDataSiloInput(d *schema.ResourceData) DataSiloInput {
+	return DataSiloInput{
+		Name:                    graphql.String(d.Get("type").(string)),
+		DataSiloUpdatableFields: CreateDataSiloUpdatableFields(d),
+	}
+}
+
+func FlattenOwners(dataSilo DataSilo) []interface{} {
+	owners := dataSilo.Owners
+	ret := make([]interface{}, len(owners))
+	for i, owner := range owners {
+		ret[i] = owner.Email
+	}
+	return ret
+}
+
+func FlattenDataSiloBlockList(dataSilo DataSilo) []interface{} {
+	owners := dataSilo.SubjectBlocklist
+	ret := make([]interface{}, len(owners))
+	for i, owner := range owners {
+		ret[i] = owner.ID
+	}
+	return ret
 }

@@ -293,8 +293,8 @@ func mutateDataPoint(client *Client, d *schema.ResourceData, diags diag.Diagnost
 		"title":             graphql.String(d.Get("title").(string)),
 		"dataCollectionTag": graphql.String(d.Get("data_collection_tag").(string)),
 		"description":       graphql.String(d.Get("description").(string)),
-		"enabledActions":    toRequestActionObjectResolverList(d.Get("enabled_actions").([]interface{})),
-		"subDataPoints":     toDataPointSubDataPointInputList(d.Get("sub_data_points").([]interface{})),
+		"enabledActions":    types.ToRequestActionObjectResolverList(d.Get("enabled_actions").([]interface{})),
+		"subDataPoints":     types.ToDataPointSubDataPointInputList(d.Get("sub_data_points").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)

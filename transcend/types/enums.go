@@ -1,7 +1,5 @@
 package types
 
-import "github.com/shurcooL/graphql"
-
 // Enums
 type DbIntegrationQuerySuggestionInput string
 type RequestActionObjectResolver string
@@ -11,10 +9,11 @@ type RequestAction string
 type DataSiloConnectionState string
 type ScopeName string
 
-type Header struct {
-	Name     graphql.String  `json:"name"`
-	Value    graphql.String  `json:"value"`
-	IsSecret graphql.Boolean `json:"isSecret"`
-}
+func ToRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {
+	vals := make([]RequestActionObjectResolver, len(origs))
+	for i, orig := range origs {
+		vals[i] = RequestActionObjectResolver(orig.(string))
+	}
 
-type CustomHeaderInput Header
+	return vals
+}

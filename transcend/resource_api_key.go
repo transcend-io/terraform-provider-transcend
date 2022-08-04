@@ -57,19 +57,15 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	var mutation struct {
 		CreateApiKey struct {
 			APIKey types.APIKey
-		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos, scopes: $scopes})"`
-	}
-
-	sc := d.Get("scopes").([]interface{})
-	scopes := make([]types.ScopeName, len(sc))
-	for i, scope := range sc {
-		scopes[i] = types.ScopeName(scope.(string))
+		} `graphql:"createApiKey(input: $input})"`
 	}
 
 	vars := map[string]interface{}{
-		"title":      graphql.String(d.Get("title").(string)),
-		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
-		"scopes":     scopes,
+		"input": types.CreateApiKeyInput{
+			Title:     graphql.String(d.Get("title").(string)),
+			DataSilos: types.ToIDList(d.Get("data_silos").([]interface{})),
+			Scopes:    types.CreateScopeNames(d.Get("scopes").([]interface{})),
+		},
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -81,12 +77,9 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-
 	d.SetId(string(mutation.CreateApiKey.APIKey.ID))
-	d.Set("title", mutation.CreateApiKey.APIKey.Title)
-	// TODO: Set scopes/data_silos
 
-	return nil
+	return resourceDataSilosRead(ctx, d, m)
 }
 func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
@@ -105,6 +98,8 @@ func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	d.Set("title", query.APIKey.Title)
+	d.Set("scopes", types.FlattenScopes(query.APIKey.Scopes))
+	d.Set("data_silos", types.FlattenDataSilos(query.APIKey.DataSilos))
 
 	return nil
 }
@@ -116,13 +111,13 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	var mutation struct {
 		UpdateApiKey struct {
 			APIKey types.APIKey
-		} `graphql:"updateApiKey(input: {id: $id, title: $title, dataSilos: $data_silos})"`
+		} `graphql:"updateApiKey(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
 		"id":         graphql.ID(d.Get("id").(string)),
 		"title":      graphql.String(d.Get("title").(string)),
-		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
+		"data_silos": types.ToIDList(d.Get("data_silos").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)

@@ -12,32 +12,6 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
-func createDataSiloUpdatableFields(d *schema.ResourceData) types.DataSiloUpdatableFields {
-	return types.DataSiloUpdatableFields{
-		Title:              graphql.String(d.Get("title").(string)),
-		Description:        graphql.String(d.Get("description").(string)),
-		URL:                graphql.String(d.Get("url").(string)),
-		NotifyEmailAddress: graphql.String(d.Get("notify_email_address").(string)),
-		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
-		OwnerEmails:        toStringList(d.Get("owner_emails").([]interface{})),
-		Headers:            toCustomHeaderInputList((d.Get("headers").([]interface{}))),
-
-		// TODO: Add more fields
-		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
-		// Identifiers:             toStringList(d.Get("identifiers").([]interface{})),
-		// "api_key_id":                   graphql.ID(d.Get("api_key_id").(string)),
-		// "depended_on_data_silo_titles": toStringList(d.Get("depended_on_data_silo_titles").([]interface{})),
-		// "team_names":                   toStringList(d.Get("team_names").([]interface{})),
-	}
-}
-
-func createDataSiloInput(d *schema.ResourceData) types.DataSiloInput {
-	return types.DataSiloInput{
-		Name:                    graphql.String(d.Get("type").(string)),
-		DataSiloUpdatableFields: createDataSiloUpdatableFields(d),
-	}
-}
-
 func resourceDataSilo() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataSilosCreate,
@@ -272,8 +246,8 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.Set("outer_type", query.DataSilo.OuterType)
 	d.Set("notify_email_address", query.DataSilo.NotifyEmailAddress)
 	d.Set("is_live", query.DataSilo.IsLive)
-	d.Set("owner_emails", flattenOwners(query.DataSilo))
-	d.Set("headers", flattenHeaders(&query.DataSilo.Headers))
+	d.Set("owner_emails", types.FlattenOwners(query.DataSilo))
+	d.Set("headers", types.FlattenHeaders(&query.DataSilo.Headers))
 
 	// TODO: Support these fields being read in
 	// d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
@@ -302,7 +276,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	vars := map[string]interface{}{
 		"input": types.UpdateDataSiloInput{
 			Id:                      graphql.ID(d.Get("id").(string)),
-			DataSiloUpdatableFields: createDataSiloUpdatableFields(d),
+			DataSiloUpdatableFields: types.CreateDataSiloUpdatableFields(d),
 		},
 	}
 
