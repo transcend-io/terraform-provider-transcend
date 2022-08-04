@@ -235,29 +235,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	d.Set("id", query.DataSilo.ID)
-	d.Set("link", query.DataSilo.Link)
-	d.Set("aws_external_id", query.DataSilo.ExternalId)
-	d.Set("has_avc_functionality", query.DataSilo.Catalog.HasAvcFunctionality)
-	d.Set("type", query.DataSilo.Type)
-	d.Set("title", query.DataSilo.Title)
-	d.Set("description", query.DataSilo.Description)
-	d.Set("url", query.DataSilo.URL)
-	d.Set("outer_type", query.DataSilo.OuterType)
-	d.Set("notify_email_address", query.DataSilo.NotifyEmailAddress)
-	d.Set("is_live", query.DataSilo.IsLive)
-	d.Set("owner_emails", types.FlattenOwners(query.DataSilo))
-	d.Set("headers", types.FlattenHeaders(&query.DataSilo.Headers))
-
-	// TODO: Support these fields being read in
-	// d.Set("data_subject_block_list", flattenDataSiloBlockList(query.DataSilo))
-	// d.Set("identifiers", query.DataSilo.Identifiers)
-	// d.Set("prompt_email_template_id", query.DataSilo.PromptEmailTemplate.ID)
-	// d.Set("team_names", ...)
-	// d.Set("depended_on_data_silo_ids", ...)
-	// d.Set("data_subject_block_list_ids", ...)
-	// d.Set("headers", ...)
-	// d.Set("api_key_id", ...)
+	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	return nil
 }
