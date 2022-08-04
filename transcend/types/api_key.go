@@ -6,36 +6,56 @@ import (
 )
 
 type Scope struct {
-	Type graphql.String `json:"type"`
+	Name graphql.String `json:"name"`
 }
 
 type APIKey struct {
-	ID    graphql.String `json:"id"`
-	Title graphql.String `json:"title"`
-	// Scopes    []Scope        `json:"scopes"`
+	ID     graphql.String `json:"id"`
+	Title  graphql.String `json:"title"`
+	Scopes []Scope        `json:"scopes"`
 	// DataSilos []DataSilo     `json:"dataSilos"`
+}
+
+type APIKeyUpdatableFields struct {
+	Scopes []ScopeName `json:"scopes"`
+	// DataSilos []graphql.ID   `json:"dataSilos"`
 }
 
 type ApiKeyInput struct {
 	Title graphql.String `json:"title"`
-	// Scopes    []ScopeName    `json:"scopes"`
-	// DataSilos []graphql.ID   `json:"dataSilos"`
+	APIKeyUpdatableFields
 }
 
-type UpdateApiKeyInput ApiKeyInput
+type UpdateApiKeyInput struct {
+	ID graphql.String `json:"id"`
+	APIKeyUpdatableFields
+}
 
 func MakeApiKeyInput(d *schema.ResourceData) ApiKeyInput {
 	return ApiKeyInput{
-		Title: graphql.String(d.Get("title").(string)),
+		Title:                 graphql.String(d.Get("title").(string)),
+		APIKeyUpdatableFields: MakeAPIKeyUpdatableFields((d)),
+	}
+}
+
+func MakeUpdateApiKeyInput(d *schema.ResourceData) UpdateApiKeyInput {
+	return UpdateApiKeyInput{
+		ID:                    graphql.String(d.Get("id").(string)),
+		APIKeyUpdatableFields: MakeAPIKeyUpdatableFields((d)),
+	}
+}
+
+func MakeAPIKeyUpdatableFields(d *schema.ResourceData) APIKeyUpdatableFields {
+	return APIKeyUpdatableFields{
+		Scopes: CreateScopeNames(d.Get("scopes").([]interface{})),
 		// DataSilos: ToIDList(d.Get("data_silos").([]interface{})),
-		// Scopes:    CreateScopeNames(d.Get("scopes").([]interface{})),
 	}
 }
 
 func ReadApiKeyIntoState(d *schema.ResourceData, key APIKey) {
 	d.Set("title", key.Title)
-	// d.Set("scopes", types.FlattenScopes(key.Scopes))
-	// d.Set("data_silos", types.FlattenDataSilos(key.DataSilos))
+	d.Set("scopes", FlattenScopes(key.Scopes))
+	// d.Set("data_silos", FlattenDataSilos(key.DataSilos))
 }
 
 func CreateScopeNames(rawScopes []interface{}) []ScopeName {
@@ -49,7 +69,7 @@ func CreateScopeNames(rawScopes []interface{}) []ScopeName {
 func FlattenScopes(scopes []Scope) []interface{} {
 	ret := make([]interface{}, len(scopes))
 	for i, scope := range scopes {
-		ret[i] = scope.Type
+		ret[i] = scope.Name
 	}
 	return ret
 }

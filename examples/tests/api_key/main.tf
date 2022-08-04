@@ -12,9 +12,14 @@ provider "transcend" {
 }
 
 variable "title" {}
+variable "scopes" {
+  type = list(string)
+  default = []
+}
 
 resource "transcend_api_key" "key" {
   title = var.title
+  scopes = var.scopes
 }
 
 output "apiKeyId" {

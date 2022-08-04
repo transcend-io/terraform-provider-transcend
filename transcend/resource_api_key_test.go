@@ -49,3 +49,25 @@ func TestCanCreateAndDestroyAPIKey(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.String(t.Name()), key.Title)
 }
+
+func TestCanChangeApiKeyTitle(t *testing.T) {
+	key, options := deployApiKey(t, map[string]interface{}{"title": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), key.Title)
+	originalKeyId := key.ID
+
+	key, _ = deployApiKey(t, map[string]interface{}{"title": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), key.Title)
+
+	// Ensure that a new API key was created
+	assert.NotEqual(t, originalKeyId, key.ID)
+}
+
+func TestCanChangeScopes(t *testing.T) {
+	key, options := deployApiKey(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String("connectDataSilos"), key.Scopes[0].Name)
+
+	key, _ = deployApiKey(t, map[string]interface{}{"scopes": []string{"makeDataSubjectRequest"}})
+	assert.Equal(t, graphql.String("makeDataSubjectRequest"), key.Scopes[0].Name)
+}

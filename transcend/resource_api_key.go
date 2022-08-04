@@ -25,6 +25,7 @@ func resourceAPIKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The title used to identify the API key",
+				ForceNew:    true,
 			},
 			"scopes": &schema.Schema{
 				Type:     schema.TypeList,
@@ -111,7 +112,7 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	vars := map[string]interface{}{
-		"input": types.MakeApiKeyInput(d),
+		"input": types.MakeUpdateApiKeyInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
