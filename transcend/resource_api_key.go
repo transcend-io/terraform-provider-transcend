@@ -57,15 +57,11 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	var mutation struct {
 		CreateApiKey struct {
 			APIKey types.APIKey
-		} `graphql:"createApiKey(input: $input})"`
+		} `graphql:"createApiKey(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"input": types.CreateApiKeyInput{
-			Title:     graphql.String(d.Get("title").(string)),
-			DataSilos: types.ToIDList(d.Get("data_silos").([]interface{})),
-			Scopes:    types.CreateScopeNames(d.Get("scopes").([]interface{})),
-		},
+		"input": types.MakeApiKeyInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -79,8 +75,9 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId(string(mutation.CreateApiKey.APIKey.ID))
 
-	return resourceDataSilosRead(ctx, d, m)
+	return resourceAPIKeyRead(ctx, d, m)
 }
+
 func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
@@ -97,12 +94,11 @@ func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	d.Set("title", query.APIKey.Title)
-	d.Set("scopes", types.FlattenScopes(query.APIKey.Scopes))
-	d.Set("data_silos", types.FlattenDataSilos(query.APIKey.DataSilos))
+	types.ReadApiKeyIntoState(d, query.APIKey)
 
 	return nil
 }
+
 func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
@@ -115,9 +111,7 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	vars := map[string]interface{}{
-		"id":         graphql.ID(d.Get("id").(string)),
-		"title":      graphql.String(d.Get("title").(string)),
-		"data_silos": types.ToIDList(d.Get("data_silos").([]interface{})),
+		"input": types.MakeApiKeyInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -129,7 +123,8 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-	return nil
+
+	return resourceAPIKeyRead(ctx, d, m)
 }
 func resourceAPIKeyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
