@@ -53,3 +53,44 @@ func TestCanCreateAndDestroyDataPoint(t *testing.T) {
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Name)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Title.DefaultMessage)
 }
+
+func TestCanChangeDataPointTitle(t *testing.T) {
+	dataPoint, options := deployDataPoint(t, map[string]interface{}{"title": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), dataPoint.Title.DefaultMessage)
+
+	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"title": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Title.DefaultMessage)
+}
+
+func TestCanChangeDataPointName(t *testing.T) {
+	dataPoint, options := deployDataPoint(t, map[string]interface{}{"name": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), dataPoint.Name)
+
+	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"name": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Name)
+}
+
+func TestCanChangeDataPointDescription(t *testing.T) {
+	dataPoint, options := deployDataPoint(t, map[string]interface{}{"description": t.Name()})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), dataPoint.Description.DefaultMessage)
+
+	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"description": t.Name() + "_2"})
+	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Description.DefaultMessage)
+}
+
+func TestCanChangeDataPointSilo(t *testing.T) {
+	dataPoint, options := deployDataPoint(t, map[string]interface{}{"data_silo_type": "server"})
+	defer terraform.Destroy(t, options)
+	originalSiloId := terraform.Output(t, options, "dataSiloId")
+	assert.Equal(t, graphql.String(originalSiloId), dataPoint.DataSilo.ID)
+
+	dataPoint, options = deployDataPoint(t, map[string]interface{}{"data_silo_type": "promptAPerson"})
+	newSiloId := terraform.Output(t, options, "dataSiloId")
+	assert.Equal(t, graphql.String(newSiloId), dataPoint.DataSilo.ID)
+
+	// Ensure that the data silo was recreated so that the API key would have to have been updated
+	assert.NotEqual(t, originalSiloId, newSiloId)
+}

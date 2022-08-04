@@ -25,6 +25,7 @@ func resourceDataPoint() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The id of the data silo to create the datapoint for",
+				ForceNew:    true,
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
@@ -36,11 +37,11 @@ func resourceDataPoint() *schema.Resource {
 				Required:    true,
 				Description: "The title of the datapoint",
 			},
-			// "description": &schema.Schema{
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "A description for the datapoint",
-			// },
+			"description": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A description for the datapoint",
+			},
 			// "data_collection_tag": &schema.Schema{
 			// 	Type:        schema.TypeString,
 			// 	Optional:    true,

@@ -14,22 +14,31 @@ type DataPoint struct {
 	Title struct {
 		DefaultMessage graphql.String `json:"defaultMessage"`
 	} `json:"title"`
-	// Description struct {
-	// 	DefaultMessage graphql.String
-	// }
+	Description struct {
+		DefaultMessage graphql.String `json:"defaultMessage"`
+	}
 	// DataCollection struct {
 	// 	VisualID graphql.String
 	// }
 }
 
 type DataPointUpdatableFields struct {
-	DataSiloId graphql.String `json:"dataSiloId"`
-	Name       graphql.String `json:"name"`
-	Title      graphql.String `json:"title"`
-	// Description graphql.String `json:"description"`
+	DataSiloId  graphql.String `json:"dataSiloId"`
+	Name        graphql.String `json:"name"`
+	Title       graphql.String `json:"title"`
+	Description graphql.String `json:"description"`
+
+	// TODO: Add more fields
 	// Categories []DataSubCategoryInput    `json:"categories"`
 	// Purposes   []PurposeSubCategoryInput `json:"purposes"`
 	// Attributes []AttributeInput          `json:"attributes"`
+	// enabledActions
+	// dataCollectionId
+	// dataCollectionTag
+	// description
+	// erasureRedactionMethod
+	// querySuggestions
+	// subDataPoints
 }
 
 type UpdateOrCreateDataPointInput struct {
@@ -56,9 +65,10 @@ func MakeUpdateOrCreateDataPointInput(d *schema.ResourceData) UpdateOrCreateData
 	return UpdateOrCreateDataPointInput{
 		ID: graphql.String(d.Get("id").(string)),
 		DataPointUpdatableFields: DataPointUpdatableFields{
-			Name:       graphql.String(d.Get("name").(string)),
-			DataSiloId: graphql.String(d.Get("data_silo_id").(string)),
-			Title:      graphql.String(d.Get("title").(string)),
+			Name:        graphql.String(d.Get("name").(string)),
+			DataSiloId:  graphql.String(d.Get("data_silo_id").(string)),
+			Title:       graphql.String(d.Get("title").(string)),
+			Description: graphql.String(d.Get("description").(string)),
 		},
 	}
 }
@@ -67,6 +77,7 @@ func ReadDataPointIntoState(d *schema.ResourceData, dataPoint DataPoint) {
 	d.Set("name", dataPoint.Name)
 	d.Set("data_silo_id", dataPoint.DataSilo.ID)
 	d.Set("title", dataPoint.Title.DefaultMessage)
+	d.Set("description", dataPoint.Description.DefaultMessage)
 }
 
 // func ToDataPointSubDataPointInputList(origs []interface{}) []DataPointSubDataPointInput {

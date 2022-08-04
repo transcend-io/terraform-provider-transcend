@@ -13,9 +13,11 @@ provider "transcend" {
 
 variable "name" {}
 variable "title" {}
+variable "description" { default = null }
+variable "data_silo_type" { default = "server" }
 
 resource "transcend_data_silo" "silo" {
-  type = "server"
+  type = var.data_silo_type
   title = var.title
 }
 
@@ -23,6 +25,11 @@ resource "transcend_data_point" "point" {
   data_silo_id = transcend_data_silo.silo.id
   name = var.name
   title = var.title
+  description = var.description
+}
+
+output "dataSiloId" {
+  value = transcend_data_silo.silo.id
 }
 
 output "dataPointId" {
