@@ -71,3 +71,17 @@ func TestCanChangeScopes(t *testing.T) {
 	key, _ = deployApiKey(t, map[string]interface{}{"scopes": []string{"makeDataSubjectRequest"}})
 	assert.Equal(t, graphql.String("makeDataSubjectRequest"), key.Scopes[0].Name)
 }
+
+func TestCanChangeDataSilos(t *testing.T) {
+	key, options := deployApiKey(t, map[string]interface{}{"data_silo_type": "amazonS3"})
+	defer terraform.Destroy(t, options)
+	originalSiloId := terraform.Output(t, options, "dataSiloId")
+	assert.Equal(t, graphql.String(originalSiloId), key.DataSilos[0].ID)
+
+	key, options = deployApiKey(t, map[string]interface{}{"data_silo_type": "asana"})
+	newSiloId := terraform.Output(t, options, "dataSiloId")
+	assert.Equal(t, graphql.String(newSiloId), key.DataSilos[0].ID)
+
+	// Ensure that the data silo was recreated so that the API key would have to have been updated
+	assert.NotEqual(t, originalSiloId, newSiloId)
+}

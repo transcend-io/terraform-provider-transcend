@@ -9,16 +9,20 @@ type Scope struct {
 	Name graphql.String `json:"name"`
 }
 
+type Resource struct {
+	ID graphql.String `json:"id"`
+}
+
 type APIKey struct {
-	ID     graphql.String `json:"id"`
-	Title  graphql.String `json:"title"`
-	Scopes []Scope        `json:"scopes"`
-	// DataSilos []DataSilo     `json:"dataSilos"`
+	ID        graphql.String `json:"id"`
+	Title     graphql.String `json:"title"`
+	Scopes    []Scope        `json:"scopes"`
+	DataSilos []Resource     `json:"dataSilos"`
 }
 
 type APIKeyUpdatableFields struct {
-	Scopes []ScopeName `json:"scopes"`
-	// DataSilos []graphql.ID   `json:"dataSilos"`
+	Scopes    []ScopeName  `json:"scopes,omitempty"`
+	DataSilos []graphql.ID `json:"dataSilos,omitempty"`
 }
 
 type ApiKeyInput struct {
@@ -47,15 +51,15 @@ func MakeUpdateApiKeyInput(d *schema.ResourceData) UpdateApiKeyInput {
 
 func MakeAPIKeyUpdatableFields(d *schema.ResourceData) APIKeyUpdatableFields {
 	return APIKeyUpdatableFields{
-		Scopes: CreateScopeNames(d.Get("scopes").([]interface{})),
-		// DataSilos: ToIDList(d.Get("data_silos").([]interface{})),
+		Scopes:    CreateScopeNames(d.Get("scopes").([]interface{})),
+		DataSilos: ToIDList(d.Get("data_silos").([]interface{})),
 	}
 }
 
 func ReadApiKeyIntoState(d *schema.ResourceData, key APIKey) {
 	d.Set("title", key.Title)
 	d.Set("scopes", FlattenScopes(key.Scopes))
-	// d.Set("data_silos", FlattenDataSilos(key.DataSilos))
+	d.Set("data_silos", FlattenDataSilos(key.DataSilos))
 }
 
 func CreateScopeNames(rawScopes []interface{}) []ScopeName {
@@ -74,7 +78,7 @@ func FlattenScopes(scopes []Scope) []interface{} {
 	return ret
 }
 
-func FlattenDataSilos(silos []DataSilo) []interface{} {
+func FlattenDataSilos(silos []Resource) []interface{} {
 	ret := make([]interface{}, len(silos))
 	for i, silo := range silos {
 		ret[i] = silo.ID
