@@ -4,14 +4,16 @@ import (
 	"context"
 	"strings"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
 )
 
-func createDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {
-	return DataSiloUpdatableFields{
+func createDataSiloUpdatableFields(d *schema.ResourceData) types.DataSiloUpdatableFields {
+	return types.DataSiloUpdatableFields{
 		Title:              graphql.String(d.Get("title").(string)),
 		Description:        graphql.String(d.Get("description").(string)),
 		URL:                graphql.String(d.Get("url").(string)),
@@ -29,8 +31,8 @@ func createDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 	}
 }
 
-func createDataSiloInput(d *schema.ResourceData) DataSiloInput {
-	return DataSiloInput{
+func createDataSiloInput(d *schema.ResourceData) types.DataSiloInput {
+	return types.DataSiloInput{
 		Name:                    graphql.String(d.Get("type").(string)),
 		DataSiloUpdatableFields: createDataSiloUpdatableFields(d),
 	}
@@ -211,7 +213,7 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	// Create an empty data silo
 	var createMutation struct {
 		CreateDataSilos struct {
-			DataSilos []DataSilo
+			DataSilos []types.DataSilo
 		} `graphql:"createDataSilos(input: [{name: $name}])"`
 	}
 	createVars := map[string]interface{}{
@@ -247,7 +249,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*Client)
 
 	var query struct {
-		DataSilo DataSilo `graphql:"dataSilo(id: $id)"`
+		DataSilo types.DataSilo `graphql:"dataSilo(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
@@ -293,12 +295,12 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var mutation struct {
 		UpdateDataSilo struct {
-			DataSilo DataSilo
+			DataSilo types.DataSilo
 		} `graphql:"updateDataSilo(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"input": UpdateDataSiloInput{
+		"input": types.UpdateDataSiloInput{
 			Id:                      graphql.ID(d.Get("id").(string)),
 			DataSiloUpdatableFields: createDataSiloUpdatableFields(d),
 		},

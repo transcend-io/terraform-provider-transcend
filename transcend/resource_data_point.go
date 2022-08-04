@@ -3,6 +3,8 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
@@ -184,7 +186,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	var query struct {
 		DataPoints struct {
-			Nodes []DataPoint
+			Nodes []types.DataPoint
 		} `graphql:"dataPoints(filterBy: { ids: $ids })"`
 	}
 

@@ -5,16 +5,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/shurcooL/graphql"
 	"github.com/stretchr/testify/assert"
 )
 
-func lookupDataSilo(t *testing.T, id string) DataSilo {
+func lookupDataSilo(t *testing.T, id string) types.DataSilo {
 	client := NewClient("https://api.dev.trancsend.com/graphql", os.Getenv("TRANSCEND_KEY"))
 
 	var query struct {
-		DataSilo DataSilo `graphql:"dataSilo(id: $id)"`
+		DataSilo types.DataSilo `graphql:"dataSilo(id: $id)"`
 	}
 	vars := map[string]interface{}{
 		"id": graphql.String(id),
@@ -26,7 +28,7 @@ func lookupDataSilo(t *testing.T, id string) DataSilo {
 	return query.DataSilo
 }
 
-func deployDataSilo(t *testing.T, vars map[string]interface{}) (DataSilo, *terraform.Options) {
+func deployDataSilo(t *testing.T, vars map[string]interface{}) (types.DataSilo, *terraform.Options) {
 	defaultVars := map[string]interface{}{"title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v

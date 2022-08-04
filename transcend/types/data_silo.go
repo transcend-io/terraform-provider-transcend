@@ -1,73 +1,6 @@
-package transcend
+package types
 
 import "github.com/shurcooL/graphql"
-
-// Enums
-type DbIntegrationQuerySuggestionInput string
-type RequestActionObjectResolver string
-type DataCategoryType string
-type ProcessingPurpose string
-type RequestAction string
-type DataSiloConnectionState string
-
-type DataPoint struct {
-	Name  graphql.String
-	Title struct {
-		DefaultMessage graphql.String
-	}
-	Description struct {
-		DefaultMessage graphql.String
-	}
-	DataCollection struct {
-		VisualID graphql.String
-	}
-}
-
-type DataPointSubDataPointInput struct {
-	Name       graphql.String            `json:"name"`
-	Desciption graphql.String            `json:"description"`
-	Categories []DataSubCategoryInput    `json:"categories"`
-	Purposes   []PurposeSubCategoryInput `json:"purposes"`
-	Attributes []AttributeInput          `json:"attributes"`
-}
-
-type DataSubCategoryInput struct {
-	Name     graphql.String   `json:"name"`
-	Category DataCategoryType `json:"category"`
-}
-
-type PurposeSubCategoryInput struct {
-	Name    graphql.String    `json:"name"`
-	Purpose ProcessingPurpose `json:"purpose"`
-}
-
-type AttributeInput struct {
-	Key    graphql.String   `json:"key"`
-	Values []graphql.String `json:"values"`
-}
-
-type Enricher struct {
-	ID              graphql.String
-	Title           graphql.String
-	Description     graphql.String
-	Url             graphql.String
-	InputIdentifier struct {
-		ID graphql.String
-	}
-	Identifiers []struct {
-		ID graphql.String
-	}
-	Actions []RequestAction
-	Headers []Header
-}
-
-type Header struct {
-	Name     graphql.String  `json:"name"`
-	Value    graphql.String  `json:"value"`
-	IsSecret graphql.Boolean `json:"isSecret"`
-}
-
-type CustomHeaderInput Header
 
 type DataSiloUpdatableFields struct {
 	Title                   graphql.String      `json:"title,omitempty"`
@@ -98,8 +31,6 @@ type DataSiloUpdatableFields struct {
 	// hasPersonalData
 	// deprecationState
 }
-
-// TODO: Add plaintextContext
 
 type DataSiloInput struct {
 	Name graphql.String `json:"name,omitempty"`
@@ -148,13 +79,3 @@ type DataSilo struct {
 	// ApiKeys []struct{} `json:"apiKeys"`
 	// DependentDataSilos []struct{} `json:"dependentDataSilos"`
 }
-
-type APIKey struct {
-	ID     graphql.String `json:"id"`
-	Title  graphql.String `json:"title"`
-	Scopes []struct {
-		Type graphql.String `json:"type"`
-	} `json:"scopes"`
-}
-
-type ScopeName string

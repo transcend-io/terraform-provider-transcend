@@ -3,12 +3,12 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
 )
-
-// TODO: add support for scopes
 
 func resourceAPIKey() *schema.Resource {
 	return &schema.Resource{
@@ -56,14 +56,14 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var mutation struct {
 		CreateApiKey struct {
-			APIKey APIKey
+			APIKey types.APIKey
 		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos, scopes: $scopes})"`
 	}
 
 	sc := d.Get("scopes").([]interface{})
-	scopes := make([]ScopeName, len(sc))
+	scopes := make([]types.ScopeName, len(sc))
 	for i, scope := range sc {
-		scopes[i] = ScopeName(scope.(string))
+		scopes[i] = types.ScopeName(scope.(string))
 	}
 
 	vars := map[string]interface{}{
@@ -92,7 +92,7 @@ func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 	client := m.(*Client)
 
 	var query struct {
-		APIKey APIKey `graphql:"apiKey(id: $id)"`
+		APIKey types.APIKey `graphql:"apiKey(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
@@ -115,7 +115,7 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var mutation struct {
 		UpdateApiKey struct {
-			APIKey APIKey
+			APIKey types.APIKey
 		} `graphql:"updateApiKey(input: {id: $id, title: $title, dataSilos: $data_silos})"`
 	}
 

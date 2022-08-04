@@ -3,6 +3,8 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
@@ -95,7 +97,7 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	var mutation struct {
 		CreateEnricher struct {
-			Enricher Enricher
+			Enricher types.Enricher
 		} `graphql:"createEnricher(input: {title: $title, type: SERVER, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
 	}
 
@@ -129,7 +131,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 	var diags diag.Diagnostics
 
 	var query struct {
-		Enricher Enricher `graphql:"enricher(id: $id)"`
+		Enricher types.Enricher `graphql:"enricher(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
@@ -164,7 +166,7 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	var mutation struct {
 		UpdateEnricher struct {
-			Enricher Enricher
+			Enricher types.Enricher
 		} `graphql:"updateEnricher(input: {id: $id, title: $title, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
 	}
 

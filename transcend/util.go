@@ -1,6 +1,9 @@
 package transcend
 
-import "github.com/shurcooL/graphql"
+import (
+	"github.com/shurcooL/graphql"
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+)
 
 func toStringList(raw interface{}) []graphql.String {
 	if raw == nil {
@@ -31,12 +34,12 @@ func toIDList(origs []interface{}) []graphql.ID {
 	return vals
 }
 
-func toCustomHeaderInputList(origs []interface{}) []CustomHeaderInput {
-	vals := make([]CustomHeaderInput, len(origs))
+func toCustomHeaderInputList(origs []interface{}) []types.CustomHeaderInput {
+	vals := make([]types.CustomHeaderInput, len(origs))
 	for i, orig := range origs {
 		newHead := orig.(map[string]interface{})
 
-		vals[i] = CustomHeaderInput{
+		vals[i] = types.CustomHeaderInput{
 			Name:     graphql.String(newHead["name"].(string)),
 			Value:    graphql.String(newHead["value"].(string)),
 			IsSecret: graphql.Boolean(newHead["is_secret"].(bool)),
@@ -46,16 +49,16 @@ func toCustomHeaderInputList(origs []interface{}) []CustomHeaderInput {
 	return vals
 }
 
-func toRequestActionList(origs []interface{}) []RequestAction {
-	vals := make([]RequestAction, len(origs))
+func toRequestActionList(origs []interface{}) []types.RequestAction {
+	vals := make([]types.RequestAction, len(origs))
 	for i, orig := range origs {
-		vals[i] = RequestAction(orig.(string))
+		vals[i] = types.RequestAction(orig.(string))
 	}
 
 	return vals
 }
 
-func flattenDataSiloBlockList(dataSilo DataSilo) []interface{} {
+func flattenDataSiloBlockList(dataSilo types.DataSilo) []interface{} {
 	owners := dataSilo.SubjectBlocklist
 	ret := make([]interface{}, len(owners))
 	for i, owner := range owners {
@@ -64,7 +67,7 @@ func flattenDataSiloBlockList(dataSilo DataSilo) []interface{} {
 	return ret
 }
 
-func flattenOwners(dataSilo DataSilo) []interface{} {
+func flattenOwners(dataSilo types.DataSilo) []interface{} {
 	owners := dataSilo.Owners
 	ret := make([]interface{}, len(owners))
 	for i, owner := range owners {
@@ -73,7 +76,7 @@ func flattenOwners(dataSilo DataSilo) []interface{} {
 	return ret
 }
 
-func flattenHeaders(headers *[]Header) []interface{} {
+func flattenHeaders(headers *[]types.Header) []interface{} {
 	ret := make([]interface{}, len(*headers))
 
 	for i, header := range *headers {
@@ -87,20 +90,20 @@ func flattenHeaders(headers *[]Header) []interface{} {
 	return ret
 }
 
-func toRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {
-	vals := make([]RequestActionObjectResolver, len(origs))
+func toRequestActionObjectResolverList(origs []interface{}) []types.RequestActionObjectResolver {
+	vals := make([]types.RequestActionObjectResolver, len(origs))
 	for i, orig := range origs {
-		vals[i] = RequestActionObjectResolver(orig.(string))
+		vals[i] = types.RequestActionObjectResolver(orig.(string))
 	}
 
 	return vals
 }
 
-func toDataPointSubDataPointInputList(origs []interface{}) []DataPointSubDataPointInput {
-	vals := make([]DataPointSubDataPointInput, len(origs))
+func toDataPointSubDataPointInputList(origs []interface{}) []types.DataPointSubDataPointInput {
+	vals := make([]types.DataPointSubDataPointInput, len(origs))
 	for i, orig := range origs {
 		newVal := orig.(map[string]interface{})
-		vals[i] = DataPointSubDataPointInput{
+		vals[i] = types.DataPointSubDataPointInput{
 			graphql.String(newVal["name"].(string)),
 			graphql.String(newVal["description"].(string)),
 			toDataSubCategoryInputList(newVal["categories"].([]interface{})),
@@ -112,37 +115,37 @@ func toDataPointSubDataPointInputList(origs []interface{}) []DataPointSubDataPoi
 	return vals
 }
 
-func toDataSubCategoryInputList(origs []interface{}) []DataSubCategoryInput {
-	vals := make([]DataSubCategoryInput, len(origs))
+func toDataSubCategoryInputList(origs []interface{}) []types.DataSubCategoryInput {
+	vals := make([]types.DataSubCategoryInput, len(origs))
 	for i, orig := range origs {
 		newVal := orig.(map[string]interface{})
-		vals[i] = DataSubCategoryInput{
+		vals[i] = types.DataSubCategoryInput{
 			graphql.String(newVal["name"].(string)),
-			DataCategoryType(newVal["category"].(string)),
+			types.DataCategoryType(newVal["category"].(string)),
 		}
 	}
 
 	return vals
 }
 
-func toPurposeSubCategoryInputList(origs []interface{}) []PurposeSubCategoryInput {
-	vals := make([]PurposeSubCategoryInput, len(origs))
+func toPurposeSubCategoryInputList(origs []interface{}) []types.PurposeSubCategoryInput {
+	vals := make([]types.PurposeSubCategoryInput, len(origs))
 	for i, orig := range origs {
 		newVal := orig.(map[string]interface{})
-		vals[i] = PurposeSubCategoryInput{
+		vals[i] = types.PurposeSubCategoryInput{
 			graphql.String(newVal["name"].(string)),
-			ProcessingPurpose(newVal["purpose"].(string)),
+			types.ProcessingPurpose(newVal["purpose"].(string)),
 		}
 	}
 
 	return vals
 }
 
-func toAttributeInputList(origs []interface{}) []AttributeInput {
-	vals := make([]AttributeInput, len(origs))
+func toAttributeInputList(origs []interface{}) []types.AttributeInput {
+	vals := make([]types.AttributeInput, len(origs))
 	for i, orig := range origs {
 		newVal := orig.(map[string]interface{})
-		vals[i] = AttributeInput{
+		vals[i] = types.AttributeInput{
 			graphql.String(newVal["key"].(string)),
 			toStringList(newVal["values"].([]interface{})),
 		}
