@@ -3,6 +3,8 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
@@ -23,6 +25,7 @@ func resourceDataPoint() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The id of the data silo to create the datapoint for",
+				ForceNew:    true,
 			},
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
@@ -39,40 +42,40 @@ func resourceDataPoint() *schema.Resource {
 				Optional:    true,
 				Description: "A description for the datapoint",
 			},
-			"data_collection_tag": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The title of the data collection to assign to the datapoint. If the collection does not exist, one will be created.",
-			},
-			"query_suggestions": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"suggested_query": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"request_type": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-				Description: "The suggested SQL queries to run for a DSR",
-			},
-			"enabled_actions": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The actions that the datapoint should connect to",
-			},
-			"sub_data_points": &schema.Schema{
+			// "data_collection_tag": &schema.Schema{
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Description: "The title of the data collection to assign to the datapoint. If the collection does not exist, one will be created.",
+			// },
+			// "query_suggestions": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"suggested_query": &schema.Schema{
+			// 				Type:     schema.TypeString,
+			// 				Required: true,
+			// 			},
+			// 			"request_type": &schema.Schema{
+			// 				Type:     schema.TypeString,
+			// 				Required: true,
+			// 			},
+			// 		},
+			// 	},
+			// 	Description: "The suggested SQL queries to run for a DSR",
+			// },
+			// "enabled_actions": &schema.Schema{
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// 	Description: "The actions that the datapoint should connect to",
+			// },
+			"properties": &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "The subdatapoints associated with this datapoint",
+				Description: "The properties associated with this datapoint",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
@@ -147,6 +150,7 @@ func resourceDataPoint() *schema.Resource {
 						},
 					},
 				},
+				MinItems: 0,
 			},
 		},
 		Importer: &schema.ResourceImporter{
@@ -160,19 +164,28 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var diags diag.Diagnostics
 
-	//TODO: check whether it is a database integration (has different input fields)
-	id, err := mutateDataPoint(client, d, diags)
+	var mutation struct {
+		CreateApiKey struct {
+			DataPoint types.DataPoint
+		} `graphql:"updateOrCreateDataPoint(input: $input)"`
+	}
+
+	vars := map[string]interface{}{
+		"input": types.MakeUpdateOrCreateDataPointInput(d),
+	}
+
+	err := client.graphql.Mutate(context.Background(), &mutation, vars)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error creating datapoint " + d.Get("name").(string),
+			Summary:  "Error creating Data Point",
 			Detail:   err.Error(),
 		})
 		return diags
 	}
+	d.SetId(string(mutation.CreateApiKey.DataPoint.ID))
 
 	resourceDataPointRead(ctx, d, m)
-	d.SetId(id)
 
 	return nil
 }
@@ -182,20 +195,16 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	var diags diag.Diagnostics
 
-	var query struct {
+	// Query for the top level data point data
+	var dataPointsQuery struct {
 		DataPoints struct {
-			Nodes []DataPoint
-		} `graphql:"dataPoints(filterBy: { ids: $ids })"`
+			Nodes []types.DataPoint
+		} `graphql:"dataPoints(filterBy: { ids: [$id] })"`
 	}
-
-	ids := make([]graphql.ID, 1)
-	ids[0] = graphql.ID(d.Get("id").(string))
-
-	vars := map[string]interface{}{
-		"ids": ids,
+	dataPointsQueryVars := map[string]interface{}{
+		"id": graphql.ID(d.Get("id").(string)),
 	}
-
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &dataPointsQuery, dataPointsQueryVars)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -204,8 +213,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		})
 		return diags
 	}
-
-	if len(query.DataPoints.Nodes) == 0 {
+	if len(dataPointsQuery.DataPoints.Nodes) == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error reading datapoint " + d.Get("name").(string),
@@ -214,11 +222,39 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diags
 	}
 
-	// TODO: sync up all fields
-	d.Set("name", query.DataPoints.Nodes[0].Name)
-	d.Set("title", query.DataPoints.Nodes[0].Title.DefaultMessage)
-	d.Set("description", query.DataPoints.Nodes[0].Description.DefaultMessage)
-	d.Set("data_collection_tag", query.DataPoints.Nodes[0].DataCollection.VisualID)
+	// Query for subdatapoint info with Pagination
+	var subDataPointsQuery struct {
+		DataPoints struct {
+			TotalCount graphql.Int `json:"totalCount"`
+			Nodes      []types.SubDataPoint
+		} `graphql:"subDataPoints(first: $first, offset: $offset, filterBy: { dataPoints: [$dataPointId] })"`
+	}
+	var allSubDataPoints []types.SubDataPoint
+	offset := 0
+	subDataPointsQueryVars := map[string]interface{}{
+		"dataPointId": graphql.ID(d.Get("id").(string)),
+		"first":       graphql.Int(20),
+		"offset":      graphql.Int(offset),
+	}
+	for {
+		err = client.graphql.Query(context.Background(), &subDataPointsQuery, subDataPointsQueryVars)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error reading subdatapoints for datapoint " + d.Get("id").(string),
+				Detail:   err.Error(),
+			})
+			return diags
+		}
+		allSubDataPoints = append(allSubDataPoints, subDataPointsQuery.DataPoints.Nodes...)
+		if len(subDataPointsQuery.DataPoints.Nodes) == 0 || subDataPointsQuery.DataPoints.TotalCount == graphql.Int(len(allSubDataPoints)) {
+			break
+		}
+		offset = offset + 20
+		subDataPointsQueryVars["offset"] = graphql.Int(offset)
+	}
+
+	types.ReadDataPointIntoState(d, dataPointsQuery.DataPoints.Nodes[0], allSubDataPoints)
 
 	return nil
 }
@@ -228,11 +264,21 @@ func resourceDataPointUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var diags diag.Diagnostics
 
-	_, err := mutateDataPoint(client, d, diags)
+	var mutation struct {
+		UpdateApiKey struct {
+			DataPoint types.DataPoint
+		} `graphql:"updateOrCreateDataPoint(input: $input)"`
+	}
+
+	vars := map[string]interface{}{
+		"input": types.MakeUpdateOrCreateDataPointInput(d),
+	}
+
+	err := client.graphql.Mutate(context.Background(), &mutation, vars)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error updating datapoint " + d.Get("name").(string),
+			Summary:  "Error updating Data Point",
 			Detail:   err.Error(),
 		})
 		return diags
@@ -272,32 +318,4 @@ func resourceDataPointDelete(ctx context.Context, d *schema.ResourceData, m inte
 	d.SetId("")
 
 	return nil
-}
-
-func mutateDataPoint(client *Client, d *schema.ResourceData, diags diag.Diagnostics) (string, error) {
-	var mutation struct {
-		UpdateOrCreateDataPoint struct {
-			DataPoint struct {
-				ID   graphql.String
-				Name graphql.String
-			}
-		} `graphql:"updateOrCreateDataPoint(input: {id: $id, dataSiloId: $dataSiloId, name: $name, title: $title, dataCollectionTag: $dataCollectionTag, description: $description, enabledActions: $enabledActions, subDataPoints: $subDataPoints})"`
-	}
-
-	vars := map[string]interface{}{
-		"id":                graphql.ID(d.Get("id").(string)),
-		"dataSiloId":        graphql.ID(d.Get("data_silo_id").(string)),
-		"name":              graphql.String(d.Get("name").(string)),
-		"title":             graphql.String(d.Get("title").(string)),
-		"dataCollectionTag": graphql.String(d.Get("data_collection_tag").(string)),
-		"description":       graphql.String(d.Get("description").(string)),
-		"enabledActions":    toRequestActionObjectResolverList(d.Get("enabled_actions").([]interface{})),
-		"subDataPoints":     toDataPointSubDataPointInputList(d.Get("sub_data_points").([]interface{})),
-	}
-
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
-	if err != nil {
-		return "", err
-	}
-	return string(mutation.UpdateOrCreateDataPoint.DataPoint.ID), nil
 }

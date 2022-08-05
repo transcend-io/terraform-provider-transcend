@@ -28,45 +28,45 @@ jobs:
       - run: go generate ./...
       - name: git diff
         run: |
-          git diff --compact-summary --exit-code || \
+          git diff --exit-code || \
             (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
 
-  # run acceptance tests in a matrix with Terraform core versions
-  test:
-    name: Matrix Test
-    # needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        # list whatever Terraform versions here you would like to support
-        terraform:
-          # - '0.12.*'
-          # - '0.13.*'
-          # - '0.14.*'
-          # - '0.15.*'
-          # - '1.0.*'
-          # - '1.1.*'
-          - '1.2.*'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-        id: go
-      - uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ matrix.terraform }}
-          terraform_wrapper: false
-      - name: Get dependencies
-        run: go mod download
-      - name: Build the provider from source
-        run: make install
-      - name: TF acceptance tests
-        timeout-minutes: 10
-        env:
-          TF_ACC: "1"
-          TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
-        run: go test -v -cover ./transcend
+  # # run acceptance tests in a matrix with Terraform core versions
+  # test:
+  #   name: Matrix Test
+  #   # needs: build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # list whatever Terraform versions here you would like to support
+  #       terraform:
+  #         - '0.12.*'
+  #         - '0.13.*'
+  #         - '0.14.*'
+  #         - '0.15.*'
+  #         - '1.0.*'
+  #         - '1.1.*'
+  #         - '1.2.*'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-go@v3
+  #       with:
+  #         go-version-file: 'go.mod'
+  #         cache: true
+  #       id: go
+  #     - uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: ${{ matrix.terraform }}
+  #         terraform_wrapper: false
+  #     - name: Get dependencies
+  #       run: go mod download
+  #     - name: Build the provider from source
+  #       run: make install
+  #     - name: TF acceptance tests
+  #       timeout-minutes: 10
+  #       env:
+  #         TF_ACC: "1"
+  #         TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
+  #       run: go test -v -cover ./transcend

@@ -23,27 +23,15 @@ description: |-
 
 ### Optional
 
-- `data_collection_tag` (String) The title of the data collection to assign to the datapoint. If the collection does not exist, one will be created.
 - `description` (String) A description for the datapoint
-- `enabled_actions` (List of String) The actions that the datapoint should connect to
-- `query_suggestions` (Block List) The suggested SQL queries to run for a DSR (see [below for nested schema](#nestedblock--query_suggestions))
-- `sub_data_points` (Block List) The subdatapoints associated with this datapoint (see [below for nested schema](#nestedblock--sub_data_points))
+- `properties` (Block List) The properties associated with this datapoint (see [below for nested schema](#nestedblock--properties))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--query_suggestions"></a>
-### Nested Schema for `query_suggestions`
-
-Required:
-
-- `request_type` (String)
-- `suggested_query` (String)
-
-
-<a id="nestedblock--sub_data_points"></a>
-### Nested Schema for `sub_data_points`
+<a id="nestedblock--properties"></a>
+### Nested Schema for `properties`
 
 Required:
 
@@ -51,13 +39,13 @@ Required:
 
 Optional:
 
-- `attributes` (Block List) The attribute values used to label this subdatapoint (see [below for nested schema](#nestedblock--sub_data_points--attributes))
-- `categories` (Block List) The category of personal data for this subdatapoint (see [below for nested schema](#nestedblock--sub_data_points--categories))
+- `attributes` (Block List) The attribute values used to label this subdatapoint (see [below for nested schema](#nestedblock--properties--attributes))
+- `categories` (Block List) The category of personal data for this subdatapoint (see [below for nested schema](#nestedblock--properties--categories))
 - `description` (String) A description for the subdatapoint
-- `purposes` (Block List) The processing purposes for this subdatapoint (see [below for nested schema](#nestedblock--sub_data_points--purposes))
+- `purposes` (Block List) The processing purposes for this subdatapoint (see [below for nested schema](#nestedblock--properties--purposes))
 
-<a id="nestedblock--sub_data_points--attributes"></a>
-### Nested Schema for `sub_data_points.attributes`
+<a id="nestedblock--properties--attributes"></a>
+### Nested Schema for `properties.attributes`
 
 Required:
 
@@ -65,8 +53,8 @@ Required:
 - `values` (List of String) The attribute values used to label resources
 
 
-<a id="nestedblock--sub_data_points--categories"></a>
-### Nested Schema for `sub_data_points.categories`
+<a id="nestedblock--properties--categories"></a>
+### Nested Schema for `properties.categories`
 
 Required:
 
@@ -74,8 +62,8 @@ Required:
 - `name` (String) The name of the subcategory
 
 
-<a id="nestedblock--sub_data_points--purposes"></a>
-### Nested Schema for `sub_data_points.purposes`
+<a id="nestedblock--properties--purposes"></a>
+### Nested Schema for `properties.purposes`
 
 Required:
 

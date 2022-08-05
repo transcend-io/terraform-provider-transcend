@@ -3,6 +3,8 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
@@ -95,7 +97,7 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	var mutation struct {
 		CreateEnricher struct {
-			Enricher Enricher
+			Enricher types.Enricher
 		} `graphql:"createEnricher(input: {title: $title, type: SERVER, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
 	}
 
@@ -104,9 +106,9 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 		"description":     graphql.String(d.Get("description").(string)),
 		"url":             graphql.String(d.Get("url").(string)),
 		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         toCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     toIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         toRequestActionList(d.Get("actions").([]interface{})),
+		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
+		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
+		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -129,7 +131,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 	var diags diag.Diagnostics
 
 	var query struct {
-		Enricher Enricher `graphql:"enricher(id: $id)"`
+		Enricher types.Enricher `graphql:"enricher(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
@@ -152,7 +154,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("input_identifier", query.Enricher.InputIdentifier.ID)
 	d.Set("identifiers", query.Enricher.Identifiers)
 	d.Set("actions", query.Enricher.Actions)
-	d.Set("headers", flattenHeaders(&query.Enricher.Headers))
+	d.Set("headers", types.FlattenHeaders(&query.Enricher.Headers))
 
 	return nil
 }
@@ -164,7 +166,7 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	var mutation struct {
 		UpdateEnricher struct {
-			Enricher Enricher
+			Enricher types.Enricher
 		} `graphql:"updateEnricher(input: {id: $id, title: $title, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
 	}
 
@@ -174,9 +176,9 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		"description":     graphql.String(d.Get("description").(string)),
 		"url":             graphql.String(d.Get("url").(string)),
 		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         toCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     toIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         toRequestActionList(d.Get("actions").([]interface{})),
+		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
+		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
+		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)

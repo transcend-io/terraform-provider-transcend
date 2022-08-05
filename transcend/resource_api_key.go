@@ -3,12 +3,12 @@ package transcend
 import (
 	"context"
 
+	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/shurcooL/graphql"
 )
-
-// TODO: add support for scopes
 
 func resourceAPIKey() *schema.Resource {
 	return &schema.Resource{
@@ -25,6 +25,7 @@ func resourceAPIKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The title used to identify the API key",
+				ForceNew:    true,
 			},
 			"scopes": &schema.Schema{
 				Type:     schema.TypeList,
@@ -56,20 +57,12 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var mutation struct {
 		CreateApiKey struct {
-			APIKey APIKey
-		} `graphql:"createApiKey(input: {title: $title, dataSilos: $data_silos, scopes: $scopes})"`
-	}
-
-	sc := d.Get("scopes").([]interface{})
-	scopes := make([]ScopeName, len(sc))
-	for i, scope := range sc {
-		scopes[i] = ScopeName(scope.(string))
+			APIKey types.APIKey
+		} `graphql:"createApiKey(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"title":      graphql.String(d.Get("title").(string)),
-		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
-		"scopes":     scopes,
+		"input": types.MakeApiKeyInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -81,18 +74,16 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-
 	d.SetId(string(mutation.CreateApiKey.APIKey.ID))
-	d.Set("title", mutation.CreateApiKey.APIKey.Title)
-	// TODO: Set scopes/data_silos
 
-	return nil
+	return resourceAPIKeyRead(ctx, d, m)
 }
+
 func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
 	var query struct {
-		APIKey APIKey `graphql:"apiKey(id: $id)"`
+		APIKey types.APIKey `graphql:"apiKey(id: $id)"`
 	}
 
 	vars := map[string]interface{}{
@@ -104,10 +95,11 @@ func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	d.Set("title", query.APIKey.Title)
+	types.ReadApiKeyIntoState(d, query.APIKey)
 
 	return nil
 }
+
 func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
@@ -115,14 +107,12 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var mutation struct {
 		UpdateApiKey struct {
-			APIKey APIKey
-		} `graphql:"updateApiKey(input: {id: $id, title: $title, dataSilos: $data_silos})"`
+			APIKey types.APIKey
+		} `graphql:"updateApiKey(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"id":         graphql.ID(d.Get("id").(string)),
-		"title":      graphql.String(d.Get("title").(string)),
-		"data_silos": toIDList(d.Get("data_silos").([]interface{})),
+		"input": types.MakeUpdateApiKeyInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars)
@@ -134,7 +124,8 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-	return nil
+
+	return resourceAPIKeyRead(ctx, d, m)
 }
 func resourceAPIKeyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
