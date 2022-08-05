@@ -18,6 +18,11 @@ variable "data_silo_type" { default = "server" }
 variable "properties" {
   type = list(object({
     name = string
+    description = string
+    categories = list(object({
+      name = string
+      category = string
+    }))
   }))
   default = []
 }
@@ -37,6 +42,15 @@ resource "transcend_data_point" "point" {
     for_each = var.properties
     content {
       name = properties.value["name"]
+      description = properties.value["description"]
+
+      dynamic "categories" {
+        for_each = properties.value["categories"]
+        content {
+          name = categories.value["name"]
+          category = categories.value["category"]
+        }
+      }
     }
   }
 }

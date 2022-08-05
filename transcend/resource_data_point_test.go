@@ -99,10 +99,10 @@ func TestCanChangeDataPointSilo(t *testing.T) {
 func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 	_, options := deployDataPoint(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
-			{"name": "subDataPoint1"},
-			{"name": "subDataPoint2"},
-			{"name": "subDataPoint3"},
-			{"name": "subDataPoint4"},
+			{"name": "subDataPoint1", "description": "1", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint2", "description": "2", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint3", "description": "3", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint4", "description": "4", "categories": []map[string]interface{}{}},
 		},
 	})
 	defer terraform.Destroy(t, options)
@@ -113,10 +113,10 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 func TestCanChangeSubDataPoints(t *testing.T) {
 	_, options := deployDataPoint(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
-			{"name": "subDataPoint1"},
-			{"name": "subDataPoint2"},
-			{"name": "subDataPoint3"},
-			{"name": "subDataPoint4"},
+			{"name": "subDataPoint1", "description": "1", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint2", "description": "2", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint3", "description": "3", "categories": []map[string]interface{}{}},
+			{"name": "subDataPoint4", "description": "4", "categories": []map[string]interface{}{}},
 		},
 	})
 	defer terraform.Destroy(t, options)
@@ -125,7 +125,7 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 
 	_, options = deployDataPoint(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
-			{"name": "onlySubDataPoint"},
+			{"name": "onlySubDataPoint", "description": "cool", "categories": []map[string]interface{}{}},
 		},
 	})
 	properties = terraform.OutputListOfObjects(t, options, "properties")
@@ -140,7 +140,9 @@ func TestCanPaginateSubDataPoints(t *testing.T) {
 	properties := make([]map[string]interface{}, 251)
 	for i := 0; i < 251; i++ {
 		properties[i] = map[string]interface{}{
-			"name": "subDataPoint" + strconv.Itoa(i),
+			"name":        "subDataPoint" + strconv.Itoa(i),
+			"description": "subDataPoint number " + strconv.Itoa(i),
+			"categories":  []map[string]interface{}{},
 		}
 	}
 
@@ -150,4 +152,71 @@ func TestCanPaginateSubDataPoints(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	propertiesOutput := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, propertiesOutput, 251)
+}
+
+func TestCanChangeSubDataPointDescription(t *testing.T) {
+	_, options := deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1", "description": "some description", "categories": []map[string]interface{}{}},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	properties := terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+	assert.Equal(t, "some description", properties[0]["description"].(string))
+
+	_, options = deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1", "description": "some other description", "categories": []map[string]interface{}{}},
+		},
+	})
+	properties = terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+	assert.Equal(t, "some other description", properties[0]["description"].(string))
+}
+
+func TestCanChangeSubDataPointCategories(t *testing.T) {
+	_, options := deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1", "description": "some description", "categories": []map[string]interface{}{
+				{"name": "Email", "category": "CONTACT"},
+				{"name": "Phone", "category": "CONTACT"},
+			}},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	properties := terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+	assert.Equal(t, []map[string]interface{}{
+		{"name": "Email", "category": "CONTACT"},
+		{"name": "Phone", "category": "CONTACT"},
+	}, properties[0]["categories"].([]map[string]interface{}))
+
+	// Remove one category
+	_, options = deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1", "description": "some description", "categories": []map[string]interface{}{
+				{"name": "Email", "category": "CONTACT"},
+			}},
+		},
+	})
+	properties = terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+	assert.Equal(t, []map[string]interface{}{
+		{"name": "Email", "category": "CONTACT"},
+	}, properties[0]["categories"].([]map[string]interface{}))
+
+	// Change the category
+	_, options = deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1", "description": "some description", "categories": []map[string]interface{}{
+				{"name": "Phone", "category": "CONTACT"},
+			}},
+		},
+	})
+	properties = terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+	assert.Equal(t, []map[string]interface{}{
+		{"name": "Phone", "category": "CONTACT"},
+	}, properties[0]["categories"].([]map[string]interface{}))
 }

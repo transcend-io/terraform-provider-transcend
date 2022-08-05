@@ -83,30 +83,30 @@ func resourceDataPoint() *schema.Resource {
 							Required:    true,
 							Description: "The name of the subdatapoint",
 						},
-						// "description": &schema.Schema{
-						// 	Type:        schema.TypeString,
-						// 	Optional:    true,
-						// 	Description: "A description for the subdatapoint",
-						// },
-						// "categories": &schema.Schema{
-						// 	Type:     schema.TypeList,
-						// 	Optional: true,
-						// 	Elem: &schema.Resource{
-						// 		Schema: map[string]*schema.Schema{
-						// 			"name": &schema.Schema{
-						// 				Type:        schema.TypeString,
-						// 				Required:    true,
-						// 				Description: "The name of the subcategory",
-						// 			},
-						// 			"category": &schema.Schema{
-						// 				Type:        schema.TypeString,
-						// 				Required:    true,
-						// 				Description: "The category of personal data",
-						// 			},
-						// 		},
-						// 	},
-						// 	Description: "The category of personal data for this subdatapoint",
-						// },
+						"description": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "A description for the subdatapoint",
+						},
+						"categories": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": &schema.Schema{
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The name of the subcategory",
+									},
+									"category": &schema.Schema{
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The category of personal data",
+									},
+								},
+							},
+							Description: "The category of personal data for this subdatapoint",
+						},
 						// "purposes": &schema.Schema{
 						// 	Type:     schema.TypeList,
 						// 	Optional: true,
