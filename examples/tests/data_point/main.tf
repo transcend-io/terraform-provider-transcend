@@ -23,6 +23,14 @@ variable "properties" {
       name = string
       category = string
     }))
+    purposes = list(object({
+      name = string
+      purpose = string
+    }))
+    attributes = list(object({
+      key = string
+      values = list(string)
+    }))
   }))
   default = []
 }
@@ -49,6 +57,22 @@ resource "transcend_data_point" "point" {
         content {
           name = categories.value["name"]
           category = categories.value["category"]
+        }
+      }
+
+      dynamic "purposes" {
+        for_each = properties.value["purposes"]
+        content {
+          name = purposes.value["name"]
+          purpose = purposes.value["purpose"]
+        }
+      }
+
+      dynamic "attributes" {
+        for_each = properties.value["attributes"]
+        content {
+          key = attributes.value["key"]
+          values = attributes.value["values"]
         }
       }
     }

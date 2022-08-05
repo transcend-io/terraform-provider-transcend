@@ -107,47 +107,47 @@ func resourceDataPoint() *schema.Resource {
 							},
 							Description: "The category of personal data for this subdatapoint",
 						},
-						// "purposes": &schema.Schema{
-						// 	Type:     schema.TypeList,
-						// 	Optional: true,
-						// 	Elem: &schema.Resource{
-						// 		Schema: map[string]*schema.Schema{
-						// 			"name": &schema.Schema{
-						// 				Type:        schema.TypeString,
-						// 				Required:    true,
-						// 				Description: "The purpose of processing sub category",
-						// 			},
-						// 			"purpose": &schema.Schema{
-						// 				Type:        schema.TypeString,
-						// 				Required:    true,
-						// 				Description: "The purpose of processing",
-						// 			},
-						// 		},
-						// 	},
-						// 	Description: "The processing purposes for this subdatapoint",
-						// },
-						// "attributes": &schema.Schema{
-						// 	Type:     schema.TypeList,
-						// 	Optional: true,
-						// 	Elem: &schema.Resource{
-						// 		Schema: map[string]*schema.Schema{
-						// 			"key": &schema.Schema{
-						// 				Type:        schema.TypeString,
-						// 				Required:    true,
-						// 				Description: "The attribute key that houses the attribute values",
-						// 			},
-						// 			"values": &schema.Schema{
-						// 				Type:     schema.TypeList,
-						// 				Required: true,
-						// 				Elem: &schema.Schema{
-						// 					Type: schema.TypeString,
-						// 				},
-						// 				Description: "The attribute values used to label resources",
-						// 			},
-						// 		},
-						// 	},
-						// 	Description: "The attribute values used to label this subdatapoint",
-						// },
+						"purposes": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": &schema.Schema{
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The purpose of processing sub category",
+									},
+									"purpose": &schema.Schema{
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The purpose of processing",
+									},
+								},
+							},
+							Description: "The processing purposes for this subdatapoint",
+						},
+						"attributes": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": &schema.Schema{
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The attribute key that houses the attribute values",
+									},
+									"values": &schema.Schema{
+										Type:     schema.TypeList,
+										Required: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "The attribute values used to label resources",
+									},
+								},
+							},
+							Description: "The attribute values used to label this subdatapoint",
+						},
 					},
 				},
 				MinItems: 0,
@@ -241,7 +241,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Error reading subdatapoints for datapoint" + d.Get("id").(string),
+				Summary:  "Error reading subdatapoints for datapoint " + d.Get("id").(string),
 				Detail:   err.Error(),
 			})
 			return diags

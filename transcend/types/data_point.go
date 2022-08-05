@@ -25,23 +25,30 @@ type DataPoint struct {
 	// }
 }
 
+type AttributeValues struct {
+	Name         graphql.String `json:"name"`
+	AttributeKey struct {
+		Name graphql.String `json:"name"`
+	} `json:"attributeKey"`
+}
+
 type SubDataPoint struct {
 	Name      graphql.String `json:"name"`
 	DataPoint struct {
 		ID graphql.String `json:"id"`
 	} `json:"dataPoint"`
-	Description graphql.String         `json:"description"`
-	Categories  []DataSubCategoryInput `json:"categories"`
+	Description     graphql.String            `json:"description"`
+	Categories      []DataSubCategoryInput    `json:"categories"`
+	Purposes        []PurposeSubCategoryInput `json:"purposes"`
+	AttributeValues []AttributeValues         `json:"attributeValues"`
 }
 
 type DataPointSubDataPointInput struct {
-	Name        graphql.String         `json:"name"`
-	Description graphql.String         `json:"description"`
-	Categories  []DataSubCategoryInput `json:"categories"`
-
-	// TODO: Add more fields
-	// Purposes   []PurposeSubCategoryInput `json:"purposes"`
-	// Attributes []AttributeInput          `json:"attributes"`
+	Name        graphql.String            `json:"name"`
+	Description graphql.String            `json:"description"`
+	Categories  []DataSubCategoryInput    `json:"categories"`
+	Purposes    []PurposeSubCategoryInput `json:"purposes"`
+	Attributes  []AttributeInput          `json:"attributes"`
 }
 
 type DataPointUpdatableFields struct {
@@ -55,10 +62,8 @@ type DataPointUpdatableFields struct {
 	// enabledActions
 	// dataCollectionId
 	// dataCollectionTag
-	// description
 	// erasureRedactionMethod
 	// querySuggestions
-	// subDataPoints
 }
 
 type UpdateOrCreateDataPointInput struct {
@@ -66,20 +71,20 @@ type UpdateOrCreateDataPointInput struct {
 	DataPointUpdatableFields
 }
 
-// type PurposeSubCategoryInput struct {
-// 	Name    graphql.String    `json:"name"`
-// 	Purpose ProcessingPurpose `json:"purpose"`
-// }
+type PurposeSubCategoryInput struct {
+	Name    graphql.String    `json:"name"`
+	Purpose ProcessingPurpose `json:"purpose"`
+}
 
 type DataSubCategoryInput struct {
 	Name     graphql.String   `json:"name"`
 	Category DataCategoryType `json:"category"`
 }
 
-// type AttributeInput struct {
-// 	Key    graphql.String   `json:"key"`
-// 	Values []graphql.String `json:"values"`
-// }
+type AttributeInput struct {
+	Key    graphql.String   `json:"key"`
+	Values []graphql.String `json:"values"`
+}
 
 func MakeUpdateOrCreateDataPointInput(d *schema.ResourceData) UpdateOrCreateDataPointInput {
 	return UpdateOrCreateDataPointInput{
@@ -110,8 +115,8 @@ func ToDataPointSubDataPointInputList(properties []interface{}) []DataPointSubDa
 			Name:        graphql.String(property["name"].(string)),
 			Description: graphql.String(property["description"].(string)),
 			Categories:  ToDataSubCategoryInputList(property["categories"].([]interface{})),
-			// ToPurposeSubCategoryInputList(newVal["purposes"].([]interface{})),
-			// ToAttributeInputList(newVal["attributes"].([]interface{})),
+			Purposes:    ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
+			Attributes:  ToAttributeInputList(property["attributes"].([]interface{})),
 		}
 	}
 	return vals
@@ -124,8 +129,8 @@ func FromDataPointSubDataPointInputList(properties []SubDataPoint) []interface{}
 			"name":        property.Name,
 			"description": property.Description,
 			"categories":  FromDataSubCategoryInputList(property.Categories),
-			// ToPurposeSubCategoryInputList(newVal["purposes"].([]interface{})),
-			// ToAttributeInputList(newVal["attributes"].([]interface{})),
+			"purposes":    FromPurposeSubCategoryInputList(property.Purposes),
+			"attributes":  FromAttributeInputList(property.AttributeValues),
 		}
 	}
 	return vals
@@ -154,28 +159,48 @@ func FromDataSubCategoryInputList(categories []DataSubCategoryInput) []map[strin
 	return vals
 }
 
-// func ToPurposeSubCategoryInputList(origs []interface{}) []PurposeSubCategoryInput {
-// 	vals := make([]PurposeSubCategoryInput, len(origs))
-// 	for i, orig := range origs {
-// 		newVal := orig.(map[string]interface{})
-// 		vals[i] = PurposeSubCategoryInput{
-// 			graphql.String(newVal["name"].(string)),
-// 			ProcessingPurpose(newVal["purpose"].(string)),
-// 		}
-// 	}
+func ToPurposeSubCategoryInputList(categories []interface{}) []PurposeSubCategoryInput {
+	vals := make([]PurposeSubCategoryInput, len(categories))
+	for i, rawCategory := range categories {
+		category := rawCategory.(map[string]interface{})
+		vals[i] = PurposeSubCategoryInput{
+			Name:    graphql.String(category["name"].(string)),
+			Purpose: ProcessingPurpose(category["purpose"].(string)),
+		}
+	}
+	return vals
+}
 
-// 	return vals
-// }
+func FromPurposeSubCategoryInputList(categories []PurposeSubCategoryInput) []map[string]interface{} {
+	vals := make([]map[string]interface{}, len(categories))
+	for i, category := range categories {
+		vals[i] = map[string]interface{}{
+			"name":    category.Name,
+			"purpose": category.Purpose,
+		}
+	}
+	return vals
+}
 
-// func ToAttributeInputList(origs []interface{}) []AttributeInput {
-// 	vals := make([]AttributeInput, len(origs))
-// 	for i, orig := range origs {
-// 		newVal := orig.(map[string]interface{})
-// 		vals[i] = AttributeInput{
-// 			graphql.String(newVal["key"].(string)),
-// 			ToStringList(newVal["values"].([]interface{})),
-// 		}
-// 	}
+func ToAttributeInputList(attributes []interface{}) []AttributeInput {
+	vals := make([]AttributeInput, len(attributes))
+	for i, rawAttribute := range attributes {
+		attribute := rawAttribute.(map[string]interface{})
+		vals[i] = AttributeInput{
+			Key:    graphql.String(attribute["key"].(string)),
+			Values: ToStringList(attribute["values"].([]interface{})),
+		}
+	}
+	return vals
+}
 
-// 	return vals
-// }
+func FromAttributeInputList(attributes []AttributeValues) []map[string]interface{} {
+	vals := make([]map[string]interface{}, len(attributes))
+	for i, attribute := range attributes {
+		vals[i] = map[string]interface{}{
+			"key":    attribute.AttributeKey.Name,
+			"values": attribute.Name,
+		}
+	}
+	return vals
+}

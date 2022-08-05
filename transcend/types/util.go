@@ -11,7 +11,14 @@ func ToStringList(raw interface{}) []graphql.String {
 	for i, orig := range origs {
 		vals[i] = graphql.String(orig.(string))
 	}
+	return vals
+}
 
+func FromStringList(strings []graphql.String) []interface{} {
+	vals := make([]interface{}, len(strings))
+	for i, graphQlString := range strings {
+		vals[i] = graphQlString
+	}
 	return vals
 }
 
