@@ -72,85 +72,86 @@ func resourceDataPoint() *schema.Resource {
 			// 	},
 			// 	Description: "The actions that the datapoint should connect to",
 			// },
-			// "sub_data_points": &schema.Schema{
-			// 	Type:        schema.TypeList,
-			// 	Optional:    true,
-			// 	Description: "The subdatapoints associated with this datapoint",
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"name": &schema.Schema{
-			// 				Type:        schema.TypeString,
-			// 				Required:    true,
-			// 				Description: "The name of the subdatapoint",
-			// 			},
-			// 			"description": &schema.Schema{
-			// 				Type:        schema.TypeString,
-			// 				Optional:    true,
-			// 				Description: "A description for the subdatapoint",
-			// 			},
-			// 			"categories": &schema.Schema{
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"name": &schema.Schema{
-			// 							Type:        schema.TypeString,
-			// 							Required:    true,
-			// 							Description: "The name of the subcategory",
-			// 						},
-			// 						"category": &schema.Schema{
-			// 							Type:        schema.TypeString,
-			// 							Required:    true,
-			// 							Description: "The category of personal data",
-			// 						},
-			// 					},
-			// 				},
-			// 				Description: "The category of personal data for this subdatapoint",
-			// 			},
-			// 			"purposes": &schema.Schema{
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"name": &schema.Schema{
-			// 							Type:        schema.TypeString,
-			// 							Required:    true,
-			// 							Description: "The purpose of processing sub category",
-			// 						},
-			// 						"purpose": &schema.Schema{
-			// 							Type:        schema.TypeString,
-			// 							Required:    true,
-			// 							Description: "The purpose of processing",
-			// 						},
-			// 					},
-			// 				},
-			// 				Description: "The processing purposes for this subdatapoint",
-			// 			},
-			// 			"attributes": &schema.Schema{
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"key": &schema.Schema{
-			// 							Type:        schema.TypeString,
-			// 							Required:    true,
-			// 							Description: "The attribute key that houses the attribute values",
-			// 						},
-			// 						"values": &schema.Schema{
-			// 							Type:     schema.TypeList,
-			// 							Required: true,
-			// 							Elem: &schema.Schema{
-			// 								Type: schema.TypeString,
-			// 							},
-			// 							Description: "The attribute values used to label resources",
-			// 						},
-			// 					},
-			// 				},
-			// 				Description: "The attribute values used to label this subdatapoint",
-			// 			},
-			// 		},
-			// 	},
-			// },
+			"properties": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The properties associated with this datapoint",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the subdatapoint",
+						},
+						// "description": &schema.Schema{
+						// 	Type:        schema.TypeString,
+						// 	Optional:    true,
+						// 	Description: "A description for the subdatapoint",
+						// },
+						// "categories": &schema.Schema{
+						// 	Type:     schema.TypeList,
+						// 	Optional: true,
+						// 	Elem: &schema.Resource{
+						// 		Schema: map[string]*schema.Schema{
+						// 			"name": &schema.Schema{
+						// 				Type:        schema.TypeString,
+						// 				Required:    true,
+						// 				Description: "The name of the subcategory",
+						// 			},
+						// 			"category": &schema.Schema{
+						// 				Type:        schema.TypeString,
+						// 				Required:    true,
+						// 				Description: "The category of personal data",
+						// 			},
+						// 		},
+						// 	},
+						// 	Description: "The category of personal data for this subdatapoint",
+						// },
+						// "purposes": &schema.Schema{
+						// 	Type:     schema.TypeList,
+						// 	Optional: true,
+						// 	Elem: &schema.Resource{
+						// 		Schema: map[string]*schema.Schema{
+						// 			"name": &schema.Schema{
+						// 				Type:        schema.TypeString,
+						// 				Required:    true,
+						// 				Description: "The purpose of processing sub category",
+						// 			},
+						// 			"purpose": &schema.Schema{
+						// 				Type:        schema.TypeString,
+						// 				Required:    true,
+						// 				Description: "The purpose of processing",
+						// 			},
+						// 		},
+						// 	},
+						// 	Description: "The processing purposes for this subdatapoint",
+						// },
+						// "attributes": &schema.Schema{
+						// 	Type:     schema.TypeList,
+						// 	Optional: true,
+						// 	Elem: &schema.Resource{
+						// 		Schema: map[string]*schema.Schema{
+						// 			"key": &schema.Schema{
+						// 				Type:        schema.TypeString,
+						// 				Required:    true,
+						// 				Description: "The attribute key that houses the attribute values",
+						// 			},
+						// 			"values": &schema.Schema{
+						// 				Type:     schema.TypeList,
+						// 				Required: true,
+						// 				Elem: &schema.Schema{
+						// 					Type: schema.TypeString,
+						// 				},
+						// 				Description: "The attribute values used to label resources",
+						// 			},
+						// 		},
+						// 	},
+						// 	Description: "The attribute values used to label this subdatapoint",
+						// },
+					},
+				},
+				MinItems: 0,
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -194,17 +195,16 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	var diags diag.Diagnostics
 
-	var query struct {
+	// Query for the top level data point data
+	var dataPointsQuery struct {
 		DataPoints struct {
 			Nodes []types.DataPoint
 		} `graphql:"dataPoints(filterBy: { ids: [$id] })"`
 	}
-
-	vars := map[string]interface{}{
+	dataPointsQueryVars := map[string]interface{}{
 		"id": graphql.ID(d.Get("id").(string)),
 	}
-
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &dataPointsQuery, dataPointsQueryVars)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -213,8 +213,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		})
 		return diags
 	}
-
-	if len(query.DataPoints.Nodes) == 0 {
+	if len(dataPointsQuery.DataPoints.Nodes) == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error reading datapoint " + d.Get("name").(string),
@@ -223,7 +222,39 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diags
 	}
 
-	types.ReadDataPointIntoState(d, query.DataPoints.Nodes[0])
+	// Query for subdatapoint info with Pagination
+	var subDataPointsQuery struct {
+		DataPoints struct {
+			TotalCount graphql.Int `json:"totalCount"`
+			Nodes      []types.SubDataPoint
+		} `graphql:"subDataPoints(first: $first, offset: $offset, filterBy: { dataPoints: [$dataPointId] })"`
+	}
+	var allSubDataPoints []types.SubDataPoint
+	offset := 0
+	subDataPointsQueryVars := map[string]interface{}{
+		"dataPointId": graphql.ID(d.Get("id").(string)),
+		"first":       graphql.Int(20),
+		"offset":      graphql.Int(offset),
+	}
+	for {
+		err = client.graphql.Query(context.Background(), &subDataPointsQuery, subDataPointsQueryVars)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error reading subdatapoints for datapoint" + d.Get("id").(string),
+				Detail:   err.Error(),
+			})
+			return diags
+		}
+		allSubDataPoints = append(allSubDataPoints, subDataPointsQuery.DataPoints.Nodes...)
+		if len(subDataPointsQuery.DataPoints.Nodes) == 0 || subDataPointsQuery.DataPoints.TotalCount == graphql.Int(len(allSubDataPoints)) {
+			break
+		}
+		offset = offset + 20
+		subDataPointsQueryVars["offset"] = graphql.Int(offset)
+	}
+
+	types.ReadDataPointIntoState(d, dataPointsQuery.DataPoints.Nodes[0], allSubDataPoints)
 
 	return nil
 }

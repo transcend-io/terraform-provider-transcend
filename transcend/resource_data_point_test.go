@@ -3,6 +3,7 @@ package transcend
 import (
 	"context"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
@@ -93,4 +94,60 @@ func TestCanChangeDataPointSilo(t *testing.T) {
 
 	// Ensure that the data silo was recreated so that the API key would have to have been updated
 	assert.NotEqual(t, originalSiloId, newSiloId)
+}
+
+func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
+	_, options := deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1"},
+			{"name": "subDataPoint2"},
+			{"name": "subDataPoint3"},
+			{"name": "subDataPoint4"},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	properties := terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 4)
+}
+
+func TestCanChangeSubDataPoints(t *testing.T) {
+	_, options := deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "subDataPoint1"},
+			{"name": "subDataPoint2"},
+			{"name": "subDataPoint3"},
+			{"name": "subDataPoint4"},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	properties := terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 4)
+
+	_, options = deployDataPoint(t, map[string]interface{}{
+		"properties": []map[string]interface{}{
+			{"name": "onlySubDataPoint"},
+		},
+	})
+	properties = terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 1)
+
+	_, options = deployDataPoint(t, map[string]interface{}{})
+	properties = terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, properties, 0)
+}
+
+func TestCanPaginateSubDataPoints(t *testing.T) {
+	properties := make([]map[string]interface{}, 251)
+	for i := 0; i < 251; i++ {
+		properties[i] = map[string]interface{}{
+			"name": "subDataPoint" + strconv.Itoa(i),
+		}
+	}
+
+	_, options := deployDataPoint(t, map[string]interface{}{
+		"properties": properties,
+	})
+	defer terraform.Destroy(t, options)
+	propertiesOutput := terraform.OutputListOfObjects(t, options, "properties")
+	assert.Len(t, propertiesOutput, 251)
 }

@@ -15,6 +15,12 @@ variable "name" {}
 variable "title" {}
 variable "description" { default = null }
 variable "data_silo_type" { default = "server" }
+variable "properties" {
+  type = list(object({
+    name = string
+  }))
+  default = []
+}
 
 resource "transcend_data_silo" "silo" {
   type = var.data_silo_type
@@ -26,6 +32,17 @@ resource "transcend_data_point" "point" {
   name = var.name
   title = var.title
   description = var.description
+
+  dynamic "properties" {
+    for_each = var.properties
+    content {
+      name = properties.value["name"]
+    }
+  }
+}
+
+output "properties" {
+  value = transcend_data_point.point.properties
 }
 
 output "dataSiloId" {

@@ -66,7 +66,6 @@ resource "transcend_data_silo" "silo" {
   # data_subject_block_list_ids = var.data_subject_block_list_ids
 }
 
-
 output "awsExternalId" {
   value = transcend_data_silo.silo.aws_external_id
 }

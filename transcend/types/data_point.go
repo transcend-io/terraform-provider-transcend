@@ -16,20 +16,35 @@ type DataPoint struct {
 	} `json:"title"`
 	Description struct {
 		DefaultMessage graphql.String `json:"defaultMessage"`
-	}
+	} `json:"description"`
+	// DataCollection struct {
+	// 	DataCetegoryId graphql.String `json:"dataCetegoryId"`
+	// } `json:"dataCollection"`
 	// DataCollection struct {
 	// 	VisualID graphql.String
 	// }
 }
 
+type SubDataPoint struct {
+	Name      graphql.String `json:"name"`
+	DataPoint struct {
+		ID graphql.String `json:"id"`
+	} `json:"dataPoint"`
+}
+
+type DataPointSubDataPointInput struct {
+	Name graphql.String `json:"name"`
+}
+
 type DataPointUpdatableFields struct {
-	DataSiloId  graphql.String `json:"dataSiloId"`
-	Name        graphql.String `json:"name"`
-	Title       graphql.String `json:"title"`
-	Description graphql.String `json:"description"`
+	DataSiloId    graphql.String               `json:"dataSiloId"`
+	Name          graphql.String               `json:"name"`
+	Title         graphql.String               `json:"title"`
+	Description   graphql.String               `json:"description"`
+	SubDataPoints []DataPointSubDataPointInput `json:"subDataPoints,omitempty"`
 
 	// TODO: Add more fields
-	// Categories []DataSubCategoryInput    `json:"categories"`
+	// Categories  []DataSubCategoryInput `json:"categories"`
 	// Purposes   []PurposeSubCategoryInput `json:"purposes"`
 	// Attributes []AttributeInput          `json:"attributes"`
 	// enabledActions
@@ -65,36 +80,51 @@ func MakeUpdateOrCreateDataPointInput(d *schema.ResourceData) UpdateOrCreateData
 	return UpdateOrCreateDataPointInput{
 		ID: graphql.String(d.Get("id").(string)),
 		DataPointUpdatableFields: DataPointUpdatableFields{
-			Name:        graphql.String(d.Get("name").(string)),
-			DataSiloId:  graphql.String(d.Get("data_silo_id").(string)),
-			Title:       graphql.String(d.Get("title").(string)),
-			Description: graphql.String(d.Get("description").(string)),
+			Name:          graphql.String(d.Get("name").(string)),
+			DataSiloId:    graphql.String(d.Get("data_silo_id").(string)),
+			Title:         graphql.String(d.Get("title").(string)),
+			Description:   graphql.String(d.Get("description").(string)),
+			SubDataPoints: ToDataPointSubDataPointInputList(d.Get("properties").([]interface{})),
 		},
 	}
 }
 
-func ReadDataPointIntoState(d *schema.ResourceData, dataPoint DataPoint) {
+func ReadDataPointIntoState(d *schema.ResourceData, dataPoint DataPoint, properties []SubDataPoint) {
 	d.Set("name", dataPoint.Name)
 	d.Set("data_silo_id", dataPoint.DataSilo.ID)
 	d.Set("title", dataPoint.Title.DefaultMessage)
 	d.Set("description", dataPoint.Description.DefaultMessage)
+	d.Set("properties", FromDataPointSubDataPointInputList(properties))
 }
 
-// func ToDataPointSubDataPointInputList(origs []interface{}) []DataPointSubDataPointInput {
-// 	vals := make([]DataPointSubDataPointInput, len(origs))
-// 	for i, orig := range origs {
-// 		newVal := orig.(map[string]interface{})
-// 		vals[i] = DataPointSubDataPointInput{
-// 			Name: graphql.String(newVal["name"].(string)),
-// 			Description: graphql.String(newVal["description"].(string)),
-// 			// ToDataSubCategoryInputList(newVal["categories"].([]interface{})),
-// 			// ToPurposeSubCategoryInputList(newVal["purposes"].([]interface{})),
-// 			// ToAttributeInputList(newVal["attributes"].([]interface{})),
-// 		}
-// 	}
+func ToDataPointSubDataPointInputList(properties []interface{}) []DataPointSubDataPointInput {
+	vals := make([]DataPointSubDataPointInput, len(properties))
+	for i, rawProperty := range properties {
+		property := rawProperty.(map[string]interface{})
+		vals[i] = DataPointSubDataPointInput{
+			Name: graphql.String(property["name"].(string)),
+			// Description: graphql.String(property["description"].(string)),
+			// ToDataSubCategoryInputList(newVal["categories"].([]interface{})),
+			// ToPurposeSubCategoryInputList(newVal["purposes"].([]interface{})),
+			// ToAttributeInputList(newVal["attributes"].([]interface{})),
+		}
+	}
+	return vals
+}
 
-// 	return vals
-// }
+func FromDataPointSubDataPointInputList(properties []SubDataPoint) []interface{} {
+	vals := make([]interface{}, len(properties))
+	for i, property := range properties {
+		vals[i] = map[string]interface{}{
+			"name": property.Name,
+			// Description: graphql.String(property["description"].(string)),
+			// ToDataSubCategoryInputList(newVal["categories"].([]interface{})),
+			// ToPurposeSubCategoryInputList(newVal["purposes"].([]interface{})),
+			// ToAttributeInputList(newVal["attributes"].([]interface{})),
+		}
+	}
+	return vals
+}
 
 // func ToDataSubCategoryInputList(origs []interface{}) []DataSubCategoryInput {
 // 	vals := make([]DataSubCategoryInput, len(origs))
