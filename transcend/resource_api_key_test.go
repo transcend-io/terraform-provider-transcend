@@ -8,7 +8,7 @@ import (
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +22,7 @@ func lookupApiKey(t *testing.T, id string) types.APIKey {
 		"id": graphql.ID(id),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("ApiKey"))
 	assert.Nil(t, err)
 
 	return query.APIKey

@@ -1,6 +1,6 @@
 package types
 
-import "github.com/shurcooL/graphql"
+import graphql "github.com/hasura/go-graphql-client"
 
 func ToStringList(raw interface{}) []graphql.String {
 	if raw == nil {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 func resourceDataPoint() *schema.Resource {
@@ -174,7 +174,7 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 		"input": types.MakeUpdateOrCreateDataPointInput(d),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("UpdateOrCreateDataPoint"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -185,9 +185,7 @@ func resourceDataPointCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 	d.SetId(string(mutation.CreateApiKey.DataPoint.ID))
 
-	resourceDataPointRead(ctx, d, m)
-
-	return nil
+	return resourceDataPointRead(ctx, d, m)
 }
 
 func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -204,7 +202,7 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 	dataPointsQueryVars := map[string]interface{}{
 		"id": graphql.ID(d.Get("id").(string)),
 	}
-	err := client.graphql.Query(context.Background(), &dataPointsQuery, dataPointsQueryVars)
+	err := client.graphql.Query(context.Background(), &dataPointsQuery, dataPointsQueryVars, graphql.OperationName("DataPoints"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -222,6 +220,23 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diags
 	}
 
+	// First query for how many subdatapoints there are
+	var totalCountQuery struct {
+		DataPoints struct {
+			TotalCount graphql.Int `json:"totalCount"`
+		} `graphql:"subDataPoints(first: 1, filterBy: { dataPoints: [$dataPointId] })"`
+	}
+	totalCountQueryVars := map[string]interface{}{"dataPointId": graphql.ID(d.Get("id").(string))}
+	err = client.graphql.Query(context.Background(), &totalCountQuery, totalCountQueryVars, graphql.OperationName("SubDataPoints"))
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error counting subdatapoints for datapoint " + d.Get("id").(string),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+
 	// Query for subdatapoint info with Pagination
 	var subDataPointsQuery struct {
 		DataPoints struct {
@@ -229,15 +244,21 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 			Nodes      []types.SubDataPoint
 		} `graphql:"subDataPoints(first: $first, offset: $offset, filterBy: { dataPoints: [$dataPointId] })"`
 	}
-	var allSubDataPoints []types.SubDataPoint
+	allSubDataPoints := make([]types.SubDataPoint, totalCountQuery.DataPoints.TotalCount)
+	perPage := 20
 	offset := 0
 	subDataPointsQueryVars := map[string]interface{}{
 		"dataPointId": graphql.ID(d.Get("id").(string)),
-		"first":       graphql.Int(20),
+		"first":       graphql.Int(perPage),
 		"offset":      graphql.Int(offset),
 	}
 	for {
-		err = client.graphql.Query(context.Background(), &subDataPointsQuery, subDataPointsQueryVars)
+		err = client.graphql.Query(
+			context.Background(),
+			&subDataPointsQuery,
+			subDataPointsQueryVars,
+			graphql.OperationName("SubDataPoints"),
+		)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -247,10 +268,10 @@ func resourceDataPointRead(ctx context.Context, d *schema.ResourceData, m interf
 			return diags
 		}
 		allSubDataPoints = append(allSubDataPoints, subDataPointsQuery.DataPoints.Nodes...)
-		if len(subDataPointsQuery.DataPoints.Nodes) == 0 || subDataPointsQuery.DataPoints.TotalCount == graphql.Int(len(allSubDataPoints)) {
+		if len(subDataPointsQuery.DataPoints.Nodes) == 0 || subDataPointsQuery.DataPoints.TotalCount <= graphql.Int(len(allSubDataPoints)) {
 			break
 		}
-		offset = offset + 20
+		offset = offset + len(subDataPointsQuery.DataPoints.Nodes)
 		subDataPointsQueryVars["offset"] = graphql.Int(offset)
 	}
 
@@ -274,7 +295,7 @@ func resourceDataPointUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		"input": types.MakeUpdateOrCreateDataPointInput(d),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("UdpateOrCreateDataPoint"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -305,7 +326,7 @@ func resourceDataPointDelete(ctx context.Context, d *schema.ResourceData, m inte
 		"ids": ids,
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("DeleteDataPoints"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

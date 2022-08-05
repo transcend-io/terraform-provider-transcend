@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.3.0"
+      version = "0.4.0"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -16,12 +16,16 @@ variable "outer_type" { default = null }
 variable "type" { default = "amazonWebServices" }
 variable "description" { default = "some description" }
 variable "owner_emails" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 variable "is_live" {
-  type = bool
+  type    = bool
   default = false
+}
+variable "skip_connecting" {
+  type    = bool
+  default = true
 }
 variable "url" { default = null }
 variable "notify_email_address" { default = null }
@@ -35,31 +39,43 @@ variable "notify_email_address" { default = null }
 # }
 variable "headers" {
   type = list(object({
-    name = string
-    value = string
+    name      = string
+    value     = string
     is_secret = bool
   }))
   default = []
 }
 
 resource "transcend_data_silo" "silo" {
-  type = var.type
-  title = var.title
-  description = var.description
-  owner_emails = var.owner_emails
-  is_live = var.is_live
+  type                 = var.type
+  title                = var.title
+  description          = var.description
+  owner_emails         = var.owner_emails
+  is_live              = var.is_live
+  url                  = var.url
+  notify_email_address = var.notify_email_address
+  outer_type           = var.outer_type
+  skip_connecting      = var.skip_connecting
+
+  dynamic "plaintext_context" {
+    for_each = var.type == "amazonWebServices" ? [
+      { name = "role", value = "TranscendAWSIntegrationRole" },
+      { name = "accountId", value = "590309927493" },
+    ] : []
+    content {
+      name  = plaintext_context.value["name"]
+      value = plaintext_context.value["value"]
+    }
+  }
 
   dynamic "headers" {
     for_each = var.headers
     content {
-      name = headers.value["name"]
-      value = headers.value["value"]
+      name      = headers.value["name"]
+      value     = headers.value["value"]
       is_secret = headers.value["is_secret"]
     }
   }
-  url = var.url
-  notify_email_address = var.notify_email_address
-  outer_type = var.outer_type
 
   // TODO: Add tests for changing these
   # identifiers = var.data_silo_identifiers

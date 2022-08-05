@@ -8,7 +8,7 @@ import (
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +22,7 @@ func lookupDataSilo(t *testing.T, id string) types.DataSilo {
 		"id": graphql.String(id),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DataSilo"))
 	assert.Nil(t, err)
 
 	return query.DataSilo
@@ -49,6 +49,14 @@ func TestCanCreateAndDestroyDataSilo(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
+}
+
+func TestCanConnectAwsDataSilo(t *testing.T) {
+	silo, options := deployDataSilo(t, map[string]interface{}{"skip_connecting": false})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
 
 func TestCanChangeTitle(t *testing.T) {

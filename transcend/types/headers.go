@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 type Header struct {
