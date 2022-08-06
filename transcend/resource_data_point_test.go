@@ -10,7 +10,7 @@ import (
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func lookupDataPoint(t *testing.T, id string) types.DataPoint {
 		"id": graphql.ID(id),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("dataPoints"))
 	assert.Nil(t, err)
 	assert.NotEmpty(t, query.DataPoints)
 
@@ -192,8 +192,9 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 }
 
 func TestCanPaginateSubDataPoints(t *testing.T) {
-	properties := make([]map[string]interface{}, 251)
-	for i := 0; i < 251; i++ {
+	numSubDataPoints := 251
+	properties := make([]map[string]interface{}, numSubDataPoints)
+	for i := 0; i < numSubDataPoints; i++ {
 		properties[i] = map[string]interface{}{
 			"name":        "subDataPoint" + strconv.Itoa(i),
 			"description": "subDataPoint number " + strconv.Itoa(i),
@@ -208,7 +209,7 @@ func TestCanPaginateSubDataPoints(t *testing.T) {
 	})
 	defer terraform.Destroy(t, options)
 	propertiesOutput := terraform.OutputListOfObjects(t, options, "properties")
-	assert.Len(t, propertiesOutput, 251)
+	assert.Len(t, propertiesOutput, numSubDataPoints)
 }
 
 func TestCanChangeSubDataPointDescription(t *testing.T) {

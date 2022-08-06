@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 func resourceAPIKey() *schema.Resource {
@@ -65,7 +65,7 @@ func resourceAPIKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		"input": types.MakeApiKeyInput(d),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("CreateApiKey"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -90,7 +90,7 @@ func resourceAPIKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 		"id": graphql.ID(d.Get("id").(string)),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("MyQuery"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +115,7 @@ func resourceAPIKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		"input": types.MakeUpdateApiKeyInput(d),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("UpdateApiKey"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -142,7 +142,7 @@ func resourceAPIKeyDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		"id": graphql.ID(d.Get("id").(string)),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("DeleteApiKey"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

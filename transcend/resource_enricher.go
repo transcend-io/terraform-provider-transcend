@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 func resourceEnricher() *schema.Resource {
@@ -111,7 +111,7 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("CreateEnricher"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -138,7 +138,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 		"id": graphql.ID(d.Get("id").(string)),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("Enricher"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -181,7 +181,7 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("UpdateEnricher"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -209,7 +209,7 @@ func resourceEnricherDelete(ctx context.Context, d *schema.ResourceData, m inter
 		"id": graphql.ID(d.Get("id").(string)),
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("DeleteEnricher"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.3.0"
+      version = "0.4.0"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -17,18 +17,18 @@ variable "description" { default = null }
 variable "data_silo_type" { default = "server" }
 variable "properties" {
   type = list(object({
-    name = string
+    name        = string
     description = string
     categories = list(object({
-      name = string
+      name     = string
       category = string
     }))
     purposes = list(object({
-      name = string
+      name    = string
       purpose = string
     }))
     attributes = list(object({
-      key = string
+      key    = string
       values = list(string)
     }))
   }))
@@ -36,26 +36,27 @@ variable "properties" {
 }
 
 resource "transcend_data_silo" "silo" {
-  type = var.data_silo_type
-  title = var.title
+  type            = var.data_silo_type
+  title           = var.title
+  skip_connecting = true
 }
 
 resource "transcend_data_point" "point" {
   data_silo_id = transcend_data_silo.silo.id
-  name = var.name
-  title = var.title
-  description = var.description
+  name         = var.name
+  title        = var.title
+  description  = var.description
 
   dynamic "properties" {
     for_each = var.properties
     content {
-      name = properties.value["name"]
+      name        = properties.value["name"]
       description = properties.value["description"]
 
       dynamic "categories" {
         for_each = properties.value["categories"]
         content {
-          name = categories.value["name"]
+          name     = categories.value["name"]
           category = categories.value["category"]
         }
       }
@@ -63,7 +64,7 @@ resource "transcend_data_point" "point" {
       dynamic "purposes" {
         for_each = properties.value["purposes"]
         content {
-          name = purposes.value["name"]
+          name    = purposes.value["name"]
           purpose = purposes.value["purpose"]
         }
       }
@@ -71,7 +72,7 @@ resource "transcend_data_point" "point" {
       dynamic "attributes" {
         for_each = properties.value["attributes"]
         content {
-          key = attributes.value["key"]
+          key    = attributes.value["key"]
           values = attributes.value["values"]
         }
       }

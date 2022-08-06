@@ -1,6 +1,6 @@
 package types
 
-import "github.com/shurcooL/graphql"
+import graphql "github.com/hasura/go-graphql-client"
 
 type Enricher struct {
 	ID              graphql.String

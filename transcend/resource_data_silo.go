@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 func resourceDataSilo() *schema.Resource {
@@ -53,7 +53,6 @@ func resourceDataSilo() *schema.Resource {
 			"headers": &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
-				MaxItems:    1,
 				Description: "Custom headers to include in outbound webhook",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -72,6 +71,25 @@ func resourceDataSilo() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "When true, the value of this header will be considered sensitive",
+						},
+					},
+				},
+			},
+			"plaintext_context": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "This is where you put non-secretive values that go in the form when connecting a data silo",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the plaintext input",
+						},
+						"value": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The value of the plaintext input",
 						},
 					},
 				},
@@ -118,6 +136,17 @@ func resourceDataSilo() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether the data silo should be live",
+			},
+			"skip_connecting": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment",
+			},
+			"connection_state": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The current state of the integration",
 			},
 			// "api_key_id": &schema.Schema{
 			// 	Type:        schema.TypeString,
@@ -176,24 +205,16 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var diags diag.Diagnostics
 
-	// Determine the type of the data silo. Most often, this is just the `type` field.
-	// But for AVC silos, the `outer_type` actually contains the name to use, as the `type`
-	// is always "promptAPerson"
-	integrationName := d.Get("outer_type")
-	if integrationName == "" {
-		integrationName = d.Get("type")
-	}
-
 	// Create an empty data silo
 	var createMutation struct {
 		CreateDataSilos struct {
 			DataSilos []types.DataSilo
-		} `graphql:"createDataSilos(input: [{name: $name}])"`
+		} `graphql:"createDataSilos(input: [$dataSilo])"`
 	}
 	createVars := map[string]interface{}{
-		"name": graphql.String(integrationName.(string)),
+		"dataSilo": types.CreateDataSiloInput(d),
 	}
-	err := client.graphql.Mutate(context.Background(), &createMutation, createVars)
+	err := client.graphql.Mutate(context.Background(), &createMutation, createVars, graphql.OperationName("CreateDataSilos"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -214,9 +235,7 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 	d.SetId(string(createMutation.CreateDataSilos.DataSilos[0].ID))
 
 	// Update the data silo with all fields
-	resourceDataSilosUpdate(ctx, d, m)
-
-	return nil
+	return resourceDataSilosUpdate(ctx, d, m)
 }
 
 func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -230,7 +249,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 		"id": graphql.String(d.Get("id").(string)),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars)
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DataSilo"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -245,20 +264,18 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var diags diag.Diagnostics
 
-	var mutation struct {
+	var updateMutation struct {
 		UpdateDataSilo struct {
 			DataSilo types.DataSilo
 		} `graphql:"updateDataSilo(input: $input)"`
 	}
-
-	vars := map[string]interface{}{
+	updateVars := map[string]interface{}{
 		"input": types.UpdateDataSiloInput{
 			Id:                      graphql.ID(d.Get("id").(string)),
 			DataSiloUpdatableFields: types.CreateDataSiloUpdatableFields(d),
 		},
 	}
-
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSilo"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -266,6 +283,28 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Detail:   "Error when updating data silo: " + err.Error(),
 		})
 		return diags
+	}
+
+	shouldSkipConnecting := d.Get("skip_connecting").(bool)
+	if !shouldSkipConnecting {
+		var connectMutation struct {
+			ReconnectDataSilo struct {
+				DataSilo types.DataSilo
+			} `graphql:"reconnectDataSilo(input: $input, dhEncrypted: $dhEncrypted)"`
+		}
+		connectVars := map[string]interface{}{
+			"input":       types.CreateReconnectDataSiloFields(d),
+			"dhEncrypted": graphql.String(""), // This is not needed when no encrypted saas contexts are provided
+		}
+		err = client.graphql.Mutate(context.Background(), &connectMutation, connectVars, graphql.OperationName("ReconnectDataSilo"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error connecting data silos",
+				Detail:   "Error when connecting data silo: " + err.Error(),
+			})
+			return diags
+		}
 	}
 
 	return resourceDataSilosRead(ctx, d, m)
@@ -289,7 +328,7 @@ func resourceDataSilosDelete(ctx context.Context, d *schema.ResourceData, m inte
 		"ids": ids,
 	}
 
-	err := client.graphql.Mutate(context.Background(), &mutation, vars)
+	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("DeleteDataSilos"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

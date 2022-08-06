@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/shurcooL/graphql"
+	graphql "github.com/hasura/go-graphql-client"
 )
 
 type DataSiloUpdatableFields struct {
@@ -35,14 +35,23 @@ type DataSiloUpdatableFields struct {
 	// deprecationState
 }
 
-type DataSiloInput struct {
-	Name graphql.String `json:"name,omitempty"`
-	DataSiloUpdatableFields
+type CreateDataSilosInput struct {
+	Name graphql.String `json:"name"`
 }
 
 type UpdateDataSiloInput struct {
 	Id graphql.ID `json:"id"`
 	DataSiloUpdatableFields
+}
+
+type PlaintextContextInput struct {
+	Name  graphql.String `json:"name"`
+	Value graphql.String `json:"value"`
+}
+
+type ReconnectDataSiloInput struct {
+	DataSiloId       graphql.ID              `json:"dataSiloId"`
+	PlaintextContext []PlaintextContextInput `json:"plaintextContext,omitempty"`
 }
 
 type DataSilo struct {
@@ -59,20 +68,22 @@ type DataSilo struct {
 	URL                graphql.String  `json:"url,omitempty"`
 	NotifyEmailAddress graphql.String  `json:"notifyEmailAddress,omitempty"`
 	IsLive             graphql.Boolean `json:"isLive"`
-	// Identifiers        []struct {
-	// 	Name graphql.String `json:"name"`
-	// } `json:"identifiers"`
-	Owners []struct {
+	Owners             []struct {
 		ID    graphql.String `json:"id"`
 		Email graphql.String `json:"email"`
 	} `json:"owners"`
 	SubjectBlocklist []struct {
 		ID graphql.String `json:"id"`
 	} `json:"subjectBlocklist"`
-	Headers   []Header       `json:"headers"`
-	OuterType graphql.String `json:"outerType"`
+	Headers          []Header                `json:"headers"`
+	OuterType        graphql.String          `json:"outerType"`
+	PlaintextContext []PlaintextContextInput `json:"plaintextContext"`
+	ConnectionState  DataSiloConnectionState `json:"connectionState"`
 
 	// TODO: Add support to DataSiloInput first
+	// Identifiers        []struct {
+	// 	Name graphql.String `json:"name"`
+	// } `json:"identifiers"`
 	// PromptEmailTemplate struct {
 	// 	ID graphql.String `json:"id,omitempty"`
 	// } `json:"promptEmailTemplate,omitempty"`
@@ -92,6 +103,7 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
+		// PlaintextContext:   ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
 
 		// TODO: Add more fields
 		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
@@ -102,10 +114,24 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 	}
 }
 
-func createDataSiloInput(d *schema.ResourceData) DataSiloInput {
-	return DataSiloInput{
-		Name:                    graphql.String(d.Get("type").(string)),
-		DataSiloUpdatableFields: CreateDataSiloUpdatableFields(d),
+func CreateReconnectDataSiloFields(d *schema.ResourceData) ReconnectDataSiloInput {
+	return ReconnectDataSiloInput{
+		DataSiloId:       graphql.String(d.Get("id").(string)),
+		PlaintextContext: ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
+	}
+}
+
+func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
+	// Determine the type of the data silo. Most often, this is just the `type` field.
+	// But for AVC silos, the `outer_type` actually contains the name to use, as the `type`
+	// is always "promptAPerson"
+	integrationName := d.Get("outer_type")
+	if integrationName == "" {
+		integrationName = d.Get("type")
+	}
+
+	return CreateDataSilosInput{
+		Name: graphql.String(integrationName.(string)),
 	}
 }
 
@@ -121,8 +147,10 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("outer_type", silo.OuterType)
 	d.Set("notify_email_address", silo.NotifyEmailAddress)
 	d.Set("is_live", silo.IsLive)
+	d.Set("connectionState", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))
 	d.Set("headers", FlattenHeaders(&silo.Headers))
+	d.Set("plaintext_context", FromPlaintextContextList(silo.PlaintextContext))
 
 	// TODO: Support these fields being read in
 	// d.Set("data_subject_block_list", flattenDataSiloBlockList(silo))
@@ -131,8 +159,30 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	// d.Set("team_names", ...)
 	// d.Set("depended_on_data_silo_ids", ...)
 	// d.Set("data_subject_block_list_ids", ...)
-	// d.Set("headers", ...)
 	// d.Set("api_key_id", ...)
+}
+
+func ToPlaintextContextList(plaintextContexts []interface{}) []PlaintextContextInput {
+	vals := make([]PlaintextContextInput, len(plaintextContexts))
+	for i, rawContext := range plaintextContexts {
+		context := rawContext.(map[string]interface{})
+		vals[i] = PlaintextContextInput{
+			Name:  graphql.String(context["name"].(string)),
+			Value: graphql.String(context["value"].(string)),
+		}
+	}
+	return vals
+}
+
+func FromPlaintextContextList(plaintextContexts []PlaintextContextInput) []map[string]interface{} {
+	vals := make([]map[string]interface{}, len(plaintextContexts))
+	for i, context := range plaintextContexts {
+		vals[i] = map[string]interface{}{
+			"name":  context.Name,
+			"value": context.Value,
+		}
+	}
+	return vals
 }
 
 func FlattenOwners(dataSilo DataSilo) []interface{} {
