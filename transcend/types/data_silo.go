@@ -49,11 +49,6 @@ type PlaintextContextInput struct {
 	Value graphql.String `json:"value"`
 }
 
-type ReconnectDataSiloInput struct {
-	DataSiloId       graphql.ID              `json:"dataSiloId"`
-	PlaintextContext []PlaintextContextInput `json:"plaintextContext,omitempty"`
-}
-
 type DataSilo struct {
 	ID         graphql.String `json:"id"`
 	Link       graphql.String `json:"link,omitempty"`
@@ -114,13 +109,6 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 	}
 }
 
-func CreateReconnectDataSiloFields(d *schema.ResourceData) ReconnectDataSiloInput {
-	return ReconnectDataSiloInput{
-		DataSiloId:       graphql.String(d.Get("id").(string)),
-		PlaintextContext: ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
-	}
-}
-
 func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
 	// Determine the type of the data silo. Most often, this is just the `type` field.
 	// But for AVC silos, the `outer_type` actually contains the name to use, as the `type`
@@ -160,29 +148,6 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	// d.Set("depended_on_data_silo_ids", ...)
 	// d.Set("data_subject_block_list_ids", ...)
 	// d.Set("api_key_id", ...)
-}
-
-func ToPlaintextContextList(plaintextContexts []interface{}) []PlaintextContextInput {
-	vals := make([]PlaintextContextInput, len(plaintextContexts))
-	for i, rawContext := range plaintextContexts {
-		context := rawContext.(map[string]interface{})
-		vals[i] = PlaintextContextInput{
-			Name:  graphql.String(context["name"].(string)),
-			Value: graphql.String(context["value"].(string)),
-		}
-	}
-	return vals
-}
-
-func FromPlaintextContextList(plaintextContexts []PlaintextContextInput) []map[string]interface{} {
-	vals := make([]map[string]interface{}, len(plaintextContexts))
-	for i, context := range plaintextContexts {
-		vals[i] = map[string]interface{}{
-			"name":  context.Name,
-			"value": context.Value,
-		}
-	}
-	return vals
 }
 
 func FlattenOwners(dataSilo DataSilo) []interface{} {

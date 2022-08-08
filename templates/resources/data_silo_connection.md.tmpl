@@ -1,0 +1,35 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usages
+
+### Connecting an AWS Silo
+
+Connecting Amazon to Transcend is done through [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In any AWS Account you want us to have access to audit, you need to create an IAM Role allowing our AWS organization access to it. This is the recommended pattern from Amazon [documented here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html). This is done in a few steps:
+
+- You create an AWS data silo in Transcend.
+- We provide you with an external id through a resource output
+- You create an IAM Policy for what permissions Transcend can take in your organization
+- You create an IAM Role that only allows Transcend to access it, and only when using the given external ID
+
+{{ tffile "examples/data_silo/aws.tf" }}
+
+The above example completes this entire flow. The `transcend_data_silo_connection` resource ensures that the IAM Role is assumable by Transcend. 
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import transcend_data_silo.silo <data_silo_id_from_silo_url>
+```

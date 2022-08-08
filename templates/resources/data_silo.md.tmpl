@@ -1,0 +1,57 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usages
+
+### Connecting an AWS Silo
+
+Connecting Amazon to Transcend is done through [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In any AWS Account you want us to have access to audit, you need to create an IAM Role allowing our AWS organization access to it. This is the recommended pattern from Amazon [documented here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html). This is done in a few steps:
+
+- You create an AWS data silo in Transcend.
+- We provide you with an external id through a resource output
+- You create an IAM Policy for what permissions Transcend can take in your organization
+- You create an IAM Role that only allows Transcend to access it, and only when using the given external ID
+
+{{ tffile "examples/data_silo/aws.tf" }}
+
+The above example completes this entire flow. The `transcend_data_silo_connection` resource ensures that the IAM Role is assumable by Transcend. 
+
+### Creating an Automated Vendor Coordination Silo
+
+{{ tffile "examples/data_silo/avc.tf" }}
+
+In most cases, Transcend aims to provide an API-based integration into your SaaS tools and internal systems. Sometimes, the API based approach may not be possible due to restrictions such as:
+
+- The SaaS vendor has no API for a certain type(s) of privacy requests, and requests you to send an email in a specific template.
+- The SaaS vendor only provides a self-serve dashboard to submit data privacy requests, and someone on your team would need to log in and submit the request through their browser.
+- You want to notify an internal team to perform a manual process against a database or internal tool.
+
+In these cases, you can configure your Transcend instance to automate the sending of an email template whenever a particular type of data subject request is made. These emails can be sent to the SaaS vendor directly, or to an individual in your organization.
+
+## Looking up Data Silo metadata
+
+If you are wondering what integration names Transcend supports or what fields are available on those integrations, you can lookup all data silo metadata via our GraphQL API.
+
+Go to [our GraphQL Playground](https://api.transcend.io/graphql) and enter a query like
+
+{{ codefile "gql" "examples/data_silo/search_catalog.gql" }}
+
+to search for integration metadata based on a title substring. Make sure you are logged into [your Organization's admin-dashboard](https://app.transcend.io/login) to have credentials on the GraphQL Playground.
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import transcend_data_silo.silo <data_silo_id_from_silo_url>
+```

@@ -145,7 +145,7 @@ func resourceDataSilo() *schema.Resource {
 			},
 			"connection_state": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
+				Computed:    true,
 				Description: "The current state of the integration",
 			},
 			// "api_key_id": &schema.Schema{

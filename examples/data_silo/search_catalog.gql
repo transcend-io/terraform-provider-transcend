@@ -1,0 +1,22 @@
+query {
+  searchCatalogs(input: { text: "slack", limit: 25 }) {
+    catalogs {
+      integrationName
+      description
+      formConfigs {
+        passportName
+        type
+        formItems {
+          name
+          type
+          isPlaintext
+        }
+      }
+      promptEmailTemplateId
+      promptAVendorEmailAddress
+      isPromptAVendorCompatible
+      dataPointsCustomizable
+      allowedActions
+    }
+  }
+}
