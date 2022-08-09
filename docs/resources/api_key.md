@@ -45,5 +45,5 @@ resource "transcend_api_key" "test" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import transcend_data_silo.silo <data_silo_id_from_silo_url>
+terraform import transcend_api_key.key <api_key_id>
 ```

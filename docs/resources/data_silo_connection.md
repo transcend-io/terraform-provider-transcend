@@ -42,7 +42,8 @@ resource "aws_iam_role" "iam_role" {
       {
         Action    = "sts:AssumeRole"
         Effect    = "Allow"
-        Principal = { AWS = "arn:aws:iam::590309927493:root" }
+        // 829095311197 is the AWS Organization for Transcend that will try to assume role into your organization
+        Principal = { AWS = "arn:aws:iam::829095311197:root" }
         Condition = { StringEquals = { "sts:ExternalId" : transcend_data_silo.aws.aws_external_id } }
       },
     ]
@@ -123,5 +124,5 @@ Required:
 Import is supported using the following syntax:
 
 ```shell
-terraform import transcend_data_silo.silo <data_silo_id_from_silo_url>
+terraform import transcend_data_silo_connection.connection <data_silo_id_from_silo_url>
 ```
