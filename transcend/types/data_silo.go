@@ -135,7 +135,7 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("outer_type", silo.OuterType)
 	d.Set("notify_email_address", silo.NotifyEmailAddress)
 	d.Set("is_live", silo.IsLive)
-	d.Set("connectionState", silo.ConnectionState)
+	d.Set("connection_state", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))
 	d.Set("headers", FlattenHeaders(&silo.Headers))
 	d.Set("plaintext_context", FromPlaintextContextList(silo.PlaintextContext))
