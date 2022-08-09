@@ -57,4 +57,4 @@ jobs:
         env:
           TF_ACC: "1"
           TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
-        run: go test -v ./... -run "TestCanCreateAndDestroyDataPoint"
+        run: go test -v ./...
