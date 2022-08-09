@@ -5,20 +5,20 @@ import (
 	graphql "github.com/hasura/go-graphql-client"
 )
 
+type IDObject struct {
+	ID graphql.String `json:"id"`
+}
+
 type Enricher struct {
-	ID              graphql.String `json:"id"`
-	Title           graphql.String `json:"title"`
-	Description     graphql.String `json:"description"`
-	URL             graphql.String `json:"url"`
-	InputIdentifier struct {
-		ID graphql.String `json:"id"`
-	} `json:"inputIdentifier"`
-	Identifiers []struct {
-		ID graphql.String `json:"id"`
-	} `json:"identifiers"`
-	Headers []Header        `json:"headers"`
-	Actions []RequestAction `json:"actions"`
-	Type    EnricherType    `json:"type"`
+	ID              graphql.String  `json:"id"`
+	Title           graphql.String  `json:"title"`
+	Description     graphql.String  `json:"description"`
+	URL             graphql.String  `json:"url"`
+	InputIdentifier IDObject        `json:"inputIdentifier"`
+	Identifiers     []IDObject      `json:"identifiers"`
+	Headers         []Header        `json:"headers"`
+	Actions         []RequestAction `json:"actions"`
+	Type            EnricherType    `json:"type"`
 }
 
 type UpdateEnricherInput struct {
@@ -78,7 +78,23 @@ func ReadEnricherIntoState(d *schema.ResourceData, enricher Enricher) {
 	d.Set("description", enricher.Description)
 	d.Set("url", enricher.URL)
 	d.Set("input_identifier", enricher.InputIdentifier.ID)
-	d.Set("output_identifiers", enricher.Identifiers)
+	d.Set("output_identifiers", FlattenIDObject(enricher.Identifiers))
 	d.Set("actions", enricher.Actions)
 	d.Set("headers", FlattenHeaders(&enricher.Headers))
+}
+
+func FlattenRequestAction(actions []RequestAction) []interface{} {
+	ret := make([]interface{}, len(actions))
+	for i, action := range actions {
+		ret[i] = string(action)
+	}
+	return ret
+}
+
+func FlattenIDObject(objects []IDObject) []interface{} {
+	ret := make([]interface{}, len(objects))
+	for i, object := range objects {
+		ret[i] = object.ID
+	}
+	return ret
 }
