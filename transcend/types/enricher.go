@@ -15,7 +15,7 @@ type Enricher struct {
 	} `json:"inputIdentifier"`
 	Identifiers []struct {
 		ID graphql.String `json:"id"`
-	} `json:"identifier"`
+	} `json:"identifiers"`
 	Headers []Header        `json:"headers"`
 	Actions []RequestAction `json:"actions"`
 	Type    EnricherType    `json:"type"`

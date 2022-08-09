@@ -45,7 +45,7 @@ func dataSourceIdentifierRead(ctx context.Context, d *schema.ResourceData, m int
 		"text": graphql.String(d.Get("text").(string)),
 	}
 
-	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("Identifier"))
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("Identifiers"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
