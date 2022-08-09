@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.4.1"
+      version = "0.4.2"
       # This next line uses the locally built code from `make install`
       source = "transcend.com/cli/transcend"
       # This next line uses the published version from the terraform registry
