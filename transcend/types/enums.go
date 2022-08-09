@@ -8,6 +8,7 @@ type ProcessingPurpose string
 type RequestAction string
 type DataSiloConnectionState string
 type ScopeName string
+type EnricherType string
 
 func ToRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {
 	vals := make([]RequestActionObjectResolver, len(origs))
