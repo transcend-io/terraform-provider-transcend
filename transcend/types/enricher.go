@@ -78,7 +78,7 @@ func ReadEnricherIntoState(d *schema.ResourceData, enricher Enricher) {
 	d.Set("description", enricher.Description)
 	d.Set("url", enricher.URL)
 	d.Set("input_identifier", enricher.InputIdentifier.ID)
-	d.Set("identifiers", enricher.Identifiers)
+	d.Set("output_identifiers", enricher.Identifiers)
 	d.Set("actions", enricher.Actions)
 	d.Set("headers", FlattenHeaders(&enricher.Headers))
 }
