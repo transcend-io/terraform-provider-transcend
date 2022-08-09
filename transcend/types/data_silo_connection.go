@@ -20,7 +20,7 @@ func CreateReconnectDataSiloFields(d *schema.ResourceData) ReconnectDataSiloInpu
 func ReadDataSiloConnectionIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("id", silo.ID)
 	d.Set("data_silo_id", silo.ID)
-	d.Set("connectionState", silo.ConnectionState)
+	d.Set("connection_state", silo.ConnectionState)
 	d.Set("plaintext_context", FromPlaintextContextList(silo.PlaintextContext))
 }
 

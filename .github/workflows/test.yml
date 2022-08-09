@@ -33,7 +33,7 @@ jobs:
 
   # run acceptance tests in a matrix with Terraform core versions
   test:
-    name: Matrix Test
+    name: End to End tests
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -46,7 +46,7 @@ jobs:
         id: go
       - uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: '1.2.*'
+          terraform_version: '1.2.6'
           terraform_wrapper: false
       - name: Get dependencies
         run: go mod download
