@@ -1,0 +1,18 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+You can search for an identifier by the identifier name (or a substring of the name as long as only one identifier is matched)
+
+{{ tffile "examples/identifiers/main.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

@@ -26,6 +26,11 @@ func resourceEnricher() *schema.Resource {
 				Required:    true,
 				Description: "The enricher's title",
 			},
+			"type": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The enricher's title",
+			},
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
@@ -33,7 +38,7 @@ func resourceEnricher() *schema.Resource {
 			},
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The url that the enricher should post to",
 			},
 			"input_identifier": &schema.Schema{
@@ -98,17 +103,11 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 	var mutation struct {
 		CreateEnricher struct {
 			Enricher types.Enricher
-		} `graphql:"createEnricher(input: {title: $title, type: SERVER, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
+		} `graphql:"createEnricher(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"title":           graphql.String(d.Get("title").(string)),
-		"description":     graphql.String(d.Get("description").(string)),
-		"url":             graphql.String(d.Get("url").(string)),
-		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
+		"input": types.MakeEnricherInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("CreateEnricher"))
@@ -120,9 +119,9 @@ func resourceEnricherCreate(ctx context.Context, d *schema.ResourceData, m inter
 		})
 		return diags
 	}
-
 	d.SetId(string(mutation.CreateEnricher.Enricher.ID))
-	return nil
+
+	return resourceEnricherRead(ctx, d, m)
 }
 
 func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -148,13 +147,7 @@ func resourceEnricherRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diags
 	}
 
-	d.Set("title", query.Enricher.Title)
-	d.Set("description", query.Enricher.Description)
-	d.Set("url", query.Enricher.Url)
-	d.Set("input_identifier", query.Enricher.InputIdentifier.ID)
-	d.Set("identifiers", query.Enricher.Identifiers)
-	d.Set("actions", query.Enricher.Actions)
-	d.Set("headers", types.FlattenHeaders(&query.Enricher.Headers))
+	types.ReadEnricherIntoState(d, query.Enricher)
 
 	return nil
 }
@@ -167,18 +160,11 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	var mutation struct {
 		UpdateEnricher struct {
 			Enricher types.Enricher
-		} `graphql:"updateEnricher(input: {id: $id, title: $title, description: $description, url: $url, inputIdentifier: $inputIdentifier, headers: $headers, identifiers: $identifiers, actions: $actions})"`
+		} `graphql:"updateEnricher(input: $input)"`
 	}
 
 	vars := map[string]interface{}{
-		"id":              graphql.ID(d.Get("id").(string)),
-		"title":           graphql.String(d.Get("title").(string)),
-		"description":     graphql.String(d.Get("description").(string)),
-		"url":             graphql.String(d.Get("url").(string)),
-		"inputIdentifier": graphql.ID(d.Get("input_identifier").(string)),
-		"headers":         types.ToCustomHeaderInputList(d.Get("headers").([]interface{})),
-		"identifiers":     types.ToIDList(d.Get("output_identifiers").([]interface{})),
-		"actions":         types.ToRequestActionList(d.Get("actions").([]interface{})),
+		"input": types.MakeUpdateEnricherInput(d),
 	}
 
 	err := client.graphql.Mutate(context.Background(), &mutation, vars, graphql.OperationName("UpdateEnricher"))
@@ -191,7 +177,7 @@ func resourceEnricherUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diags
 	}
 
-	return nil
+	return resourceEnricherRead(ctx, d, m)
 }
 
 func resourceEnricherDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
