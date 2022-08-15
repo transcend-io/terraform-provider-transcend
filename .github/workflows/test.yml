@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: needs.list-test-files.outputs.tests
+        test: ${{ needs.list-test-files.outputs.tests }}
     steps:
       - run: echo "Here's where I would run test ${{ matrix.test }}"
       # - uses: actions/checkout@v3
