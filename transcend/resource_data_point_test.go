@@ -43,8 +43,11 @@ func deployDataPoint(t *testing.T, vars map[string]interface{}) (types.DataPoint
 		TerraformDir: "../examples/tests/data_point",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
+	// TODO: use InitAndApplyAndIdempotent in tests
+	terraform.InitAndApply(t, terraformOptions)
+	// terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataPointId"))
+
 	dataPoint := lookupDataPoint(t, terraform.Output(t, terraformOptions, "dataPointId"))
 	return dataPoint, terraformOptions
 }
@@ -185,10 +188,6 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 	})
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
-
-	_, options = deployDataPoint(t, map[string]interface{}{})
-	properties = terraform.OutputListOfObjects(t, options, "properties")
-	assert.Len(t, properties, 0)
 }
 
 func TestCanPaginateSubDataPoints(t *testing.T) {
@@ -317,8 +316,10 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 				"description": "some description",
 				"categories":  []map[string]interface{}{},
 				"purposes": []map[string]interface{}{
-					{"name": "Other", "purpose": "LEGAL"},
+					// TODO: Add test for when the purposes are in non-alphabetical order
+					// that things remain idempotent
 					{"name": "Other", "purpose": "HR"},
+					{"name": "Other", "purpose": "LEGAL"},
 				},
 				"attributes": []map[string]interface{}{},
 			},
@@ -328,8 +329,8 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
-		{"name": "Other", "purpose": "LEGAL"},
 		{"name": "Other", "purpose": "HR"},
+		{"name": "Other", "purpose": "LEGAL"},
 	}, properties[0]["purposes"].([]map[string]interface{}))
 
 	// Change the category

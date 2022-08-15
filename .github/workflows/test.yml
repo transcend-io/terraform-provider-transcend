@@ -31,30 +31,46 @@ jobs:
           git diff --exit-code || \
             (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
 
-  # run acceptance tests in a matrix with Terraform core versions
-  test:
-    name: End to End tests
-    needs: build
+  list-test-files:
+    name: List Test Files
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    outputs:
+      tests: ${{ steps.list-tests.outputs.tests }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-        id: go
-      - uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: '1.2.6'
-          terraform_wrapper: false
-      - name: Get dependencies
-        run: go mod download
-      - name: Build the provider from source
-        run: make install
-      - name: TF acceptance tests
-        timeout-minutes: 20
-        env:
-          TF_ACC: "1"
-          TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
-        run: go test -v ./...
+      - run: echo "::set-output name=tests::$(go test ./...  -list=. | grep 'Test' | paste -s -d, -)""
+        id: list-tests
+
+  # run acceptance tests in a matrix with Terraform core versions
+  test:
+    name: End to End tests
+    needs: [build, list-test-files]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        test: needs.list-test-files.outputs.tests
+    steps:
+      - run: echo "Here's where I would run test ${{ matrix.test }}"
+      # - uses: actions/checkout@v3
+      # - uses: actions/setup-go@v3
+      #   with:
+      #     go-version-file: 'go.mod'
+      #     cache: true
+      #   id: go
+      # - uses: hashicorp/setup-terraform@v2
+      #   with:
+      #     terraform_version: '1.2.6'
+      #     terraform_wrapper: false
+      # - name: Get dependencies
+      #   run: go mod download
+      # - name: Build the provider from source
+      #   run: make install
+      # - name: TF acceptance tests
+      #   timeout-minutes: 20
+      #   env:
+      #     TF_ACC: "1"
+      #     TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
+      #   run: go test -v ./...

@@ -46,52 +46,52 @@ provider "transcend" {
 # # TranscendAWSIntegrationRole
 # # 590309927493
 
-# resource "transcend_data_silo" "server" {
-#   type = "server"
-#   title = "User Data Webhook"
-#   url = "https://your.company.domain/user/lookup"
-#   description = "Fetches user data from our internal API"
-#   owner_emails = ["david@transcend.io"]
-#   headers {
-#     name = "someHeaderSentWithWebhook"
-#     value = "someSecret"
-#     is_secret = false
-#   }
-# }
+resource "transcend_data_silo" "server" {
+  type = "server"
+  title = "User Data Webhook"
+  url = "https://your.company.domain/user/lookup"
+  description = "Fetches user data from our internal API"
+  owner_emails = ["david@transcend.io"]
+  headers {
+    name = "someHeaderSentWithWebhook"
+    value = "someSecret"
+    is_secret = false
+  }
+}
 
-# resource "transcend_data_point" "server" {
-#   data_silo_id = transcend_data_silo.server.id
-#   name = "User"
-#   title = "User Data"
+resource "transcend_data_point" "server" {
+  data_silo_id = transcend_data_silo.server.id
+  name = "User"
+  title = "User Data"
 
-#   properties {
-#     name = "Email"
-#     description = "The email address of a customer"
+  # properties {
+  #   name = "Email"
+  #   description = "The email address of a customer"
 
-#     categories {
-#       name = "Email"
-#       category = "CONTACT"
-#     }
-#     purposes {
-#       name = "Other"
-#       purpose = "ESSENTIAL"
-#     }
-#   }
+  #   categories {
+  #     name = "Email"
+  #     category = "CONTACT"
+  #   }
+  #   purposes {
+  #     name = "Other"
+  #     purpose = "ESSENTIAL"
+  #   }
+  # }
 
-#   properties {
-#     name = "Location"
-#     description = "The user's estimated location"
+  # properties {
+  #   name = "Location"
+  #   description = "The user's estimated location"
 
-#     categories {
-#       name = "Approximate Geolocation"
-#       category = "LOCATION"
-#     }
-#     purposes {
-#       name = "Other"
-#       purpose = "ADDITIONAL_FUNCTIONALITY"
-#     }
-#   }
-# }
+  #   categories {
+  #     name = "Approximate Geolocation"
+  #     category = "LOCATION"
+  #   }
+  #   purposes {
+  #     name = "Other"
+  #     purpose = "ADDITIONAL_FUNCTIONALITY"
+  #   }
+  # }
+}
 
 # resource "transcend_api_key" "test" {
 #   title = "server-key"
