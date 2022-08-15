@@ -163,7 +163,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `notify_email_address` (String) The email address that should be notified whenever new requests are made
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
-- `plaintext_context` (Block List) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
+- `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
 - `url` (String) The URL of the server to post to if a server silo

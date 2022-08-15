@@ -47,33 +47,32 @@ jobs:
 
   # run acceptance tests in a matrix with Terraform core versions
   test:
-    name: End to End tests
+    name: ${{ matrix.test }}
     needs: [build, list-test-files]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.list-test-files.outputs.tests) }}
     steps:
-      - run: echo "Here's where I would run test ${{ matrix.test }}"
-      # - uses: actions/checkout@v3
-      # - uses: actions/setup-go@v3
-      #   with:
-      #     go-version-file: 'go.mod'
-      #     cache: true
-      #   id: go
-      # - uses: hashicorp/setup-terraform@v2
-      #   with:
-      #     terraform_version: '1.2.6'
-      #     terraform_wrapper: false
-      # - name: Get dependencies
-      #   run: go mod download
-      # - name: Build the provider from source
-      #   run: make install
-      # - name: TF acceptance tests
-      #   timeout-minutes: 20
-      #   env:
-      #     TF_ACC: "1"
-      #     TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
-      #   run: go test -v ./...
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+        id: go
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '1.2.6'
+          terraform_wrapper: false
+      - name: Get dependencies
+        run: go mod download
+      - name: Build the provider from source
+        run: make install
+      - name: TF acceptance tests
+        timeout-minutes: 5
+        env:
+          TF_ACC: "1"
+          TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
+        run: go test -v ./... -run "${{ matrix.test }}"
