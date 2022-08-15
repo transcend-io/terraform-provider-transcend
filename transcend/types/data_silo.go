@@ -98,7 +98,6 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
-		// PlaintextContext:   ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
 
 		// TODO: Add more fields
 		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),

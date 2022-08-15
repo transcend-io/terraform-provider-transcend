@@ -38,7 +38,7 @@ func deployEnricher(t *testing.T, vars map[string]interface{}) (types.Enricher, 
 		TerraformDir: "../examples/tests/enricher",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "enricherId"))
 	enricher := lookupEnricher(t, terraform.Output(t, terraformOptions, "enricherId"))
 	return enricher, terraformOptions

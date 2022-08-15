@@ -13,7 +13,7 @@ type ReconnectDataSiloInput struct {
 func CreateReconnectDataSiloFields(d *schema.ResourceData) ReconnectDataSiloInput {
 	return ReconnectDataSiloInput{
 		DataSiloId:       graphql.String(d.Get("id").(string)),
-		PlaintextContext: ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
+		PlaintextContext: ToPlaintextContextList(d.Get("plaintext_context").(*schema.Set)),
 	}
 }
 
@@ -24,9 +24,9 @@ func ReadDataSiloConnectionIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("plaintext_context", FromPlaintextContextList(silo.PlaintextContext))
 }
 
-func ToPlaintextContextList(plaintextContexts []interface{}) []PlaintextContextInput {
-	vals := make([]PlaintextContextInput, len(plaintextContexts))
-	for i, rawContext := range plaintextContexts {
+func ToPlaintextContextList(plaintextContexts *schema.Set) []PlaintextContextInput {
+	vals := make([]PlaintextContextInput, plaintextContexts.Len())
+	for i, rawContext := range plaintextContexts.List() {
 		context := rawContext.(map[string]interface{})
 		vals[i] = PlaintextContextInput{
 			Name:  graphql.String(context["name"].(string)),

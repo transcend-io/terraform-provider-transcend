@@ -43,7 +43,7 @@ func deployDataPoint(t *testing.T, vars map[string]interface{}) (types.DataPoint
 		TerraformDir: "../examples/tests/data_point",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataPointId"))
 	dataPoint := lookupDataPoint(t, terraform.Output(t, terraformOptions, "dataPointId"))
 	return dataPoint, terraformOptions

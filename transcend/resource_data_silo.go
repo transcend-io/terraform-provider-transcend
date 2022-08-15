@@ -76,7 +76,7 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"plaintext_context": &schema.Schema{
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "This is where you put non-secretive values that go in the form when connecting a data silo",
 				Elem: &schema.Resource{

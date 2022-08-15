@@ -48,44 +48,47 @@ provider "transcend" {
 
 # resource "transcend_data_silo" "server" {
 #   type = "server"
-#   title = "Example Webhook (terraform test)"
-#   url = "https://some.api.link/some/path"
-#   description = "This is a test"
+#   title = "User Data Webhook"
+#   url = "https://your.company.domain/user/lookup"
+#   description = "Fetches user data from our internal API"
 #   owner_emails = ["david@transcend.io"]
 #   headers {
-#     name = "someSecretHeader"
+#     name = "someHeaderSentWithWebhook"
 #     value = "someSecret"
 #     is_secret = false
 #   }
 # }
 
-# resource "transcend_data_point" "customer" {
+# resource "transcend_data_point" "server" {
 #   data_silo_id = transcend_data_silo.server.id
-#   name = "customer"
-#   title = "whatever"
-#   data_collection_tag = "test"
-#   query_suggestions {
-#     suggested_query = "testing"
-#     request_type = "ACCESS"
-#   }
-#   sub_data_points {
-#     name = "test"
-#     description = "testing"
+#   name = "User"
+#   title = "User Data"
+
+#   properties {
+#     name = "Email"
+#     description = "The email address of a customer"
+
 #     categories {
-#       name = "Other"
-#       category = "FINANCIAL"
-#     }
-#     categories {
-#       name = "Biometrics"
-#       category = "HEALTH"
+#       name = "Email"
+#       category = "CONTACT"
 #     }
 #     purposes {
-#       name = "essential"
+#       name = "Other"
 #       purpose = "ESSENTIAL"
 #     }
-#     attributes {
-#       key = "something"
-#       values = ["something"]
+#   }
+
+#   properties {
+#     name = "Location"
+#     description = "The user's estimated location"
+
+#     categories {
+#       name = "Approximate Geolocation"
+#       category = "LOCATION"
+#     }
+#     purposes {
+#       name = "Other"
+#       purpose = "ADDITIONAL_FUNCTIONALITY"
 #     }
 #   }
 # }
@@ -96,19 +99,25 @@ provider "transcend" {
 #   scopes = ["makeDataSubjectRequest", "connectDataSilos"]
 # }
 
-resource "transcend_data_silo" "avc" {
-  type                 = "promptAPerson"
-  outer_type           = "coupa"
-  notify_email_address = "dpo@coupa.com"
-  description          = "Coupa is a cloud platform for business spend that offers a fully unified suite of financial applications for business spend management"
-  is_live              = true
-}
+# resource "transcend_data_silo" "avc" {
+#   type                 = "promptAPerson"
+#   outer_type           = "coupa"
+#   notify_email_address = "dpo@coupa.com"
+#   description          = "Coupa is a cloud platform for business spend that offers a fully unified suite of financial applications for business spend management"
+#   is_live              = true
+# }
 
-resource "transcend_data_silo" "oauth" {
-  type            = "slack"
-  description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
-  skip_connecting = true
-}
+# resource "transcend_data_silo" "oauth" {
+#   type            = "slack"
+#   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
+#   skip_connecting = true
+# }
+
+# resource "transcend_data_silo" "datadog" {
+#   type            = "datadog"
+#   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
+#   skip_connecting = true
+# }
 
 resource "transcend_data_silo" "aws" {
   type        = "amazonWebServices"

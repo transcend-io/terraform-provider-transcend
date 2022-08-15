@@ -38,7 +38,7 @@ func deployApiKey(t *testing.T, vars map[string]interface{}) (types.APIKey, *ter
 		TerraformDir: "../examples/tests/api_key",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "apiKeyId"))
 	key := lookupApiKey(t, terraform.Output(t, terraformOptions, "apiKeyId"))
 	return key, terraformOptions

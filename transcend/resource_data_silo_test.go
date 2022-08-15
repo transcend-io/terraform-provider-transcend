@@ -38,7 +38,7 @@ func deployDataSilo(t *testing.T, vars map[string]interface{}) (types.DataSilo, 
 		TerraformDir: "../examples/tests/data_silo",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	return silo, terraformOptions

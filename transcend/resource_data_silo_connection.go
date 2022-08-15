@@ -27,7 +27,7 @@ func resourceDataSiloConnection() *schema.Resource {
 				Description: "The ID of the data silo to connect",
 			},
 			"plaintext_context": &schema.Schema{
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "This is where you put non-secretive values that go in the form when connecting a data silo",
 				Elem: &schema.Resource{
@@ -96,7 +96,7 @@ func resourceDataSiloConnectionsUpdate(ctx context.Context, d *schema.ResourceDa
 	connectVars := map[string]interface{}{
 		"input": types.ReconnectDataSiloInput{
 			DataSiloId:       graphql.String(d.Get("data_silo_id").(string)),
-			PlaintextContext: types.ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
+			PlaintextContext: types.ToPlaintextContextList(d.Get("plaintext_context").(*schema.Set)),
 		},
 		"dhEncrypted": graphql.String(""), // This is not needed when no encrypted saas contexts are provided
 	}
