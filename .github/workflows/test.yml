@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
-      - run: echo "::set-output name=tests::$(go test ./...  -list=. | grep 'Test' | paste -s -d, -)""
+      - run: echo "::set-output name=tests::$(go test ./...  -list=. | grep 'Test' | paste -s -d, -)"
         id: list-tests
 
   # run acceptance tests in a matrix with Terraform core versions
