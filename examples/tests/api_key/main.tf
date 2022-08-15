@@ -23,6 +23,7 @@ resource "transcend_data_silo" "silo" {
   type            = var.data_silo_type
   title           = var.title
   skip_connecting = true
+  lifecycle { ignore_changes = [description] }
 }
 
 resource "transcend_api_key" "key" {
