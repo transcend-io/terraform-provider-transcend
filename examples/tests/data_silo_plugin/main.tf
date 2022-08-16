@@ -55,7 +55,3 @@ output "gradlePluginDataSiloId" {
 output "gradlePluginType" {
   value = resource.transcend_data_silo_plugin.gradle.type
 }
-
-output "apiKeyId" {
-  value = transcend_api_key.key.id
-}
