@@ -9,6 +9,7 @@ type RequestAction string
 type DataSiloConnectionState string
 type ScopeName string
 type EnricherType string
+type PluginType string
 
 func ToRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {
 	vals := make([]RequestActionObjectResolver, len(origs))
