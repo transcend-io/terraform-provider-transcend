@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.5.0"
+      version = "0.5.1"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -58,7 +58,7 @@ resource "transcend_data_silo" "silo" {
   skip_connecting      = var.skip_connecting
 
   dynamic "plaintext_context" {
-    for_each = var.type == "amazonWebServices" ? [
+    for_each = var.type == "amazonWebServices" && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
     ] : []

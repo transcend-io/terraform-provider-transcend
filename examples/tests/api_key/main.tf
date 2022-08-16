@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.5.0"
+      version = "0.5.1"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -21,7 +21,9 @@ variable "data_silo_type" { default = null }
 resource "transcend_data_silo" "silo" {
   count           = var.data_silo_type != null ? 1 : 0
   type            = var.data_silo_type
+  title           = var.title
   skip_connecting = true
+  lifecycle { ignore_changes = [description] }
 }
 
 resource "transcend_api_key" "key" {

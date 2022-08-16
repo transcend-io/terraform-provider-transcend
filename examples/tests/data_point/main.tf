@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.5.0"
+      version = "0.5.1"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -32,12 +32,19 @@ variable "properties" {
       values = list(string)
     }))
   }))
-  default = []
+  default = [{
+    name        = "test"
+    description = "test"
+    categories  = []
+    purposes    = []
+    attributes  = []
+  }]
 }
 
 resource "transcend_data_silo" "silo" {
   type            = var.data_silo_type
   title           = var.title
+  description     = "Send a webhook to a server and POST back through our API."
   skip_connecting = true
 }
 

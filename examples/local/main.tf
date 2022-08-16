@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.5.0"
+      version = "0.5.1"
       # This next line uses the locally built code from `make install`
       source = "transcend.com/cli/transcend"
       # This next line uses the published version from the terraform registry
@@ -46,49 +46,52 @@ provider "transcend" {
 # # TranscendAWSIntegrationRole
 # # 590309927493
 
-# resource "transcend_data_silo" "server" {
-#   type = "server"
-#   title = "Example Webhook (terraform test)"
-#   url = "https://some.api.link/some/path"
-#   description = "This is a test"
-#   owner_emails = ["david@transcend.io"]
-#   headers {
-#     name = "someSecretHeader"
-#     value = "someSecret"
-#     is_secret = false
-#   }
-# }
+resource "transcend_data_silo" "server" {
+  type = "server"
+  title = "User Data Webhook"
+  url = "https://your.company.domain/user/lookup"
+  description = "Fetches user data from our internal API"
+  owner_emails = ["david@transcend.io"]
+  headers {
+    name = "someHeaderSentWithWebhook"
+    value = "someSecret"
+    is_secret = false
+  }
+}
 
-# resource "transcend_data_point" "customer" {
-#   data_silo_id = transcend_data_silo.server.id
-#   name = "customer"
-#   title = "whatever"
-#   data_collection_tag = "test"
-#   query_suggestions {
-#     suggested_query = "testing"
-#     request_type = "ACCESS"
-#   }
-#   sub_data_points {
-#     name = "test"
-#     description = "testing"
-#     categories {
-#       name = "Other"
-#       category = "FINANCIAL"
-#     }
-#     categories {
-#       name = "Biometrics"
-#       category = "HEALTH"
-#     }
-#     purposes {
-#       name = "essential"
-#       purpose = "ESSENTIAL"
-#     }
-#     attributes {
-#       key = "something"
-#       values = ["something"]
-#     }
-#   }
-# }
+resource "transcend_data_point" "server" {
+  data_silo_id = transcend_data_silo.server.id
+  name = "User"
+  title = "User Data"
+
+  # properties {
+  #   name = "Email"
+  #   description = "The email address of a customer"
+
+  #   categories {
+  #     name = "Email"
+  #     category = "CONTACT"
+  #   }
+  #   purposes {
+  #     name = "Other"
+  #     purpose = "ESSENTIAL"
+  #   }
+  # }
+
+  # properties {
+  #   name = "Location"
+  #   description = "The user's estimated location"
+
+  #   categories {
+  #     name = "Approximate Geolocation"
+  #     category = "LOCATION"
+  #   }
+  #   purposes {
+  #     name = "Other"
+  #     purpose = "ADDITIONAL_FUNCTIONALITY"
+  #   }
+  # }
+}
 
 # resource "transcend_api_key" "test" {
 #   title = "server-key"
@@ -106,6 +109,12 @@ provider "transcend" {
 
 # resource "transcend_data_silo" "oauth" {
 #   type            = "slack"
+#   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
+#   skip_connecting = true
+# }
+
+# resource "transcend_data_silo" "datadog" {
+#   type            = "datadog"
 #   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
 #   skip_connecting = true
 # }

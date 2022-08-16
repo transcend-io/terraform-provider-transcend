@@ -55,12 +55,12 @@ resource "transcend_data_point" "customer" {
 
 - `data_silo_id` (String) The id of the data silo to create the datapoint for
 - `name` (String) he datapoint name (used to key by)
+- `properties` (Block Set, Min: 1) The properties associated with this datapoint (see [below for nested schema](#nestedblock--properties))
 - `title` (String) The title of the datapoint
 
 ### Optional
 
 - `description` (String) A description for the datapoint
-- `properties` (Block List) The properties associated with this datapoint (see [below for nested schema](#nestedblock--properties))
 
 ### Read-Only
 

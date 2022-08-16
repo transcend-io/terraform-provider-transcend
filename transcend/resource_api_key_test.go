@@ -28,7 +28,7 @@ func lookupApiKey(t *testing.T, id string) types.APIKey {
 	return query.APIKey
 }
 
-func deployApiKey(t *testing.T, vars map[string]interface{}) (types.APIKey, *terraform.Options) {
+func prepareApiKeyOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{"title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v
@@ -38,25 +38,31 @@ func deployApiKey(t *testing.T, vars map[string]interface{}) (types.APIKey, *ter
 		TerraformDir: "../examples/tests/api_key",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	return terraformOptions
+}
+
+func deployApiKey(t *testing.T, terraformOptions *terraform.Options) types.APIKey {
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "apiKeyId"))
 	key := lookupApiKey(t, terraform.Output(t, terraformOptions, "apiKeyId"))
-	return key, terraformOptions
+	return key
 }
 
 func TestCanCreateAndDestroyAPIKey(t *testing.T) {
-	key, options := deployApiKey(t, map[string]interface{}{"title": t.Name()})
+	options := prepareApiKeyOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
+	key := deployApiKey(t, options)
 	assert.Equal(t, graphql.String(t.Name()), key.Title)
 }
 
 func TestCanChangeApiKeyTitle(t *testing.T) {
-	key, options := deployApiKey(t, map[string]interface{}{"title": t.Name()})
+	options := prepareApiKeyOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
+	key := deployApiKey(t, options)
 	assert.Equal(t, graphql.String(t.Name()), key.Title)
 	originalKeyId := key.ID
 
-	key, _ = deployApiKey(t, map[string]interface{}{"title": t.Name() + "_2"})
+	key = deployApiKey(t, prepareApiKeyOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), key.Title)
 
 	// Ensure that a new API key was created
@@ -64,21 +70,24 @@ func TestCanChangeApiKeyTitle(t *testing.T) {
 }
 
 func TestCanChangeScopes(t *testing.T) {
-	key, options := deployApiKey(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
+	options := prepareApiKeyOptions(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
 	defer terraform.Destroy(t, options)
+	key := deployApiKey(t, options)
 	assert.Equal(t, graphql.String("connectDataSilos"), key.Scopes[0].Name)
 
-	key, _ = deployApiKey(t, map[string]interface{}{"scopes": []string{"makeDataSubjectRequest"}})
+	key = deployApiKey(t, prepareApiKeyOptions(t, map[string]interface{}{"scopes": []string{"makeDataSubjectRequest"}}))
 	assert.Equal(t, graphql.String("makeDataSubjectRequest"), key.Scopes[0].Name)
 }
 
 func TestCanChangeDataSilos(t *testing.T) {
-	key, options := deployApiKey(t, map[string]interface{}{"data_silo_type": "amazonS3"})
+	options := prepareApiKeyOptions(t, map[string]interface{}{"data_silo_type": "amazonS3"})
 	defer terraform.Destroy(t, options)
+	key := deployApiKey(t, options)
 	originalSiloId := terraform.Output(t, options, "dataSiloId")
 	assert.Equal(t, graphql.String(originalSiloId), key.DataSilos[0].ID)
 
-	key, options = deployApiKey(t, map[string]interface{}{"data_silo_type": "asana"})
+	options = prepareApiKeyOptions(t, map[string]interface{}{"data_silo_type": "asana"})
+	key = deployApiKey(t, options)
 	newSiloId := terraform.Output(t, options, "dataSiloId")
 	assert.Equal(t, graphql.String(newSiloId), key.DataSilos[0].ID)
 

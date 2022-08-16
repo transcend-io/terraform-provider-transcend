@@ -33,7 +33,7 @@ func lookupDataPoint(t *testing.T, id string) types.DataPoint {
 	return query.DataPoints.Nodes[0]
 }
 
-func deployDataPoint(t *testing.T, vars map[string]interface{}) (types.DataPoint, *terraform.Options) {
+func prepareDataPointOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{"name": t.Name(), "title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v
@@ -43,53 +43,65 @@ func deployDataPoint(t *testing.T, vars map[string]interface{}) (types.DataPoint
 		TerraformDir: "../examples/tests/data_point",
 		Vars:         defaultVars,
 	})
+	return terraformOptions
+}
+
+func deployDataPoint(t *testing.T, terraformOptions *terraform.Options) types.DataPoint {
+	// TODO: use InitAndApplyAndIdempotent in tests
 	terraform.InitAndApply(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataPointId"))
+
 	dataPoint := lookupDataPoint(t, terraform.Output(t, terraformOptions, "dataPointId"))
-	return dataPoint, terraformOptions
+	return dataPoint
 }
 
 func TestCanCreateAndDestroyDataPoint(t *testing.T) {
-	dataPoint, options := deployDataPoint(t, map[string]interface{}{})
+	options := prepareDataPointOptions(t, map[string]interface{}{})
 	defer terraform.Destroy(t, options)
+	dataPoint := deployDataPoint(t, options)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Name)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Title.DefaultMessage)
 }
 
 func TestCanChangeDataPointTitle(t *testing.T) {
-	dataPoint, options := deployDataPoint(t, map[string]interface{}{"title": t.Name()})
+	options := prepareDataPointOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
+	dataPoint := deployDataPoint(t, options)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Title.DefaultMessage)
 
-	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"title": t.Name() + "_2"})
+	dataPoint = deployDataPoint(t, prepareDataPointOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Title.DefaultMessage)
 }
 
 func TestCanChangeDataPointName(t *testing.T) {
-	dataPoint, options := deployDataPoint(t, map[string]interface{}{"name": t.Name()})
+	options := prepareDataPointOptions(t, map[string]interface{}{"name": t.Name()})
 	defer terraform.Destroy(t, options)
+	dataPoint := deployDataPoint(t, options)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Name)
 
-	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"name": t.Name() + "_2"})
+	dataPoint = deployDataPoint(t, prepareDataPointOptions(t, map[string]interface{}{"name": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Name)
 }
 
 func TestCanChangeDataPointDescription(t *testing.T) {
-	dataPoint, options := deployDataPoint(t, map[string]interface{}{"description": t.Name()})
+	options := prepareDataPointOptions(t, map[string]interface{}{"description": t.Name()})
 	defer terraform.Destroy(t, options)
+	dataPoint := deployDataPoint(t, options)
 	assert.Equal(t, graphql.String(t.Name()), dataPoint.Description.DefaultMessage)
 
-	dataPoint, _ = deployDataPoint(t, map[string]interface{}{"description": t.Name() + "_2"})
+	dataPoint = deployDataPoint(t, prepareDataPointOptions(t, map[string]interface{}{"description": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), dataPoint.Description.DefaultMessage)
 }
 
 func TestCanChangeDataPointSilo(t *testing.T) {
-	dataPoint, options := deployDataPoint(t, map[string]interface{}{"data_silo_type": "server"})
+	options := prepareDataPointOptions(t, map[string]interface{}{"data_silo_type": "server"})
 	defer terraform.Destroy(t, options)
+	dataPoint := deployDataPoint(t, options)
 	originalSiloId := terraform.Output(t, options, "dataSiloId")
 	assert.Equal(t, graphql.String(originalSiloId), dataPoint.DataSilo.ID)
 
-	dataPoint, options = deployDataPoint(t, map[string]interface{}{"data_silo_type": "promptAPerson"})
+	options = prepareDataPointOptions(t, map[string]interface{}{"data_silo_type": "promptAPerson"})
+	dataPoint = deployDataPoint(t, options)
 	newSiloId := terraform.Output(t, options, "dataSiloId")
 	assert.Equal(t, graphql.String(newSiloId), dataPoint.DataSilo.ID)
 
@@ -98,7 +110,7 @@ func TestCanChangeDataPointSilo(t *testing.T) {
 }
 
 func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -131,12 +143,13 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 4)
 }
 
 func TestCanChangeSubDataPoints(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -169,10 +182,11 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 4)
 
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "someSubDataPoint",
@@ -183,12 +197,9 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
-
-	_, options = deployDataPoint(t, map[string]interface{}{})
-	properties = terraform.OutputListOfObjects(t, options, "properties")
-	assert.Len(t, properties, 0)
 }
 
 func TestCanPaginateSubDataPoints(t *testing.T) {
@@ -204,16 +215,17 @@ func TestCanPaginateSubDataPoints(t *testing.T) {
 		}
 	}
 
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": properties,
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	propertiesOutput := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, propertiesOutput, numSubDataPoints)
 }
 
 func TestCanChangeSubDataPointDescription(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -225,11 +237,12 @@ func TestCanChangeSubDataPointDescription(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, "some description", properties[0]["description"].(string))
 
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -240,13 +253,14 @@ func TestCanChangeSubDataPointDescription(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, "some other description", properties[0]["description"].(string))
 }
 
 func TestCanChangeSubDataPointCategories(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -261,6 +275,7 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
@@ -269,7 +284,7 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 	}, properties[0]["categories"].([]map[string]interface{}))
 
 	// Remove one category
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -282,6 +297,7 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
@@ -289,7 +305,7 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 	}, properties[0]["categories"].([]map[string]interface{}))
 
 	// Change the category
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -302,6 +318,7 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
@@ -310,30 +327,33 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 }
 
 func TestCanChangeSubDataPointPurposes(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
 				"description": "some description",
 				"categories":  []map[string]interface{}{},
 				"purposes": []map[string]interface{}{
-					{"name": "Other", "purpose": "LEGAL"},
+					// TODO: Add test for when the purposes are in non-alphabetical order
+					// that things remain idempotent
 					{"name": "Other", "purpose": "HR"},
+					{"name": "Other", "purpose": "LEGAL"},
 				},
 				"attributes": []map[string]interface{}{},
 			},
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
-		{"name": "Other", "purpose": "LEGAL"},
 		{"name": "Other", "purpose": "HR"},
+		{"name": "Other", "purpose": "LEGAL"},
 	}, properties[0]["purposes"].([]map[string]interface{}))
 
 	// Change the category
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -346,6 +366,7 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	properties = terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
 	assert.Equal(t, []map[string]interface{}{
@@ -354,7 +375,7 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 }
 
 func TestCanChangeSubDataPointAttributes(t *testing.T) {
-	_, options := deployDataPoint(t, map[string]interface{}{
+	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -368,6 +389,7 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
 	rawProperties := terraform.OutputJson(t, options, "properties")
 	var properties []interface{}
 	err := json.Unmarshal([]byte(rawProperties), &properties)
@@ -378,7 +400,7 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 	}, properties[0].(map[string]interface{})["attributes"].([]interface{}))
 
 	// Change the attributes
-	_, options = deployDataPoint(t, map[string]interface{}{
+	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
 				"name":        "subDataPoint1",
@@ -391,6 +413,7 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 			},
 		},
 	})
+	deployDataPoint(t, options)
 	rawProperties = terraform.OutputJson(t, options, "properties")
 	err = json.Unmarshal([]byte(rawProperties), &properties)
 	assert.Nil(t, err)
