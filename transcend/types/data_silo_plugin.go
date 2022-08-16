@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
@@ -62,7 +63,7 @@ func MakePluginsFiltersInput(d *schema.ResourceData) PluginsFiltersInput {
 func MakeUpdatePluginInput(d *schema.ResourceData, date string) UpdatePluginInput {
 	return UpdatePluginInput{
 		DataSiloID:        graphql.ID(d.Get("data_silo_id").(string)),
-		PluginID:          graphql.ID(d.Get("plugin_id").(string)),
+		PluginID:          graphql.ID(d.Get("id").(string)),
 		Enabled:           graphql.Boolean(d.Get("enabled").(bool)),
 		ScheduleFrequency: graphql.String(d.Get("schedule_frequency").(string)),
 		ScheduleStartAt:   graphql.String(date),
@@ -95,4 +96,32 @@ func PluginsReadQuery(client graphql.Client, d *schema.ResourceData) (Plugin, st
 	}
 
 	return query.Plugins.Plugins[0], ""
+}
+
+func PluginsUpdateQuery(client graphql.Client, d *schema.ResourceData) string {
+	var updateMutation struct {
+		UpdateDataSiloPluginPayload struct {
+			Plugin Plugin
+		} `graphql:"updateDataSiloPlugin(input: $input)"`
+	}
+
+	dateTime, err := time.Parse("2022-08-16T07:00:00.000Z", d.Get("schedule_start_at").(string))
+	date := dateTime.String()
+	if err != nil {
+		plugin, err := PluginsReadQuery(client, d)
+		if err != "" {
+			return err
+		}
+		date = string(plugin.ScheduleStartAt)
+	}
+	updateVars := map[string]interface{}{
+		"input": MakeUpdatePluginInput(d, date),
+	}
+
+	err = client.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
+	if err != nil {
+		return "Error when updating plugin: " + err.Error()
+	}
+
+	return ""
 }

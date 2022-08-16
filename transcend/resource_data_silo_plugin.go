@@ -2,13 +2,11 @@ package transcend
 
 import (
 	"context"
-	"time"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	graphql "github.com/hasura/go-graphql-client"
 )
 
 func resourceDataSiloPlugin() *schema.Resource {
@@ -21,10 +19,6 @@ func resourceDataSiloPlugin() *schema.Resource {
 			"id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"plugin_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
 			},
 			"data_silo_id": &schema.Schema{
 				Type:        schema.TypeString,
@@ -84,7 +78,32 @@ func resourceDataSiloPlugin() *schema.Resource {
 }
 
 func resourceDataSiloPluginCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceDataSiloPluginUpdate(ctx, d, m)
+	client := m.(*Client)
+
+	var diags diag.Diagnostics
+
+	plugin, err := types.PluginsReadQuery(*client.graphql, d)
+	if err != "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading plugin",
+			Detail:   err,
+		})
+		return diags
+	}
+
+	d.SetId(string(plugin.ID))
+
+	err = types.PluginsUpdateQuery(*client.graphql, d)
+	if err != "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading plugin",
+			Detail:   err,
+		})
+		return diags
+	}
+	return nil
 }
 
 func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -113,37 +132,12 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	var diags diag.Diagnostics
 
-	var updateMutation struct {
-		UpdateDataSiloPluginPayload struct {
-			Plugin types.Plugin
-		} `graphql:"updateDataSiloPlugin(input: $input)"`
-	}
-
-	dateTime, err := time.Parse("2022-08-16T07:00:00.000Z", d.Get("schedule_start_at").(string))
-	date := dateTime.String()
-	if err != nil {
-		plugin, err := types.PluginsReadQuery(*client.graphql, d)
-		if err != "" {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Error updating plugin",
-				Detail:   err,
-			})
-			return diags
-		}
-		date = string(plugin.ScheduleStartAt)
-	}
-
-	updateVars := map[string]interface{}{
-		"input": types.MakeUpdatePluginInput(d, date),
-	}
-
-	err = client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
-	if err != nil {
+	err := types.PluginsUpdateQuery(*client.graphql, d)
+	if err != "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error updating plugin",
-			Detail:   "Error when updating plugin: " + err.Error(),
+			Summary:  "Error reading plugin",
+			Detail:   err,
 		})
 		return diags
 	}
@@ -153,6 +147,22 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 
 // Data silos cannot be disconnected, so just no-op
 func resourceDataSiloPluginDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Client)
+
+	var diags diag.Diagnostics
+
+	d.Set("enabled", false)
+
+	err := types.PluginsUpdateQuery(*client.graphql, d)
+	if err != "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error reading plugin",
+			Detail:   err,
+		})
+		return diags
+	}
+
 	d.SetId("")
 	return nil
 }
