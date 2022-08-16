@@ -69,8 +69,7 @@ func TestCanChangeEnabled(t *testing.T) {
 	plugin := deployPlugin(t, options)
 	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 
-	options = preparePluginOptions(t, map[string]interface{}{"enabled": false})
-	plugin = deployPlugin(t, options)
+	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"enabled": false}))
 	assert.Equal(t, graphql.Boolean(false), plugin.Enabled)
 }
 
