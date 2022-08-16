@@ -57,18 +57,14 @@ func TestCanCreateAndDestroyPlugin(t *testing.T) {
 	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 }
 
-// func TestCanChangeApiKeyTitle(t *testing.T) {
-// 	key, options := deployApiKey(t, map[string]interface{}{"enabled": true})
-// 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String(t.Name()), key.Title)
-// 	originalKeyId := key.ID
+func TestCanChangeEnabled(t *testing.T) {
+	plugin, options := deployPlugin(t, map[string]interface{}{"enabled": true})
+	defer terraform.Destroy(t, options)
+	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 
-// 	key, _ = deployApiKey(t, map[string]interface{}{"title": t.Name() + "_2"})
-// 	assert.Equal(t, graphql.String(t.Name()+"_2"), key.Title)
-
-// 	// Ensure that a new API key was created
-// 	assert.NotEqual(t, originalKeyId, key.ID)
-// }
+	plugin, _ = deployPlugin(t, map[string]interface{}{"enabled": false})
+	assert.Equal(t, graphql.Boolean(false), plugin.Enabled)
+}
 
 // func TestCanChangeScopes(t *testing.T) {
 // 	key, options := deployApiKey(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
