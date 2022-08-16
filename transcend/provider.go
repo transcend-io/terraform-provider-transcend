@@ -25,14 +25,16 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"transcend_data_silo":            resourceDataSilo(),
-			"transcend_data_silo_connection": resourceDataSiloConnection(),
 			"transcend_api_key":              resourceAPIKey(),
 			"transcend_data_point":           resourceDataPoint(),
 			"transcend_enricher":             resourceEnricher(),
+			"transcend_data_silo":            resourceDataSilo(),
+			"transcend_data_silo_connection": resourceDataSiloConnection(),
+			"transcend_data_silo_plugin":     resourceDataSiloPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"transcend_identifier": dataSourceIdentifier(),
+			"transcend_data_silo_plugin": dataSourceDataSiloPlugin(),
+			"transcend_identifier":       dataSourceIdentifier(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

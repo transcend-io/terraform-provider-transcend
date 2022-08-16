@@ -96,31 +96,47 @@ provider "transcend" {
 #   scopes = ["makeDataSubjectRequest", "connectDataSilos"]
 # }
 
-resource "transcend_data_silo" "avc" {
-  type                 = "promptAPerson"
-  outer_type           = "coupa"
-  notify_email_address = "dpo@coupa.com"
-  description          = "Coupa is a cloud platform for business spend that offers a fully unified suite of financial applications for business spend management"
-  is_live              = true
+# resource "transcend_data_silo" "avc" {
+#   type                 = "promptAPerson"
+#   outer_type           = "coupa"
+#   notify_email_address = "dpo@coupa.com"
+#   description          = "Coupa is a cloud platform for business spend that offers a fully unified suite of financial applications for business spend management"
+#   is_live              = true
+# }
+
+# resource "transcend_data_silo" "oauth" {
+#   type            = "slack"
+#   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
+#   skip_connecting = true
+# }
+
+# resource "transcend_data_silo" "aws" {
+#   type        = "amazonWebServices"
+#   description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
+
+#   plaintext_context {
+#     name  = "role"
+#     value = "TranscendAWSIntegrationRole"
+#   }
+
+#   plaintext_context {
+#     name  = "accountId"
+#     value = "590309927493"
+#   }
+# }
+
+resource "transcend_data_silo" "gradle" {
+  type = "gradle"
 }
 
-resource "transcend_data_silo" "oauth" {
-  type            = "slack"
-  description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
-  skip_connecting = true
+data "transcend_data_silo_plugin" "gradlePlugin" {
+  data_silo_id = resource.transcend_data_silo.gradle.id
+  type = "DATA_SILO_DISCOVERY"
 }
 
-resource "transcend_data_silo" "aws" {
-  type        = "amazonWebServices"
-  description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
-
-  plaintext_context {
-    name  = "role"
-    value = "TranscendAWSIntegrationRole"
-  }
-
-  plaintext_context {
-    name  = "accountId"
-    value = "590309927493"
-  }
+resource "transcend_data_silo_plugin" "gradle" {
+  plugin_id = data.transcend_data_silo_plugin.gradlePlugin.id
+  data_silo_id = data.transcend_data_silo_plugin.gradlePlugin.data_silo_id
+  type = data.transcend_data_silo_plugin.gradlePlugin.type
+  enabled = true
 }
