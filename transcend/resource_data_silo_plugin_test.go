@@ -63,11 +63,11 @@ func TestCanCreateAndDestroyPlugin(t *testing.T) {
 }
 
 func TestCanChangeEnabled(t *testing.T) {
-	options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
-	plugin := deployPlugin(t, options)
-	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
+	// options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
+	// plugin := deployPlugin(t, options)
+	// assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 
-	options = preparePluginOptions(t, map[string]interface{}{"enabled": false})
+	options := preparePluginOptions(t, map[string]interface{}{"enabled": false})
 	newPlugin := deployPlugin(t, options)
 	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.Boolean(false), newPlugin.Enabled)
