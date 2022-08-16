@@ -23,6 +23,7 @@ variable "schedule_start_at" {
 
 variable "enabled" {
   type = bool
+  default = false
 }
 
 resource "transcend_data_silo" "gradle" {
