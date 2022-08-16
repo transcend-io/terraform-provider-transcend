@@ -69,6 +69,7 @@ func TestCanChangeEnabled(t *testing.T) {
 
 	options = preparePluginOptions(t, map[string]interface{}{"enabled": false})
 	newPlugin := deployPlugin(t, options)
+	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.Boolean(false), newPlugin.Enabled)
 }
 
