@@ -34,7 +34,7 @@ func lookupPlugin(t *testing.T, dataSiloId string, typ string) types.Plugin {
 	return query.Plugins.Plugins[0]
 }
 
-func deployPlugin(t *testing.T, vars map[string]interface{}) (types.Plugin, *terraform.Options) {
+func preparePluginOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{}
 	for k, v := range vars {
 		defaultVars[k] = v
@@ -44,25 +44,31 @@ func deployPlugin(t *testing.T, vars map[string]interface{}) (types.Plugin, *ter
 		TerraformDir: "../examples/tests/data_silo_plugin",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
-	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "gradlePluginDataSiloId"))
-	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "gradlePluginType"))
-	plugin := lookupPlugin(t, terraform.Output(t, terraformOptions, "gradlePluginDataSiloId"), terraform.Output(t, terraformOptions, "gradlePluginType"))
-	return plugin, terraformOptions
+	return terraformOptions
+}
+
+func deployPlugin(t *testing.T, options *terraform.Options) types.Plugin {
+	terraform.InitAndApply(t, options)
+	assert.NotEmpty(t, terraform.Output(t, options, "gradlePluginDataSiloId"))
+	assert.NotEmpty(t, terraform.Output(t, options, "gradlePluginType"))
+	plugin := lookupPlugin(t, terraform.Output(t, options, "gradlePluginDataSiloId"), terraform.Output(t, options, "gradlePluginType"))
+	return plugin
 }
 
 func TestCanCreateAndDestroyPlugin(t *testing.T) {
-	plugin, options := deployPlugin(t, map[string]interface{}{"enabled": true})
+	options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
+	plugin := deployPlugin(t, options)
 	defer terraform.Destroy(t, options)
 	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 }
 
 func TestCanChangeEnabled(t *testing.T) {
-	plugin, options := deployPlugin(t, map[string]interface{}{"enabled": true})
-	defer terraform.Destroy(t, options)
+	options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
+	plugin := deployPlugin(t, options)
 	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
 
-	plugin, _ = deployPlugin(t, map[string]interface{}{"enabled": false})
+	options = preparePluginOptions(t, map[string]interface{}{"enabled": false})
+	plugin = deployPlugin(t, options)
 	assert.Equal(t, graphql.Boolean(false), plugin.Enabled)
 }
 
