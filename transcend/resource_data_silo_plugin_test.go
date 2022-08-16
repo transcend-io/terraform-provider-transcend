@@ -48,7 +48,7 @@ func preparePluginOptions(t *testing.T, vars map[string]interface{}) *terraform.
 }
 
 func deployPlugin(t *testing.T, options *terraform.Options) types.Plugin {
-	terraform.InitAndApplyAndIdempotent(t, options)
+	terraform.InitAndApply(t, options)
 	assert.NotEmpty(t, terraform.Output(t, options, "gradlePluginDataSiloId"))
 	assert.NotEmpty(t, terraform.Output(t, options, "gradlePluginType"))
 	plugin := lookupPlugin(t, terraform.Output(t, options, "gradlePluginDataSiloId"), terraform.Output(t, options, "gradlePluginType"))
