@@ -73,8 +73,8 @@ func resourceDataPoint() *schema.Resource {
 			// 	Description: "The actions that the datapoint should connect to",
 			// },
 			"properties": &schema.Schema{
-				Type:        schema.TypeList,
-				Optional:    true,
+				Type:        schema.TypeSet,
+				Required:    true,
 				Description: "The properties associated with this datapoint",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -150,7 +150,7 @@ func resourceDataPoint() *schema.Resource {
 						},
 					},
 				},
-				MinItems: 0,
+				MinItems: 1,
 			},
 		},
 		Importer: &schema.ResourceImporter{

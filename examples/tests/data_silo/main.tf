@@ -58,7 +58,7 @@ resource "transcend_data_silo" "silo" {
   skip_connecting      = var.skip_connecting
 
   dynamic "plaintext_context" {
-    for_each = var.type == "amazonWebServices" ? [
+    for_each = var.type == "amazonWebServices" && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
     ] : []

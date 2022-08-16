@@ -98,7 +98,6 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
-		// PlaintextContext:   ToPlaintextContextList(d.Get("plaintext_context").([]interface{})),
 
 		// TODO: Add more fields
 		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),
@@ -130,10 +129,14 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("has_avc_functionality", silo.Catalog.HasAvcFunctionality)
 	d.Set("type", silo.Type)
 	d.Set("title", silo.Title)
-	d.Set("description", silo.Description)
+	if d.Get("description") != nil {
+		d.Set("description", silo.Description)
+	}
 	d.Set("url", silo.URL)
 	d.Set("outer_type", silo.OuterType)
-	d.Set("notify_email_address", silo.NotifyEmailAddress)
+	if d.Get("notify_email") != nil {
+		d.Set("notify_email_address", silo.NotifyEmailAddress)
+	}
 	d.Set("is_live", silo.IsLive)
 	d.Set("connection_state", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))

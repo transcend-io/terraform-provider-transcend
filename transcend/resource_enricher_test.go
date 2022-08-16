@@ -28,7 +28,7 @@ func lookupEnricher(t *testing.T, id string) types.Enricher {
 	return query.Enricher
 }
 
-func deployEnricher(t *testing.T, vars map[string]interface{}) (types.Enricher, *terraform.Options) {
+func prepareEnricherOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{"title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v
@@ -38,14 +38,19 @@ func deployEnricher(t *testing.T, vars map[string]interface{}) (types.Enricher, 
 		TerraformDir: "../examples/tests/enricher",
 		Vars:         defaultVars,
 	})
-	terraform.InitAndApply(t, terraformOptions)
+	return terraformOptions
+}
+
+func deployEnricher(t *testing.T, terraformOptions *terraform.Options) types.Enricher {
+	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "enricherId"))
 	enricher := lookupEnricher(t, terraform.Output(t, terraformOptions, "enricherId"))
-	return enricher, terraformOptions
+	return enricher
 }
 
 func TestCanCreateAndDestroyEnricher(t *testing.T) {
-	enricher, options := deployEnricher(t, map[string]interface{}{"title": t.Name()})
+	options := prepareEnricherOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
+	enricher := deployEnricher(t, options)
 	assert.Equal(t, graphql.String(t.Name()), enricher.Title)
 }

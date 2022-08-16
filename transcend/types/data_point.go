@@ -94,7 +94,7 @@ func MakeUpdateOrCreateDataPointInput(d *schema.ResourceData) UpdateOrCreateData
 			DataSiloId:    graphql.String(d.Get("data_silo_id").(string)),
 			Title:         graphql.String(d.Get("title").(string)),
 			Description:   graphql.String(d.Get("description").(string)),
-			SubDataPoints: ToDataPointSubDataPointInputList(d.Get("properties").([]interface{})),
+			SubDataPoints: ToDataPointSubDataPointInputList(d.Get("properties").(*schema.Set)),
 		},
 	}
 }
@@ -107,9 +107,9 @@ func ReadDataPointIntoState(d *schema.ResourceData, dataPoint DataPoint, propert
 	d.Set("properties", FromDataPointSubDataPointInputList(properties))
 }
 
-func ToDataPointSubDataPointInputList(properties []interface{}) []DataPointSubDataPointInput {
-	vals := make([]DataPointSubDataPointInput, len(properties))
-	for i, rawProperty := range properties {
+func ToDataPointSubDataPointInputList(properties *schema.Set) []DataPointSubDataPointInput {
+	vals := make([]DataPointSubDataPointInput, properties.Len())
+	for i, rawProperty := range properties.List() {
 		property := rawProperty.(map[string]interface{})
 		vals[i] = DataPointSubDataPointInput{
 			Name:        graphql.String(property["name"].(string)),
@@ -123,14 +123,26 @@ func ToDataPointSubDataPointInputList(properties []interface{}) []DataPointSubDa
 }
 
 func FromDataPointSubDataPointInputList(properties []SubDataPoint) []interface{} {
-	vals := make([]interface{}, len(properties))
-	for i, property := range properties {
-		vals[i] = map[string]interface{}{
-			"name":        property.Name,
-			"description": property.Description,
-			"categories":  FromDataSubCategoryInputList(property.Categories),
-			"purposes":    FromPurposeSubCategoryInputList(property.Purposes),
-			"attributes":  FromAttributeInputList(property.AttributeValues),
+	// We want to filter out properties without names
+	missingNameCount := 0
+	for _, property := range properties {
+		if len(property.Name) == 0 {
+			missingNameCount += 1
+		}
+	}
+
+	vals := make([]interface{}, len(properties)-missingNameCount)
+	valIndex := 0
+	for _, property := range properties {
+		if len(property.Name) > 0 {
+			vals[valIndex] = map[string]interface{}{
+				"name":        property.Name,
+				"description": property.Description,
+				"categories":  FromDataSubCategoryInputList(property.Categories),
+				"purposes":    FromPurposeSubCategoryInputList(property.Purposes),
+				"attributes":  FromAttributeInputList(property.AttributeValues),
+			}
+			valIndex += 1
 		}
 	}
 	return vals
