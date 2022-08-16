@@ -73,6 +73,17 @@ func TestCanChangeEnabled(t *testing.T) {
 	assert.Equal(t, graphql.Boolean(false), plugin.Enabled)
 }
 
+func TestCanChangeFrequency(t *testing.T) {
+	options := preparePluginOptions(t, map[string]interface{}{"schedule_frequency": "2000"})
+	defer terraform.Destroy(t, options)
+
+	plugin := deployPlugin(t, options)
+	assert.Equal(t, graphql.String("2000"), plugin.ScheduleFrequency)
+
+	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_frequency": "3000"}))
+	assert.Equal(t, graphql.String("3000"), plugin.ScheduleFrequency)
+}
+
 // func TestCanChangeScopes(t *testing.T) {
 // 	key, options := deployApiKey(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
 // 	defer terraform.Destroy(t, options)
