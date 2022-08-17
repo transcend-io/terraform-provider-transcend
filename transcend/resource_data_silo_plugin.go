@@ -40,9 +40,10 @@ func resourceDataSiloPlugin() *schema.Resource {
 				Optional:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 			},
+			// TODO: set as optional
 			"schedule_start_at": &schema.Schema{
 				Type:        schema.TypeString,
-				Optional:    true,
+				Computed:    true,
 				Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 			},
 			"schedule_now": &schema.Schema{
@@ -86,7 +87,7 @@ func resourceDataSiloPluginCreate(ctx context.Context, d *schema.ResourceData, m
 	if err != "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error reading plugin",
+			Summary:  "Error reading plugin during creation",
 			Detail:   err,
 		})
 		return diags
@@ -98,7 +99,7 @@ func resourceDataSiloPluginCreate(ctx context.Context, d *schema.ResourceData, m
 	if err != "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error reading plugin",
+			Summary:  "Error creating plugin",
 			Detail:   err,
 		})
 		return diags
@@ -136,7 +137,7 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 	if err != "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error reading plugin",
+			Summary:  "Error reading plugin during update",
 			Detail:   err,
 		})
 		return diags
@@ -157,7 +158,7 @@ func resourceDataSiloPluginDelete(ctx context.Context, d *schema.ResourceData, m
 	if err != "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error reading plugin",
+			Summary:  "Error reading plugin during deletion",
 			Detail:   err,
 		})
 		return diags

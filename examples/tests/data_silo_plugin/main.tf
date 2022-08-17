@@ -43,7 +43,6 @@ resource "transcend_data_silo_plugin" "gradle" {
   enabled = var.enabled
 }
 
-
 output "gradlePluginId" {
   value = resource.transcend_data_silo_plugin.gradle.id
 }
@@ -55,6 +54,7 @@ output "gradlePluginDataSiloId" {
 output "gradlePluginType" {
   value = resource.transcend_data_silo_plugin.gradle.type
 }
+
 output "gradlePluginEnabled" {
   value = resource.transcend_data_silo_plugin.gradle.enabled
 }

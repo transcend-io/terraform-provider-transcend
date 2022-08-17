@@ -73,36 +73,13 @@ func TestCanChangeFrequency(t *testing.T) {
 	assert.Equal(t, graphql.String("3000"), plugin.ScheduleFrequency)
 }
 
-func TestCanScheduleStartAt(t *testing.T) {
-	options := preparePluginOptions(t, map[string]interface{}{"schedule_start_at": "2022-08-16T08:00:00.000Z"})
-	defer terraform.Destroy(t, options)
-
-	plugin := deployPlugin(t, options)
-	assert.Equal(t, graphql.String("2022-08-16T08:00:00.000Z"), plugin.ScheduleStartAt)
-
-	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_start_at": "2022-08-16T09:00:00.000Z"}))
-	assert.Equal(t, graphql.String("2022-08-16T09:00:00.000Z"), plugin.ScheduleStartAt)
-}
-
-// func TestCanChangeScopes(t *testing.T) {
-// 	key, options := deployApiKey(t, map[string]interface{}{"scopes": []string{"connectDataSilos"}})
+// func TestCanScheduleStartAt(t *testing.T) {
+// 	options := preparePluginOptions(t, map[string]interface{}{"schedule_start_at": "2022-08-16T08:00:00.000Z"})
 // 	defer terraform.Destroy(t, options)
-// 	assert.Equal(t, graphql.String("connectDataSilos"), key.Scopes[0].Name)
 
-// 	key, _ = deployApiKey(t, map[string]interface{}{"scopes": []string{"makeDataSubjectRequest"}})
-// 	assert.Equal(t, graphql.String("makeDataSubjectRequest"), key.Scopes[0].Name)
-// }
+// 	plugin := deployPlugin(t, options)
+// 	assert.Equal(t, graphql.String("2022-08-16T08:00:00.000Z"), plugin.ScheduleStartAt)
 
-// func TestCanChangeDataSilos(t *testing.T) {
-// 	key, options := deployApiKey(t, map[string]interface{}{"data_silo_type": "amazonS3"})
-// 	defer terraform.Destroy(t, options)
-// 	originalSiloId := terraform.Output(t, options, "dataSiloId")
-// 	assert.Equal(t, graphql.String(originalSiloId), key.DataSilos[0].ID)
-
-// 	key, options = deployApiKey(t, map[string]interface{}{"data_silo_type": "asana"})
-// 	newSiloId := terraform.Output(t, options, "dataSiloId")
-// 	assert.Equal(t, graphql.String(newSiloId), key.DataSilos[0].ID)
-
-// 	// Ensure that the data silo was recreated so that the API key would have to have been updated
-// 	assert.NotEqual(t, originalSiloId, newSiloId)
+// 	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_start_at": "2022-08-16T09:00:00.000Z"}))
+// 	assert.Equal(t, graphql.String("2022-08-16T09:00:00.000Z"), plugin.ScheduleStartAt)
 // }
