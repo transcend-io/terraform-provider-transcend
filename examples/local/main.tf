@@ -113,23 +113,27 @@ resource "transcend_data_point" "server" {
 #   skip_connecting = true
 # }
 
-# resource "transcend_data_silo" "datadog" {
-#   type            = "datadog"
-#   description     = "Slack is a team communication application providing real-time messaging, archiving, and search for modern teams."
-#   skip_connecting = true
+# resource "transcend_data_silo" "aws" {
+#   type        = "amazonWebServices"
+#   description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
+
+#   plaintext_context {
+#     name  = "role"
+#     value = "TranscendAWSIntegrationRole"
+#   }
+
+#   plaintext_context {
+#     name  = "accountId"
+#     value = "590309927493"
+#   }
 # }
 
-resource "transcend_data_silo" "aws" {
-  type        = "amazonWebServices"
-  description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
+resource "transcend_data_silo" "gradle" {
+  type = "gradle"
+}
 
-  plaintext_context {
-    name  = "role"
-    value = "TranscendAWSIntegrationRole"
-  }
-
-  plaintext_context {
-    name  = "accountId"
-    value = "590309927493"
-  }
+resource "transcend_data_silo_plugin" "gradle" {
+  data_silo_id = resource.transcend_data_silo.gradle.id
+  type = data.transcend_data_silo_plugin.gradlePlugin.type
+  enabled = true
 }
