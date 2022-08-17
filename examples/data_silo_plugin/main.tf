@@ -4,7 +4,6 @@ data "transcend_data_silo_plugin" "bigquery" {
 }
 
 resource "transcend_data_silo_plugin" "bigquery" {
-  plugin_id = data.transcend_data_silo_plugin.bigquery.id
   data_silo_id = data.transcend_data_silo_plugin.bigquery.data_silo_id
   type = data.transcend_data_silo_plugin.bigquery.type
   schedule_frequency = "3000"
