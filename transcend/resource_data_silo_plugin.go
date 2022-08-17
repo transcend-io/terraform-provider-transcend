@@ -40,10 +40,10 @@ func resourceDataSiloPlugin() *schema.Resource {
 				Optional:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 			},
-			// TODO: set as optional
+			// TODO: separate day and time to separate fields, and update to follow correct timezone
 			"schedule_start_at": &schema.Schema{
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 			},
 			"schedule_now": &schema.Schema{

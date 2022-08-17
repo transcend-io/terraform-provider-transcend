@@ -2,7 +2,6 @@ package types
 
 import (
 	"context"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
@@ -100,14 +99,14 @@ func PluginsReadQuery(client graphql.Client, d *schema.ResourceData) (Plugin, st
 
 func PluginsUpdateQuery(client graphql.Client, d *schema.ResourceData) string {
 	var updateMutation struct {
-		UpdateDataSiloPluginPayload struct {
+		UpdateDataSiloPlugin struct {
 			Plugin Plugin
 		} `graphql:"updateDataSiloPlugin(input: $input)"`
 	}
 
-	dateTime, err := time.Parse("2022-08-16T07:00:00.000Z", d.Get("schedule_start_at").(string))
-	date := dateTime.String()
-	if err != nil {
+	date := d.Get("schedule_start_at").(string)
+
+	if date == "" {
 		plugin, err := PluginsReadQuery(client, d)
 		if err != "" {
 			return err
@@ -118,7 +117,7 @@ func PluginsUpdateQuery(client graphql.Client, d *schema.ResourceData) string {
 		"input": MakeUpdatePluginInput(d, date),
 	}
 
-	err = client.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
+	err := client.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
 	if err != nil {
 		return "Error when updating plugin: " + err.Error()
 	}
