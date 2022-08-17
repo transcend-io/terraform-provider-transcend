@@ -11,14 +11,14 @@ provider "transcend" {
   url = "https://api.dev.trancsend.com/"
 }
 
-variable "schedule_frequency" {
+variable "schedule_frequency_minutes" {
   type = string
   default = "3000"
 }
 
 variable "schedule_start_at" {
   type = string
-  default = "2022-08-16T07:00:00.000Z"
+  default = "2030-08-16T07:00:00.000Z"
 }
 
 variable "enabled" {
@@ -30,15 +30,11 @@ resource "transcend_data_silo" "gradle" {
   type = "gradle"
 }
 
-data "transcend_data_silo_plugin" "gradlePlugin" {
-  data_silo_id = resource.transcend_data_silo.gradle.id
-  type = "DATA_SILO_DISCOVERY"
-}
 
 resource "transcend_data_silo_plugin" "gradle" {
-  data_silo_id = data.transcend_data_silo_plugin.gradlePlugin.data_silo_id
-  type = data.transcend_data_silo_plugin.gradlePlugin.type
-  schedule_frequency = var.schedule_frequency
+  data_silo_id = resource.transcend_data_silo.gradle.id
+  type = resource.transcend_data_silo.gradle.type
+  schedule_frequency_minutes = var.schedule_frequency_minutes
   schedule_start_at = var.schedule_start_at
   enabled = var.enabled
 }

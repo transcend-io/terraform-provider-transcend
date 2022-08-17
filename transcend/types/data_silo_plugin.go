@@ -48,7 +48,7 @@ func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
 	d.Set("last_run_at", plugin.LastRunAt)
 	d.Set("last_enabled_at", plugin.LastEnabledAt)
 	d.Set("schedule_start_at", plugin.ScheduleStartAt)
-	d.Set("schedule_frequency", plugin.ScheduleFrequency)
+	d.Set("schedule_frequency_minutes", plugin.ScheduleFrequency)
 	d.Set("error", plugin.Error)
 }
 
@@ -64,7 +64,7 @@ func MakeUpdatePluginInput(d *schema.ResourceData, date string) UpdatePluginInpu
 		DataSiloID:        graphql.ID(d.Get("data_silo_id").(string)),
 		PluginID:          graphql.ID(d.Get("id").(string)),
 		Enabled:           graphql.Boolean(d.Get("enabled").(bool)),
-		ScheduleFrequency: graphql.String(d.Get("schedule_frequency").(string)),
+		ScheduleFrequency: graphql.String(d.Get("schedule_frequency_minutes").(string)),
 		ScheduleStartAt:   graphql.String(date),
 		ScheduleNow:       graphql.Boolean(d.Get("schedule_now").(bool)),
 	}

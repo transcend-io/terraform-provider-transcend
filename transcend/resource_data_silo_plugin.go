@@ -35,7 +35,7 @@ func resourceDataSiloPlugin() *schema.Resource {
 				Optional:    true,
 				Description: "State to toggle plugin to",
 			},
-			"schedule_frequency": &schema.Schema{
+			"schedule_frequency_minutes": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",

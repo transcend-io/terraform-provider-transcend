@@ -6,7 +6,7 @@ data "transcend_data_silo_plugin" "bigquery" {
 resource "transcend_data_silo_plugin" "bigquery" {
   data_silo_id = data.transcend_data_silo_plugin.bigquery.data_silo_id
   type = data.transcend_data_silo_plugin.bigquery.type
-  schedule_frequency = "3000"
+  schedule_frequency_minutes = "3000"
   schedule_start_at = "2022-08-16T07:00:00.000Z"
   enabled = true
 }

@@ -30,7 +30,7 @@ description: |-
 - `id` (String) The ID of this resource.
 - `last_enabled_at` (String) The date at which this data silo was last enabled
 - `last_run_at` (String) The date at which this data silo was last run
-- `schedule_frequency` (String) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_frequency_minutes` (String) The updated frequency with which we should schedule this plugin, in milliseconds
 - `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 - `scheduled_at` (String) When the next plugin run is scheduled

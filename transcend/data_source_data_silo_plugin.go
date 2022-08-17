@@ -27,7 +27,7 @@ func dataSourceDataSiloPlugin() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"schedule_frequency": &schema.Schema{
+			"schedule_frequency_minutes": &schema.Schema{
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",

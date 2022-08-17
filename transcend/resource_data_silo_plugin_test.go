@@ -63,13 +63,13 @@ func TestCanCreateAndDestroyPlugin(t *testing.T) {
 }
 
 func TestCanChangeFrequency(t *testing.T) {
-	options := preparePluginOptions(t, map[string]interface{}{"schedule_frequency": "2000"})
+	options := preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "2000"})
 	defer terraform.Destroy(t, options)
 
 	plugin := deployPlugin(t, options)
 	assert.Equal(t, graphql.String("2000"), plugin.ScheduleFrequency)
 
-	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_frequency": "3000"}))
+	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "3000"}))
 	assert.Equal(t, graphql.String("3000"), plugin.ScheduleFrequency)
 }
 

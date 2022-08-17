@@ -132,14 +132,8 @@ resource "transcend_data_silo" "gradle" {
   type = "gradle"
 }
 
-data "transcend_data_silo_plugin" "gradlePlugin" {
-  data_silo_id = resource.transcend_data_silo.gradle.id
-  type = "DATA_SILO_DISCOVERY"
-}
-
 resource "transcend_data_silo_plugin" "gradle" {
-  plugin_id = data.transcend_data_silo_plugin.gradlePlugin.id
-  data_silo_id = data.transcend_data_silo_plugin.gradlePlugin.data_silo_id
+  data_silo_id = resource.transcend_data_silo.gradle.id
   type = data.transcend_data_silo_plugin.gradlePlugin.type
   enabled = true
 }
