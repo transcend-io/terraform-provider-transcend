@@ -84,7 +84,7 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 			},
 			secretContext{
 				name:  "queryTemplate",
-				value: "service:programmatic-remote-seeding AND @email:{{identifier}}"
+				value: "service:programmatic-remote-seeding AND @email:{{identifier}}",
 			},
 		},
 	})
