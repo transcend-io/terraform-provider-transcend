@@ -2,7 +2,6 @@ package transcend
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
@@ -13,7 +12,7 @@ import (
 )
 
 func lookupEnricher(t *testing.T, id string) types.Enricher {
-	client := NewClient("https://api.dev.trancsend.com/graphql", os.Getenv("TRANSCEND_KEY"))
+	client := getTestClient()
 
 	var query struct {
 		Enricher types.Enricher `graphql:"enricher(id: $id)"`

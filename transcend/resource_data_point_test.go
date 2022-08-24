@@ -3,7 +3,6 @@ package transcend
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"strconv"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func lookupDataPoint(t *testing.T, id string) types.DataPoint {
-	client := NewClient("https://api.dev.trancsend.com/graphql", os.Getenv("TRANSCEND_KEY"))
+	client := getTestClient()
 
 	var query struct {
 		DataPoints struct {

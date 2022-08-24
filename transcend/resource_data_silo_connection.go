@@ -97,6 +97,7 @@ func resourceDataSiloConnectionsUpdate(ctx context.Context, d *schema.ResourceDa
 		"input": types.ReconnectDataSiloInput{
 			DataSiloId:       graphql.String(d.Get("data_silo_id").(string)),
 			PlaintextContext: types.ToPlaintextContextList(d.Get("plaintext_context").(*schema.Set)),
+			// TODO: Support Secret contexts
 		},
 		"dhEncrypted": graphql.String(""), // This is not needed when no encrypted saas contexts are provided
 	}

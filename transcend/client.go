@@ -6,26 +6,41 @@ import (
 	graphql "github.com/hasura/go-graphql-client"
 )
 
-type myTransport struct {
+type backendTransport struct {
 	apiToken string
 }
 
-func (t *myTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("Authorization", t.apiToken)
+func (t *backendTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Authorization", "Bearer "+t.apiToken)
+	return http.DefaultTransport.RoundTrip(req)
+}
+
+type sombraTransport struct {
+	apiToken    string
+	internalKey string
+}
+
+func (t *sombraTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Authorization", "Bearer "+t.apiToken)
+	if t.internalKey != "" {
+		req.Header.Add("x-sombra-authorization", "Bearer "+t.internalKey)
+	}
 	return http.DefaultTransport.RoundTrip(req)
 }
 
 type Client struct {
-	graphql *graphql.Client
-	url     string
+	graphql      *graphql.Client
+	sombraClient *http.Client
+	url          string
 }
 
-func NewClient(url, apiToken string) *Client {
-	apiToken = "Bearer " + apiToken
-	client := &http.Client{Transport: &myTransport{apiToken: apiToken}}
+func NewClient(url, apiToken string, internalKey string) *Client {
+	backendClient := &http.Client{Transport: &backendTransport{apiToken: apiToken}}
+	sombraClient := &http.Client{Transport: &sombraTransport{apiToken: apiToken, internalKey: internalKey}}
 
 	return &Client{
-		graphql: graphql.NewClient(url, client),
-		url:     url,
+		graphql:      graphql.NewClient(url, backendClient),
+		sombraClient: sombraClient,
+		url:          url,
 	}
 }

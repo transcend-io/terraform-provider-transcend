@@ -13,7 +13,7 @@ terraform {
 
 # Set TRANSCEND_KEY and TRANSCEND_URL locally, or define in this block
 provider "transcend" {
-  url = "https://api.dev.trancsend.com/"
+  url = "https://yo.com:4001/"
 }
 
 provider "aws" {}

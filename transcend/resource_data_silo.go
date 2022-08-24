@@ -1,7 +1,9 @@
 package transcend
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"strings"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
@@ -75,6 +77,10 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
+			// TODO: What if we just had the API here be formItems as a schema.TypeMap and the provider
+			// queried the catalog for if the values should be secret or not? In the statefile, all values would be secretive,
+			// but the provider could separate out plaintext from secret context values and give better error messages if there are
+			// missing fields or if invalid field names are provided.
 			"plaintext_context": &schema.Schema{
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -90,6 +96,26 @@ func resourceDataSilo() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The value of the plaintext input",
+						},
+					},
+				},
+			},
+			"secret_context": &schema.Schema{
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the input",
+						},
+						"value": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The value of the input in plaintext",
+							Sensitive:   true,
 						},
 					},
 				},
@@ -264,6 +290,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var diags diag.Diagnostics
 
+	// Perform updates to most fields on the data silo
 	var updateMutation struct {
 		UpdateDataSilo struct {
 			DataSilo types.DataSilo
@@ -282,9 +309,104 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Summary:  "Error updating data silos",
 			Detail:   "Error when updating data silo: " + err.Error(),
 		})
+		deletionDiags := resourceDataSilosDelete(ctx, d, m)
+		if deletionDiags.HasError() {
+			diags = append(diags, deletionDiags...)
+		}
 		return diags
 	}
 
+	// Presign the SaaS context if the integration has secrets
+	// For Internal Transcend Folks, see: https://docs.google.com/document/d/1PURNdW7VI9r9kwDM4fud9Hx_58vZbhMhB8OPEYxl8O4/view#
+	var saasContext []byte
+	if d.Get("secret_context") != nil {
+		// Lookup the sombra URL to talk to
+		var sombraUrlQuery struct {
+			Organization struct {
+				Sombra struct {
+					CustomerUrl  graphql.String `graphql:"customerUrl"`
+					HostedMethod graphql.String `graphql:"hostedMethod"`
+				} `graphql:"sombra"`
+			} `graphql:"organization"`
+		}
+		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error Finding sombra URL",
+				Detail:   "Error when updating data silo: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+		// Lookup the saas context metadata
+		var catalogQuery struct {
+			Catalog struct {
+				Catalog types.Catalog `json:"catalog"`
+			} `graphql:"catalog(input: { integrationName: $integrationName })"`
+		}
+		err = client.graphql.Query(context.Background(), &catalogQuery, map[string]interface{}{
+			"integrationName": graphql.String(types.GetIntegrationName(d)),
+		}, graphql.OperationName("catalog"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error Finding saas context metadata",
+				Detail:   "Error when updating data silo: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+		// Have sombra encrypt the secret map and parse the resulting saas context
+		allowedBaseHosts := catalogQuery.Catalog.Catalog.IntegrationConfig.ConfiguredBaseHosts.PROD
+		jsonBody, err := types.ConstructSecretMapString(d, allowedBaseHosts, catalogQuery.Catalog.Catalog.PlaintextInformation)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error encoding secret map to create saas context",
+				Detail:   "Error when updating data silo: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+		sombraResponse, err := client.sombraClient.Post(string(sombraUrlQuery.Organization.Sombra.CustomerUrl)+"v1/register-saas", "application/json", bytes.NewReader(jsonBody))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error creating SaaS context for the secret values",
+				Detail:   "Error when updating data silo: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+		saasContext, err = io.ReadAll(sombraResponse.Body)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error reading response of the new SaaS context",
+				Detail:   "Error when updating data silo: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+	}
+
+	// Optionally attempt to connect the data silo, setting the form fields on success
 	shouldSkipConnecting := d.Get("skip_connecting").(bool)
 	if !shouldSkipConnecting {
 		var connectMutation struct {
@@ -293,7 +415,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			} `graphql:"reconnectDataSilo(input: $input, dhEncrypted: $dhEncrypted)"`
 		}
 		connectVars := map[string]interface{}{
-			"input":       types.CreateReconnectDataSiloFields(d),
+			"input":       types.CreateReconnectDataSiloFields(d, saasContext),
 			"dhEncrypted": graphql.String(""), // This is not needed when no encrypted saas contexts are provided
 		}
 		err = client.graphql.Mutate(context.Background(), &connectMutation, connectVars, graphql.OperationName("ReconnectDataSilo"))
@@ -303,6 +425,10 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error connecting data silos",
 				Detail:   "Error when connecting data silo: " + err.Error(),
 			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
 			return diags
 		}
 	}

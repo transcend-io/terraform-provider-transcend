@@ -30,6 +30,9 @@ jobs:
         run: |
           git diff --exit-code || \
             (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
+      - name: Show detailed diff
+        if: ${{ failure() }}
+        run: git diff
 
   list-test-files:
     name: List Test Files
@@ -70,9 +73,11 @@ jobs:
         run: go mod download
       - name: Build the provider from source
         run: make install
-      - name: TF acceptance tests
+      - name: TF acceptance test
         timeout-minutes: 5
         env:
           TF_ACC: "1"
           TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
         run: go test -v ./... -run "${{ matrix.test }}"

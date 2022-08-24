@@ -164,6 +164,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
+- `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
 - `url` (String) The URL of the server to post to if a server silo
@@ -196,6 +197,15 @@ Required:
 
 - `name` (String) The name of the plaintext input
 - `value` (String) The value of the plaintext input
+
+
+<a id="nestedblock--secret_context"></a>
+### Nested Schema for `secret_context`
+
+Required:
+
+- `name` (String) The name of the input
+- `value` (String, Sensitive) The value of the input in plaintext
 
 ## Import
 
