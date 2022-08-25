@@ -78,6 +78,7 @@ jobs:
         env:
           TF_ACC: "1"
           TRANSCEND_KEY: ${{ secrets.TRANSCEND_KEY }}
+          TRANSCEND_URL: ${{ secrets.TRANSCEND_URL }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
           DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
         run: go test -v ./... -run "${{ matrix.test }}"
