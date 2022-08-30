@@ -11,6 +11,16 @@ description: |-
 
 ## Example Usages
 
+### Connecting an API Key integration
+
+You can connect your data silos with API Key or other similar configuration through Transcend. In this flow, Transcend still does not ever see your API keys, but encrypts them through your internal Sombra before storing the encrypted values in Transcend's backend.
+
+Before we configure the data silo, it's worth noting that for self-hosted sombras you will need to add an authentication token to your internal sombra. This can be done by adding the `internal_sombra_key` field in the provider or the `TRANSCEND_INTERNAL_SOMBRA_KEY` environment variable with the value of the internal key you used when setting up your sombra service. If you are using Transcend-hosted sombra as your encryption gateway, you can skip this step as just your API key can authenticate you.
+
+In the data silo, add the `secret_context` values for each field you want to specify. Here's an example of fully connecting a Datadog silo:
+
+{{ tffile "examples/data_silo/with_secrets.tf" }}
+
 ### Connecting an AWS Silo
 
 Connecting Amazon to Transcend is done through [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In any AWS Account you want us to have access to audit, you need to create an IAM Role allowing our AWS organization access to it. This is the recommended pattern from Amazon [documented here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html). This is done in a few steps:
