@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
 )
@@ -47,6 +49,19 @@ type UpdateDataSiloInput struct {
 type PlaintextContextInput struct {
 	Name  graphql.String `json:"name"`
 	Value graphql.String `json:"value"`
+}
+
+type PlaintextInformation struct {
+	Path graphql.String `json:"path"`
+}
+
+type Catalog struct {
+	PlaintextInformation []PlaintextInformation `json:"plaintextInformation"`
+	IntegrationConfig    struct {
+		ConfiguredBaseHosts struct {
+			PROD []graphql.String `graphql:"PROD"`
+		} `json:"configuredBaseHosts"`
+	} `json:"integrationConfig"`
 }
 
 type DataSilo struct {
@@ -108,7 +123,7 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 	}
 }
 
-func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
+func GetIntegrationName(d *schema.ResourceData) string {
 	// Determine the type of the data silo. Most often, this is just the `type` field.
 	// But for AVC silos, the `outer_type` actually contains the name to use, as the `type`
 	// is always "promptAPerson"
@@ -117,9 +132,49 @@ func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
 		integrationName = d.Get("type")
 	}
 
+	return integrationName.(string)
+}
+
+func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
 	return CreateDataSilosInput{
-		Name: graphql.String(integrationName.(string)),
+		Name: graphql.String(GetIntegrationName(d)),
 	}
+}
+
+type ContextJson struct {
+	SecretMap             map[string]string `json:"secretMap"`
+	AllowedHosts          []string          `json:"allowedHosts"`
+	AllowedPlaintextPaths []string          `json:"allowedPlaintextPaths"`
+}
+
+func toStringList(l []graphql.String) []string {
+	ret := make([]string, len(l))
+	for i, s := range l {
+		ret[i] = string(s)
+	}
+	return ret
+}
+
+func ConstructSecretMapString(d *schema.ResourceData, allowedHosts []graphql.String, allowedPlaintextPathObjs []PlaintextInformation) ([]byte, error) {
+	// Contruct secret map
+	contextSet := d.Get("secret_context").(*schema.Set)
+	contextMap := map[string]string{}
+	for _, rawContext := range contextSet.List() {
+		context := rawContext.(map[string]interface{})
+		contextMap[context["name"].(string)] = context["value"].(string)
+	}
+
+	// Contruct plaintext paths
+	allowedPlaintextPaths := make([]string, len(allowedPlaintextPathObjs))
+	for i, obj := range allowedPlaintextPathObjs {
+		allowedPlaintextPaths[i] = string(obj.Path)
+	}
+
+	return json.Marshal(ContextJson{
+		SecretMap:             contextMap,
+		AllowedHosts:          toStringList(allowedHosts),
+		AllowedPlaintextPaths: allowedPlaintextPaths,
+	})
 }
 
 func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
@@ -132,12 +187,16 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	if d.Get("description") != nil {
 		d.Set("description", silo.Description)
 	}
-	d.Set("url", silo.URL)
+	if d.Get("url") != nil {
+		d.Set("url", silo.URL)
+	}
 	d.Set("outer_type", silo.OuterType)
 	if d.Get("notify_email") != nil {
 		d.Set("notify_email_address", silo.NotifyEmailAddress)
 	}
-	d.Set("is_live", silo.IsLive)
+	if d.Get("is_live") != nil {
+		d.Set("is_live", silo.IsLive)
+	}
 	d.Set("connection_state", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))
 	d.Set("headers", FlattenHeaders(&silo.Headers))

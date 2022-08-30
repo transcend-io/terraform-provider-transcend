@@ -6,14 +6,16 @@ import (
 )
 
 type ReconnectDataSiloInput struct {
-	DataSiloId       graphql.ID              `json:"dataSiloId"`
-	PlaintextContext []PlaintextContextInput `json:"plaintextContext,omitempty"`
+	DataSiloId           graphql.ID              `json:"dataSiloId"`
+	PlaintextContext     []PlaintextContextInput `json:"plaintextContext,omitempty"`
+	PresignedSaasContext graphql.String          `json:"presignedSaasContext,omitempty"`
 }
 
-func CreateReconnectDataSiloFields(d *schema.ResourceData) ReconnectDataSiloInput {
+func CreateReconnectDataSiloFields(d *schema.ResourceData, saasContext []byte) ReconnectDataSiloInput {
 	return ReconnectDataSiloInput{
-		DataSiloId:       graphql.String(d.Get("id").(string)),
-		PlaintextContext: ToPlaintextContextList(d.Get("plaintext_context").(*schema.Set)),
+		DataSiloId:           graphql.String(d.Get("id").(string)),
+		PlaintextContext:     ToPlaintextContextList(d.Get("plaintext_context").(*schema.Set)),
+		PresignedSaasContext: graphql.String(string(saasContext)),
 	}
 }
 

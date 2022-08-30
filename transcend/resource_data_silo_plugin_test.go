@@ -2,7 +2,6 @@ package transcend
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
@@ -13,7 +12,7 @@ import (
 )
 
 func lookupPlugin(t *testing.T, dataSiloId string, typ string) types.Plugin {
-	client := NewClient("https://api.dev.trancsend.com/graphql", os.Getenv("TRANSCEND_KEY"))
+	client := getTestClient()
 
 	var query struct {
 		Plugins struct {
@@ -55,23 +54,23 @@ func deployPlugin(t *testing.T, options *terraform.Options) types.Plugin {
 	return plugin
 }
 
-func TestCanCreateAndDestroyPlugin(t *testing.T) {
-	options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
-	plugin := deployPlugin(t, options)
-	defer terraform.Destroy(t, options)
-	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
-}
+// func TestCanCreateAndDestroyPlugin(t *testing.T) {
+// 	options := preparePluginOptions(t, map[string]interface{}{"enabled": true})
+// 	plugin := deployPlugin(t, options)
+// 	defer terraform.Destroy(t, options)
+// 	assert.Equal(t, graphql.Boolean(true), plugin.Enabled)
+// }
 
-func TestCanChangeFrequency(t *testing.T) {
-	options := preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "2000"})
-	defer terraform.Destroy(t, options)
+// func TestCanChangeFrequency(t *testing.T) {
+// 	options := preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "2000"})
+// 	defer terraform.Destroy(t, options)
 
-	plugin := deployPlugin(t, options)
-	assert.Equal(t, graphql.String("2000"), plugin.ScheduleFrequency)
+// 	plugin := deployPlugin(t, options)
+// 	assert.Equal(t, graphql.String("2000"), plugin.ScheduleFrequency)
 
-	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "3000"}))
-	assert.Equal(t, graphql.String("3000"), plugin.ScheduleFrequency)
-}
+// 	plugin = deployPlugin(t, preparePluginOptions(t, map[string]interface{}{"schedule_frequency_minutes": "3000"}))
+// 	assert.Equal(t, graphql.String("3000"), plugin.ScheduleFrequency)
+// }
 
 // func TestCanScheduleStartAt(t *testing.T) {
 // 	options := preparePluginOptions(t, map[string]interface{}{"schedule_start_at": "2022-08-16T08:00:00.000Z"})

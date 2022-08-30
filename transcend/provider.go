@@ -23,6 +23,12 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_KEY", nil),
 				Description: "The API Key to use to talk to Transcend. Ensure it has the scopes to perform whatever actions you need. Can be set using the TRANSCEND_KEY environment variable.",
 			},
+			"internal_sombra_key": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_KEY", nil),
+				Description: "The API Key to use to talk to a self-hosted sombra. Only used for enterprises with the self-hosted option",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"transcend_api_key":              resourceAPIKey(),
@@ -30,11 +36,11 @@ func Provider() *schema.Provider {
 			"transcend_enricher":             resourceEnricher(),
 			"transcend_data_silo":            resourceDataSilo(),
 			"transcend_data_silo_connection": resourceDataSiloConnection(),
-			"transcend_data_silo_plugin":     resourceDataSiloPlugin(),
+			// "transcend_data_silo_plugin":     resourceDataSiloPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"transcend_data_silo_plugin": dataSourceDataSiloPlugin(),
-			"transcend_identifier":       dataSourceIdentifier(),
+			// "transcend_data_silo_plugin": dataSourceDataSiloPlugin(),
+			"transcend_identifier": dataSourceIdentifier(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -42,12 +48,13 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	url := d.Get("url").(string)
-	key := d.Get("key").(string)
+	backendApiKey := d.Get("key").(string)
+	sombraInternalKey := d.Get("internal_sombra_key").(string)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	if url == "" || key == "" {
+	if url == "" || backendApiKey == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Unable to authenticate provider",
@@ -58,5 +65,5 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	url = url + "graphql"
 
-	return NewClient(url, key), nil
+	return NewClient(url, backendApiKey, sombraInternalKey), nil
 }

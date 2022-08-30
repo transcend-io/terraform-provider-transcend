@@ -45,6 +45,13 @@ variable "headers" {
   }))
   default = []
 }
+variable "secret_context" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
 
 resource "transcend_data_silo" "silo" {
   type                 = var.type
@@ -65,6 +72,14 @@ resource "transcend_data_silo" "silo" {
     content {
       name  = plaintext_context.value["name"]
       value = plaintext_context.value["value"]
+    }
+  }
+
+  dynamic "secret_context" {
+    for_each = var.secret_context
+    content {
+      name  = secret_context.value["name"]
+      value = secret_context.value["value"]
     }
   }
 

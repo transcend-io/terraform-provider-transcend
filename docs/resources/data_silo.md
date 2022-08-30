@@ -11,6 +11,37 @@ description: |-
 
 ## Example Usages
 
+### Connecting an API Key integration
+
+You can connect your data silos with API Key or other similar configuration through Transcend. In this flow, Transcend still does not ever see your API keys, but encrypts them through your internal Sombra before storing the encrypted values in Transcend's backend.
+
+Before we configure the data silo, it's worth noting that for self-hosted sombras you will need to add an authentication token to your internal sombra. This can be done by adding the `internal_sombra_key` field in the provider or the `TRANSCEND_INTERNAL_SOMBRA_KEY` environment variable with the value of the internal key you used when setting up your sombra service. If you are using Transcend-hosted sombra as your encryption gateway, you can skip this step as just your API key can authenticate you.
+
+In the data silo, add the `secret_context` values for each field you want to specify. Here's an example of fully connecting a Datadog silo:
+
+```terraform
+variable "dd_api_key" { sensitive = true }
+variable "dd_app_key" { sensitive = true}
+
+resource "transcend_data_silo" "datadog" {
+  type            = "datadog"
+  skip_connecting = false
+
+  secret_context {
+    name  = "apiKey"
+    value = var.dd_api_key
+  }
+  secret_context {
+    name  = "applicationKey"
+    value = var.dd_app_key
+  }
+  secret_context {
+    name  = "queryTemplate"
+    value = "service:programmatic-remote-seeding AND @email:{{identifier}}"
+  }
+}
+```
+
 ### Connecting an AWS Silo
 
 Connecting Amazon to Transcend is done through [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In any AWS Account you want us to have access to audit, you need to create an IAM Role allowing our AWS organization access to it. This is the recommended pattern from Amazon [documented here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html). This is done in a few steps:
@@ -164,6 +195,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
+- `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
 - `url` (String) The URL of the server to post to if a server silo
@@ -196,6 +228,15 @@ Required:
 
 - `name` (String) The name of the plaintext input
 - `value` (String) The value of the plaintext input
+
+
+<a id="nestedblock--secret_context"></a>
+### Nested Schema for `secret_context`
+
+Required:
+
+- `name` (String) The name of the input
+- `value` (String, Sensitive) The value of the input in plaintext
 
 ## Import
 

@@ -13,7 +13,7 @@ import (
 )
 
 func lookupDataSilo(t *testing.T, id string) types.DataSilo {
-	client := NewClient("https://api.dev.trancsend.com/graphql", os.Getenv("TRANSCEND_KEY"))
+	client := getTestClient()
 
 	var query struct {
 		DataSilo types.DataSilo `graphql:"dataSilo(id: $id)"`
@@ -62,6 +62,30 @@ func TestCanConnectAwsDataSilo(t *testing.T) {
 	silo := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+}
+
+func TestCanConnectDatadogDataSilo(t *testing.T) {
+	options := prepareDataSiloOptions(t, map[string]interface{}{
+		"skip_connecting": false,
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": os.Getenv("DD_API_KEY"),
+			},
+			{
+				"name":  "applicationKey",
+				"value": os.Getenv("DD_APP_KEY"),
+			},
+			{
+				"name":  "queryTemplate",
+				"value": "service:programmatic-remote-seeding AND @email:{{identifier}}",
+			},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	silo := deployDataSilo(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
 
