@@ -78,8 +78,8 @@ resource "transcend_data_silo" "silo" {
   dynamic "secret_context" {
     for_each = var.secret_context
     content {
-      name  = plaintext_context.value["name"]
-      value = plaintext_context.value["value"]
+      name  = secret_context.value["name"]
+      value = secret_context.value["value"]
     }
   }
 
