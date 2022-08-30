@@ -65,26 +65,21 @@ func TestCanConnectAwsDataSilo(t *testing.T) {
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
 
-type secretContext struct {
-	name  string
-	value string
-}
-
 func TestCanConnectDatadogDataSilo(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
-		"secret_context": []secretContext{
-			secretContext{
-				name:  "apiKey",
-				value: os.Getenv("DD_API_KEY"),
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": os.Getenv("DD_API_KEY"),
 			},
-			secretContext{
-				name:  "applicationKey",
-				value: os.Getenv("DD_APP_KEY"),
+			{
+				"name":  "applicationKey",
+				"value": os.Getenv("DD_APP_KEY"),
 			},
-			secretContext{
-				name:  "queryTemplate",
-				value: "service:programmatic-remote-seeding AND @email:{{identifier}}",
+			{
+				"name":  "queryTemplate",
+				"value": "service:programmatic-remote-seeding AND @email:{{identifier}}",
 			},
 		},
 	})
