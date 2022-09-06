@@ -121,12 +121,12 @@ type Plugin struct {
 }
 
 type UpdatePluginInput struct {
-	DataSiloID        graphql.ID      `json:"dataSiloId"`
-	PluginID          graphql.ID      `json:"pluginId"`
-	Enabled           graphql.Boolean `json:"enabled,omitempty"`
-	ScheduleFrequency graphql.String  `json:"scheduleFrequency"`
-	ScheduleStartAt   graphql.String  `json:"scheduleStartAt"`
-	ScheduleNow       graphql.Boolean `json:"scheduleNow"`
+	DataSiloID               graphql.ID      `json:"dataSiloId"`
+	PluginID                 graphql.ID      `json:"pluginId"`
+	Enabled                  graphql.Boolean `json:"enabled,omitempty"`
+	ScheduleFrequencyMinutes graphql.Int     `json:"scheduleFrequency"`
+	ScheduleStartAt          graphql.String  `json:"scheduleStartAt"`
+	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
 }
 
 func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) UpdatePluginInput {
@@ -134,12 +134,12 @@ func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) Upda
 	configuration := configurations[0].(map[string]interface{})
 
 	return UpdatePluginInput{
-		DataSiloID:        graphql.String(d.Get("id").(string)),
-		PluginID:          pluginId,
-		Enabled:           graphql.Boolean(configuration["enabled"].(bool)),
-		ScheduleFrequency: graphql.String(configuration["schedule_frequency_minutes"].(string)),
-		ScheduleStartAt:   graphql.String(configuration["schedule_at"].(string)),
-		ScheduleNow:       graphql.Boolean(configuration["schedule_now"].(bool)),
+		DataSiloID:               graphql.String(d.Get("id").(string)),
+		PluginID:                 pluginId,
+		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequencyMinutes: graphql.Int(configuration["schedule_frequency_minutes"].(int)),
+		ScheduleStartAt:          graphql.String(configuration["schedule_at"].(string)),
+		ScheduleNow:              graphql.Boolean(configuration["schedule_now"].(bool)),
 	}
 }
 
