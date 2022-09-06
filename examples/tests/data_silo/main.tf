@@ -54,11 +54,11 @@ variable "secret_context" {
 }
 variable "plugin_config" {
   type = list(object({
-    enabled                    = boolean
+    enabled                    = bool
     type                       = string
     schedule_frequency_minutes = number
     schedule_start_at          = string
-    schedule_now               = boolean
+    schedule_now               = bool
   }))
   default = []
 }
