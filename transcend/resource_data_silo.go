@@ -327,20 +327,23 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	// Read the data silo plugin information
-	var pluginQuery struct {
-		Plugins struct {
-			Plugins []types.Plugin
-		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
-	}
-	pluginVars := map[string]interface{}{
-		"dataSiloId": graphql.String(d.Get("id").(string)),
-	}
-	err = client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if len(pluginQuery.Plugins.Plugins) == 1 {
-		types.ReadDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
+	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
+		var pluginQuery struct {
+			Plugins struct {
+				Plugins []types.Plugin
+			} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		}
+		pluginVars := map[string]interface{}{
+			"dataSiloId": graphql.String(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if len(pluginQuery.Plugins.Plugins) == 1 {
+			types.ReadDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
+		}
 	}
 
 	return nil
