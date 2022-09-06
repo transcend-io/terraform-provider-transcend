@@ -138,7 +138,7 @@ func TestCanChangeTitle(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Title)
 }
 
@@ -148,7 +148,7 @@ func TestCanChangeDescription(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name() + "_2"}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Description)
 }
 
@@ -158,7 +158,7 @@ func TestCanChangeUrl(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("https://some.webhook"), silo.URL)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"}))
 	assert.Equal(t, graphql.String("https://some.other.webhook"), silo.URL)
 }
 
@@ -168,7 +168,7 @@ func TestCanChangeNotifyEmailAddress(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("david@transcend.io"), silo.NotifyEmailAddress)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "mike@transcend.io"}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "mike@transcend.io"}))
 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.NotifyEmailAddress)
 }
 
@@ -178,10 +178,10 @@ func TestCanChangeIsLive(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": true}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": true}))
 	assert.Equal(t, graphql.Boolean(true), silo.IsLive)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": false}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": false}))
 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
 }
 
@@ -191,7 +191,7 @@ func TestCanChangeOwners(t *testing.T) {
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("david@transcend.io"), silo.Owners[0].Email)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}}))
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}}))
 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.Owners[0].Email)
 }
 
@@ -208,7 +208,7 @@ func TestCanChangeHeaders(t *testing.T) {
 	assert.Equal(t, graphql.String("someHeader"), silo.Headers[0].Name)
 	assert.Equal(t, graphql.String("someHeaderValue"), silo.Headers[0].Value)
 
-	silo = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
 		{
 			"name":      "someOtherHeader",
 			"value":     "someOtherHeaderValue",
