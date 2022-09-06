@@ -128,16 +128,17 @@ type UpdatePluginInput struct {
 	ScheduleNow       graphql.Boolean `json:"scheduleNow"`
 }
 
-func MakeUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
-	configuration := d.Get("plugin_configuration").(map[string]interface{})
+func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) UpdatePluginInput {
+	configurations := d.Get("plugin_configuration").([]interface{})
+	configuration := configurations[0].(map[string]interface{})
 
 	return UpdatePluginInput{
-		DataSiloID:        graphql.ID(configuration["data_silo_id"].(string)),
-		PluginID:          graphql.ID(configuration["id"].(string)),
-		Enabled:           graphql.Boolean(d.Get("enabled").(bool)),
-		ScheduleFrequency: graphql.String(d.Get("schedule_frequency_minutes").(string)),
-		ScheduleStartAt:   graphql.String(d.Get("schedule_at").(string)),
-		ScheduleNow:       graphql.Boolean(d.Get("schedule_now").(bool)),
+		DataSiloID:        graphql.String(d.Get("id").(string)),
+		PluginID:          pluginId,
+		Enabled:           graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequency: graphql.String(configuration["schedule_frequency_minutes"].(string)),
+		ScheduleStartAt:   graphql.String(configuration["schedule_at"].(string)),
+		ScheduleNow:       graphql.Boolean(configuration["schedule_now"].(bool)),
 	}
 }
 

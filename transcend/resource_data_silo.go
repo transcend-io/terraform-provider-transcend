@@ -496,14 +496,40 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	// Handle the plugin settings if defined
 	if d.Get("plugin_configuration") != nil {
-		// DO NOT SUBMIT: We need to fetch the plugin ID here to pass to the MakeUpdatePluginInput
+		// Read the data silo plugin information
+		var pluginQuery struct {
+			Plugins struct {
+				Plugins []types.Plugin
+			} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		}
+		pluginVars := map[string]interface{}{
+			"dataSiloId": graphql.String(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error finding data silo plugin for data silo",
+				Detail:   "Error when reading data silo plugin: " + err.Error(),
+			})
+			return diags
+		}
+		if len(pluginQuery.Plugins.Plugins) != 1 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error finding exactly one data silo plugin for data silo",
+				Detail:   "Error when reading data silo plugin",
+			})
+			return diags
+		}
+
 		var updateMutation struct {
 			UpdateDataSiloPlugin struct {
 				Plugin types.Plugin
 			} `graphql:"updateDataSiloPlugin(input: $input)"`
 		}
 		updateVars := map[string]interface{}{
-			"input": types.MakeUpdatePluginInput(d),
+			"input": types.MakeUpdatePluginInput(d, pluginQuery.Plugins.Plugins[0].ID),
 		}
 
 		err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
