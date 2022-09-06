@@ -495,7 +495,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	// Handle the plugin settings if defined
-	if d.Get("plugin_configuration") != nil {
+	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
 		// Read the data silo plugin information
 		var pluginQuery struct {
 			Plugins struct {
