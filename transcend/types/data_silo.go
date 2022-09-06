@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
@@ -143,13 +144,18 @@ func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) Upda
 }
 
 func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
+	frequency, err := strconv.Atoi(string(plugin.ScheduleFrequency))
+	if err != nil {
+		return
+	}
+
 	configuration := map[string]interface{}{
-		"data_silo_id":               plugin.DataSilo.ID,
-		"enabled":                    plugin.Enabled,
-		"scheduled_at":               plugin.ScheduledAt,
-		"last_enabled_at":            plugin.LastRunAt,
-		"schedule_start_at":          plugin.ScheduleStartAt,
-		"schedule_frequency_minutes": plugin.ScheduleFrequency,
+		"enabled":                     plugin.Enabled,
+		"id":                          plugin.ID,
+		"type":                        plugin.Type,
+		"scheduled_frequency_minutes": frequency,
+		"schedule_start_at":           plugin.ScheduleStartAt,
+		"last_enabled_at":             plugin.LastRunAt,
 	}
 
 	d.Set("plugin_configuration", []interface{}{configuration})

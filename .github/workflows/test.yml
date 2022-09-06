@@ -45,7 +45,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: echo "::set-output name=tests::[$(go test ./...  -list=. | grep 'Test' | sed 's/^\(.*\)$/\"\1\"/' | paste -s -d, -)]"
+      # DO NOT SUBMIT: Remove hardcode test names
+      # - run: echo "::set-output name=tests::[$(go test ./...  -list=. | grep 'Test' | sed 's/^\(.*\)$/\"\1\"/' | paste -s -d, -)]"
+      - run: echo "::set-output name=tests::[\"TestCanCreateAndDestroyDataSilo\"]"
         id: list-tests
 
   # run acceptance tests in a matrix with Terraform core versions
