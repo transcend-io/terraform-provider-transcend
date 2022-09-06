@@ -150,12 +150,12 @@ func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
 	}
 
 	configuration := map[string]interface{}{
-		"enabled":                     plugin.Enabled,
-		"id":                          plugin.ID,
-		"type":                        plugin.Type,
-		"scheduled_frequency_minutes": frequency,
-		"schedule_start_at":           plugin.ScheduleStartAt,
-		"last_enabled_at":             plugin.LastRunAt,
+		"enabled":                    plugin.Enabled,
+		"id":                         plugin.ID,
+		"type":                       plugin.Type,
+		"schedule_frequency_minutes": frequency,
+		"schedule_start_at":          plugin.ScheduleStartAt,
+		"last_enabled_at":            plugin.LastRunAt,
 	}
 
 	d.Set("plugin_configuration", []interface{}{configuration})
