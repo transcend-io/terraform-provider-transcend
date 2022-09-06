@@ -17,8 +17,8 @@ resource "aws_iam_role" "iam_role" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         // 829095311197 is the AWS Organization for Transcend that will try to assume role into your organization
         Principal = { AWS = "arn:aws:iam::829095311197:root" }
         Condition = { StringEquals = { "sts:ExternalId" : transcend_data_silo.aws.aws_external_id } }
@@ -48,7 +48,7 @@ resource "aws_iam_role" "iam_role" {
 
 # Give AWS Time to become consistent with the new IAM Role permissions
 resource "time_sleep" "pause" {
-  depends_on = [aws_iam_role.iam_role]
+  depends_on      = [aws_iam_role.iam_role]
   create_duration = "10s"
 }
 

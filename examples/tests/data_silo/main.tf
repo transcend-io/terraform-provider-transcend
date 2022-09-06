@@ -52,6 +52,16 @@ variable "secret_context" {
   }))
   default = []
 }
+variable "plugin_config" {
+  type = list(object({
+    enabled                    = boolean
+    type                       = string
+    schedule_frequency_minutes = number
+    schedule_start_at          = string
+    schedule_now               = boolean
+  }))
+  default = []
+}
 
 resource "transcend_data_silo" "silo" {
   type                 = var.type
@@ -63,6 +73,17 @@ resource "transcend_data_silo" "silo" {
   notify_email_address = var.notify_email_address
   outer_type           = var.outer_type
   skip_connecting      = var.skip_connecting
+
+  dynamic "plugin_configuration" {
+    for_each = var.plugin_config
+    content {
+      enabled                    = plugin_configuration.value["enabled"]
+      type                       = plugin_configuration.value["type"]
+      schedule_frequency_minutes = plugin_configuration.value["schedule_frequency_minutes"]
+      schedule_start_at          = plugin_configuration.value["schedule_start_at"]
+      schedule_now               = plugin_configuration.value["schedule_now"]
+    }
+  }
 
   dynamic "plaintext_context" {
     for_each = var.type == "amazonWebServices" && !var.skip_connecting ? [

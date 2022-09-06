@@ -4,7 +4,7 @@ resource "transcend_data_silo" "silo" {
 }
 
 resource "transcend_api_key" "test" {
-  title = "server-key"
+  title      = "server-key"
   data_silos = [transcend_data_silo.silo.id]
-  scopes = ["makeDataSubjectRequest", "connectDataSilos"]
+  scopes     = ["makeDataSubjectRequest", "connectDataSilos"]
 }
