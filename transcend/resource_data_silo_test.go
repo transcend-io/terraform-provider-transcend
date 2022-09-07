@@ -120,7 +120,7 @@ func TestCanConnectPlugin(t *testing.T) {
 				"type":                       "DATA_SILO_DISCOVERY",
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
-				"schedule_start_at": "2122-09-06T17:51:13+0000",
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
 				"schedule_now":      false,
 			},
 		},
