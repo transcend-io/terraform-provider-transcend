@@ -120,6 +120,52 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
+			"plugin_configuration": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "This is where you configure how often you'd like data silo and data point plugins to run, if enabled.",
+				MinItems:    0,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: "State to toggle plugin to",
+						},
+						"id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": &schema.Schema{
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Type of plugin",
+						},
+						"schedule_frequency_minutes": &schema.Schema{
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
+						},
+						"schedule_start_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
+						},
+						"schedule_now": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether we should schedule a run immediately after this request",
+						},
+						"last_enabled_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The date at which this data silo was last enabled",
+						},
+					},
+				},
+			},
 			"outer_type": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -267,20 +313,38 @@ func resourceDataSilosCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 
+	// Read the data silo information
 	var query struct {
 		DataSilo types.DataSilo `graphql:"dataSilo(id: $id)"`
 	}
-
 	vars := map[string]interface{}{
 		"id": graphql.String(d.Get("id").(string)),
 	}
-
 	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DataSilo"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	types.ReadDataSiloIntoState(d, query.DataSilo)
+
+	// Read the data silo plugin information
+	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
+		var pluginQuery struct {
+			Plugins struct {
+				Plugins []types.Plugin
+			} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		}
+		pluginVars := map[string]interface{}{
+			"dataSiloId": graphql.String(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if len(pluginQuery.Plugins.Plugins) == 1 {
+			types.ReadDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
+		}
+	}
 
 	return nil
 }
@@ -429,6 +493,55 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			if deletionDiags.HasError() {
 				diags = append(diags, deletionDiags...)
 			}
+			return diags
+		}
+	}
+
+	// Handle the plugin settings if defined
+	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
+		// Read the data silo plugin information
+		var pluginQuery struct {
+			Plugins struct {
+				Plugins []types.Plugin
+			} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		}
+		pluginVars := map[string]interface{}{
+			"dataSiloId": graphql.String(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error finding data silo plugin for data silo",
+				Detail:   "Error when reading data silo plugin: " + err.Error(),
+			})
+			return diags
+		}
+		if len(pluginQuery.Plugins.Plugins) != 1 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error finding exactly one data silo plugin for data silo",
+				Detail:   "Error when reading data silo plugin",
+			})
+			return diags
+		}
+
+		var updateMutation struct {
+			UpdateDataSiloPlugin struct {
+				Plugin types.Plugin
+			} `graphql:"updateDataSiloPlugin(input: $input)"`
+		}
+		updateVars := map[string]interface{}{
+			"input": types.MakeUpdatePluginInput(d, pluginQuery.Plugins.Plugins[0].ID),
+		}
+
+		err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error updating data silo plugin",
+				Detail:   "Error when updating data silo plugin: " + err.Error(),
+			})
 			return diags
 		}
 	}

@@ -5,29 +5,29 @@ resource "transcend_data_silo" "silo" {
 
 resource "transcend_data_point" "customer" {
   data_silo_id = transcend_data_silo.silo.id
-  name = "customer"
-  title = "whatever"
+  name         = "customer"
+  title        = "whatever"
 
   properties {
-    name = "test"
+    name        = "test"
     description = "testing"
 
     categories {
-      name = "Other"
+      name     = "Other"
       category = "FINANCIAL"
     }
     categories {
-      name = "Biometrics"
+      name     = "Biometrics"
       category = "HEALTH"
     }
 
     purposes {
-      name = "essential"
+      name    = "essential"
       purpose = "ESSENTIAL"
     }
 
     attributes {
-      key = "something"
+      key    = "something"
       values = ["something"]
     }
   }

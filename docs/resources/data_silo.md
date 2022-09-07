@@ -21,7 +21,7 @@ In the data silo, add the `secret_context` values for each field you want to spe
 
 ```terraform
 variable "dd_api_key" { sensitive = true }
-variable "dd_app_key" { sensitive = true}
+variable "dd_app_key" { sensitive = true }
 
 resource "transcend_data_silo" "datadog" {
   type            = "datadog"
@@ -71,8 +71,8 @@ resource "aws_iam_role" "iam_role" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         // 829095311197 is the AWS Organization for Transcend that will try to assume role into your organization
         Principal = { AWS = "arn:aws:iam::829095311197:root" }
         Condition = { StringEquals = { "sts:ExternalId" : transcend_data_silo.aws.aws_external_id } }
@@ -102,7 +102,7 @@ resource "aws_iam_role" "iam_role" {
 
 # Give AWS Time to become consistent with the new IAM Role permissions
 resource "time_sleep" "pause" {
-  depends_on = [aws_iam_role.iam_role]
+  depends_on      = [aws_iam_role.iam_role]
   create_duration = "10s"
 }
 
@@ -195,6 +195,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
+- `plugin_configuration` (Block List, Max: 1) This is where you configure how often you'd like data silo and data point plugins to run, if enabled. (see [below for nested schema](#nestedblock--plugin_configuration))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
@@ -228,6 +229,26 @@ Required:
 
 - `name` (String) The name of the plaintext input
 - `value` (String) The value of the plaintext input
+
+
+<a id="nestedblock--plugin_configuration"></a>
+### Nested Schema for `plugin_configuration`
+
+Required:
+
+- `type` (String) Type of plugin
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
 
 
 <a id="nestedblock--secret_context"></a>

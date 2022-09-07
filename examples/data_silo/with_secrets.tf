@@ -1,5 +1,5 @@
 variable "dd_api_key" { sensitive = true }
-variable "dd_app_key" { sensitive = true}
+variable "dd_app_key" { sensitive = true }
 
 resource "transcend_data_silo" "datadog" {
   type            = "datadog"

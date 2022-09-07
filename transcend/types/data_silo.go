@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
@@ -102,6 +103,62 @@ type DataSilo struct {
 	// Teams   []struct{} `json:"teams"`
 	// ApiKeys []struct{} `json:"apiKeys"`
 	// DependentDataSilos []struct{} `json:"dependentDataSilos"`
+}
+
+type Plugin struct {
+	ID                graphql.String  `json:"id"`
+	Type              PluginType      `json:"type"`
+	Enabled           graphql.Boolean `json:"enabled"`
+	ScheduledAt       graphql.String  `json:"scheduledAt"`
+	LastRunAt         graphql.String  `json:"lastRunAt"`
+	LastEnabledAt     graphql.String  `json:"lastEnabledAt"`
+	ScheduleStartAt   graphql.String  `json:"scheduleStartAt"`
+	ScheduleFrequency graphql.String  `json:"scheduleFrequency"`
+	Error             graphql.String  `json:"error"`
+	DataSilo          struct {
+		ID graphql.String `json:"id"`
+	} `json:"DataSilo"`
+}
+
+type UpdatePluginInput struct {
+	DataSiloID               graphql.ID      `json:"dataSiloId"`
+	PluginID                 graphql.ID      `json:"pluginId"`
+	Enabled                  graphql.Boolean `json:"enabled,omitempty"`
+	ScheduleFrequencyMinutes graphql.String  `json:"scheduleFrequency"`
+	ScheduleStartAt          graphql.String  `json:"scheduleStartAt"`
+	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
+}
+
+func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) UpdatePluginInput {
+	configurations := d.Get("plugin_configuration").([]interface{})
+	configuration := configurations[0].(map[string]interface{})
+
+	return UpdatePluginInput{
+		DataSiloID:               graphql.String(d.Get("id").(string)),
+		PluginID:                 pluginId,
+		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int))),
+		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
+		ScheduleNow:              graphql.Boolean(configuration["schedule_now"].(bool)),
+	}
+}
+
+func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
+	frequency, err := strconv.Atoi(string(plugin.ScheduleFrequency))
+	if err != nil {
+		return
+	}
+
+	configuration := map[string]interface{}{
+		"enabled":                    plugin.Enabled,
+		"id":                         plugin.ID,
+		"type":                       plugin.Type,
+		"schedule_frequency_minutes": frequency,
+		"schedule_start_at":          plugin.ScheduleStartAt,
+		"last_enabled_at":            plugin.LastRunAt,
+	}
+
+	d.Set("plugin_configuration", []interface{}{configuration})
 }
 
 func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {
