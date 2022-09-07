@@ -46,6 +46,22 @@ In most cases, Transcend aims to provide an API-based integration into your SaaS
 
 In these cases, you can configure your Transcend instance to automate the sending of an email template whenever a particular type of data subject request is made. These emails can be sent to the SaaS vendor directly, or to an individual in your organization.
 
+### Adding a Data Silo Plugin
+
+Sometimes when you connect a data silo, you don't actually have data in that silo, but may want to connect that silo so that Transcend can find other silos from that tool. An example might be connecting Okta to find SaaS tools you use, or connecting AWS to find your S3 buckets and databases.
+
+To do so, add a `plugin_configuration` block inside any data silo that supports silo discovery like so:
+
+{{ tffile "examples/data_silo/silo_plugin.tf" }}
+
+### Adding a Data Point Plugin
+
+Sometimes when you connect a data silo, you don't know what data is inside that silo, and want Transcend to try to classify the data for you. This is called data point discovery, and can be performed by certain integrations such as Salesforce, Amazon S3/Dynamodb, Mongodb, Snowflake, and more.
+
+To do so, add a `plugin_configuration` block inside any data silo that supports data point discovery like so:
+
+{{ tffile "examples/data_silo/data_point_plugin.tf" }}
+
 ## Looking up Data Silo metadata
 
 If you are wondering what integration names Transcend supports or what fields are available on those integrations, you can lookup all data silo metadata via our GraphQL API.
