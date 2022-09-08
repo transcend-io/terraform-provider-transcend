@@ -153,7 +153,7 @@ func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
 		"enabled":                    plugin.Enabled,
 		"id":                         plugin.ID,
 		"type":                       plugin.Type,
-		"schedule_frequency_minutes": frequency,
+		"schedule_frequency_minutes": frequency / 60 / 1000,
 		"schedule_start_at":          plugin.ScheduleStartAt,
 		"last_enabled_at":            plugin.LastRunAt,
 	}
