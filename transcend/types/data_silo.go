@@ -137,7 +137,7 @@ func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) Upda
 		DataSiloID:               graphql.String(d.Get("id").(string)),
 		PluginID:                 pluginId,
 		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
-		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int))),
+		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
 		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
 		ScheduleNow:              graphql.Boolean(configuration["schedule_now"].(bool)),
 	}

@@ -1,5 +1,5 @@
 resource "transcend_data_silo" "aws" {
-  type        = "amazonS3"
+  type = "amazonS3"
 
   plugin_configuration {
     enabled                    = true
