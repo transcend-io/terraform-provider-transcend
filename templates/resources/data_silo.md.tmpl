@@ -50,7 +50,7 @@ In these cases, you can configure your Transcend instance to automate the sendin
 
 In this example, we will create a Postgres relational database using Amazon's Relational Database Service that is in a private network. We will then deploy a sombra encryption gateway inside the private network that can talk to the database. With that connection, we can then create a data silo in Transcend that will use sombra as a middle man to communicate to the database, ensuring your data remains private from both Transcend and the outside internet.
 
-${{ tffile "examples/database_silo/main.tf" }}
+{{ tffile "examples/database_silo/main.tf" }}
 
 This type of setup works for many types of relational databases including Postgres, Amazon Redshift, Snowflake, MySQL, Google BigQuery, MariaDb, and Microsoft SQL. We are always adding support for more relational database types, please reach out to support if you are wanting to connect a type you don't see existing documentation for.
 
