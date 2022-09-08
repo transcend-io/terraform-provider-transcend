@@ -150,7 +150,7 @@ In these cases, you can configure your Transcend instance to automate the sendin
 
 In this example, we will create a Postgres relational database using Amazon's Relational Database Service that is in a private network. We will then deploy a sombra encryption gateway inside the private network that can talk to the database. With that connection, we can then create a data silo in Transcend that will use sombra as a middle man to communicate to the database, ensuring your data remains private from both Transcend and the outside internet.
 
-$```terraform
+```terraform
 locals {
   subdomain = "https-test"
   # You should pick a hosted zone that is in your AWS Account
