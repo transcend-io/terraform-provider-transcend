@@ -46,6 +46,14 @@ In most cases, Transcend aims to provide an API-based integration into your SaaS
 
 In these cases, you can configure your Transcend instance to automate the sending of an email template whenever a particular type of data subject request is made. These emails can be sent to the SaaS vendor directly, or to an individual in your organization.
 
+### Connecting a database silo
+
+In this example, we will create a Postgres relational database using Amazon's Relational Database Service that is in a private network. We will then deploy a sombra encryption gateway inside the private network that can talk to the database. With that connection, we can then create a data silo in Transcend that will use sombra as a middle man to communicate to the database, ensuring your data remains private from both Transcend and the outside internet.
+
+${{ tffile "examples/database_silo/main.tf" }}
+
+This type of setup works for many types of relational databases including Postgres, Amazon Redshift, Snowflake, MySQL, Google BigQuery, MariaDb, and Microsoft SQL. We are always adding support for more relational database types, please reach out to support if you are wanting to connect a type you don't see existing documentation for.
+
 ### Adding a Data Silo Plugin
 
 Sometimes when you connect a data silo, you don't actually have data in that silo, but may want to connect that silo so that Transcend can find other silos from that tool. An example might be connecting Okta to find SaaS tools you use, or connecting AWS to find your S3 buckets and databases.

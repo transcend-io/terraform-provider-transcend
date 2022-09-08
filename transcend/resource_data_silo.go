@@ -468,6 +468,18 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
+		if strings.Contains(string(saasContext), "Client error") {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error creating a new SaaS context",
+				Detail:   string(saasContext),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
 	}
 
 	// Optionally attempt to connect the data silo, setting the form fields on success
