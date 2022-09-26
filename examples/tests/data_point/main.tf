@@ -15,7 +15,10 @@ variable "name" {}
 variable "title" {}
 variable "description" { default = null }
 variable "data_silo_type" { default = "server" }
-variable "path" { type = list(string) }
+variable "path" {
+  type    = list(string)
+  default = []
+}
 variable "properties" {
   type = list(object({
     name        = string
