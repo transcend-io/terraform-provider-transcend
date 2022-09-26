@@ -51,8 +51,8 @@ type DataPointSubDataPointInput struct {
 	Categories                     []DataSubCategoryInput    `json:"categories"`
 	Purposes                       []PurposeSubCategoryInput `json:"purposes"`
 	Attributes                     []AttributeInput          `json:"attributes"`
-	AccessRequestVisibilityEnabled graphql.Boolean           `json:"access-request-visibility-enabled"`
-	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasure-request-redaction-enabled"`
+	AccessRequestVisibilityEnabled graphql.Boolean           `json:"accessRequestVisibilityEnabled"`
+	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasureRequestRedactionEnabled"`
 }
 
 type DataPointUpdatableFields struct {
