@@ -18,7 +18,7 @@ type DataPoint struct {
 		DefaultMessage graphql.String `json:"defaultMessage"`
 	} `json:"description"`
 	// DataCollection struct {
-	// 	DataCetegoryId graphql.String `json:"dataCetegoryId"`
+	// 	DataCategoryId graphql.String `json:"dataCategoryId"`
 	// } `json:"dataCollection"`
 	// DataCollection struct {
 	// 	VisualID graphql.String
@@ -37,18 +37,22 @@ type SubDataPoint struct {
 	DataPoint struct {
 		ID graphql.String `json:"id"`
 	} `json:"dataPoint"`
-	Description     graphql.String            `json:"description"`
-	Categories      []DataSubCategoryInput    `json:"categories"`
-	Purposes        []PurposeSubCategoryInput `json:"purposes"`
-	AttributeValues []AttributeValues         `json:"attributeValues"`
+	Description                    graphql.String            `json:"description"`
+	Categories                     []DataSubCategoryInput    `json:"categories"`
+	Purposes                       []PurposeSubCategoryInput `json:"purposes"`
+	AttributeValues                []AttributeValues         `json:"attributeValues"`
+	AccessRequestVisibilityEnabled graphql.Boolean           `json:"accessRequestVisibilityEnabled"`
+	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasureRequestRedactionEnabled"`
 }
 
 type DataPointSubDataPointInput struct {
-	Name        graphql.String            `json:"name"`
-	Description graphql.String            `json:"description"`
-	Categories  []DataSubCategoryInput    `json:"categories"`
-	Purposes    []PurposeSubCategoryInput `json:"purposes"`
-	Attributes  []AttributeInput          `json:"attributes"`
+	Name                           graphql.String            `json:"name"`
+	Description                    graphql.String            `json:"description"`
+	Categories                     []DataSubCategoryInput    `json:"categories"`
+	Purposes                       []PurposeSubCategoryInput `json:"purposes"`
+	Attributes                     []AttributeInput          `json:"attributes"`
+	AccessRequestVisibilityEnabled graphql.Boolean           `json:"accessRequestVisibilityEnabled"`
+	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasureRequestRedactionEnabled"`
 }
 
 type DataPointUpdatableFields struct {
@@ -111,12 +115,15 @@ func ToDataPointSubDataPointInputList(properties *schema.Set) []DataPointSubData
 	vals := make([]DataPointSubDataPointInput, properties.Len())
 	for i, rawProperty := range properties.List() {
 		property := rawProperty.(map[string]interface{})
+
 		vals[i] = DataPointSubDataPointInput{
-			Name:        graphql.String(property["name"].(string)),
-			Description: graphql.String(property["description"].(string)),
-			Categories:  ToDataSubCategoryInputList(property["categories"].([]interface{})),
-			Purposes:    ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
-			Attributes:  ToAttributeInputList(property["attributes"].([]interface{})),
+			Name:                           graphql.String(property["name"].(string)),
+			Description:                    graphql.String(property["description"].(string)),
+			Categories:                     ToDataSubCategoryInputList(property["categories"].([]interface{})),
+			Purposes:                       ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
+			Attributes:                     ToAttributeInputList(property["attributes"].([]interface{})),
+			AccessRequestVisibilityEnabled: graphql.Boolean(property["access_request_visibility_enabled"].(bool)),
+			ErasureRequestRedactionEnabled: graphql.Boolean(property["erasure_request_redaction_enabled"].(bool)),
 		}
 	}
 	return vals
@@ -136,11 +143,13 @@ func FromDataPointSubDataPointInputList(properties []SubDataPoint) []interface{}
 	for _, property := range properties {
 		if len(property.Name) > 0 {
 			vals[valIndex] = map[string]interface{}{
-				"name":        property.Name,
-				"description": property.Description,
-				"categories":  FromDataSubCategoryInputList(property.Categories),
-				"purposes":    FromPurposeSubCategoryInputList(property.Purposes),
-				"attributes":  FromAttributeInputList(property.AttributeValues),
+				"name":                              property.Name,
+				"description":                       property.Description,
+				"categories":                        FromDataSubCategoryInputList(property.Categories),
+				"purposes":                          FromPurposeSubCategoryInputList(property.Purposes),
+				"attributes":                        FromAttributeInputList(property.AttributeValues),
+				"access_request_visibility_enabled": property.AccessRequestVisibilityEnabled,
+				"erasure_request_redaction_enabled": property.ErasureRequestRedactionEnabled,
 			}
 			valIndex += 1
 		}
