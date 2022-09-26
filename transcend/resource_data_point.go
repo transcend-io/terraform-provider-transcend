@@ -88,6 +88,19 @@ func resourceDataPoint() *schema.Resource {
 							Optional:    true,
 							Description: "A description for the subdatapoint",
 						},
+						"access_request_visibility_enabled": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When true, this subdatapoint should be revealed in a data access request. When false, this field should be redacted",
+						},
+						"erasure_request_redaction_enabled": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Description: `When true, this subdatapoint should be redacted during an erasure request.
+							There normally is a choice of enabling hard deletion or redaction at the
+							datapoint level, but if redaction is enabled, this column can be used
+							to define which fields should be redacted.`,
+						},
 						"categories": &schema.Schema{
 							Type:     schema.TypeList,
 							Optional: true,
