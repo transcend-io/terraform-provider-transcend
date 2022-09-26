@@ -127,13 +127,6 @@ func ToDataPointSubDataPointInputList(properties *schema.Set) []DataPointSubData
 			Purposes:    ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
 			Attributes:  ToAttributeInputList(property["attributes"].([]interface{})),
 		}
-
-		if property["access_request_visibility_enabled"] != nil {
-			vals[i].AccessRequestVisibilityEnabled = graphql.Boolean(property["access_request_visibility_enabled"].(bool))
-		}
-		if property["erasure_request_redaction_enabled"] != nil {
-			vals[i].ErasureRequestRedactionEnabled = graphql.Boolean(property["erasure_request_redaction_enabled"].(bool))
-		}
 	}
 	return vals
 }
