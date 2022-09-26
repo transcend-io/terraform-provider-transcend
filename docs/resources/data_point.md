@@ -75,9 +75,14 @@ Required:
 
 Optional:
 
+- `access_request_visibility_enabled` (Boolean) When true, this subdatapoint should be revealed in a data access request. When false, this field should be redacted
 - `attributes` (Block List) The attribute values used to label this subdatapoint (see [below for nested schema](#nestedblock--properties--attributes))
 - `categories` (Block List) The category of personal data for this subdatapoint (see [below for nested schema](#nestedblock--properties--categories))
 - `description` (String) A description for the subdatapoint
+- `erasure_request_redaction_enabled` (Boolean) When true, this subdatapoint should be redacted during an erasure request.
+There normally is a choice of enabling hard deletion or redaction at the
+datapoint level, but if redaction is enabled, this column can be used
+to define which fields should be redacted.
 - `purposes` (Block List) The processing purposes for this subdatapoint (see [below for nested schema](#nestedblock--properties--purposes))
 
 <a id="nestedblock--properties--attributes"></a>

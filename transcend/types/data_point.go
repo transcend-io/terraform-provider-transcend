@@ -51,8 +51,8 @@ type DataPointSubDataPointInput struct {
 	Categories                     []DataSubCategoryInput    `json:"categories"`
 	Purposes                       []PurposeSubCategoryInput `json:"purposes"`
 	Attributes                     []AttributeInput          `json:"attributes"`
-	AccessRequestVisibilityEnabled graphql.Boolean           `json:"access-request-visibility-enabled,omitempty"`
-	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasure-request-redaction-enabled,omitempty"`
+	AccessRequestVisibilityEnabled graphql.Boolean           `json:"access-request-visibility-enabled"`
+	ErasureRequestRedactionEnabled graphql.Boolean           `json:"erasure-request-redaction-enabled"`
 }
 
 type DataPointUpdatableFields struct {
@@ -117,18 +117,13 @@ func ToDataPointSubDataPointInputList(properties *schema.Set) []DataPointSubData
 		property := rawProperty.(map[string]interface{})
 
 		vals[i] = DataPointSubDataPointInput{
-			Name:        graphql.String(property["name"].(string)),
-			Description: graphql.String(property["description"].(string)),
-			Categories:  ToDataSubCategoryInputList(property["categories"].([]interface{})),
-			Purposes:    ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
-			Attributes:  ToAttributeInputList(property["attributes"].([]interface{})),
-		}
-
-		if property["access_request_visibility_enabled"] != nil {
-			vals[i].AccessRequestVisibilityEnabled = graphql.Boolean(property["access_request_visibility_enabled"].(bool))
-		}
-		if property["erasure_request_redaction_enabled"] != nil {
-			vals[i].ErasureRequestRedactionEnabled = graphql.Boolean(property["erasure_request_redaction_enabled"].(bool))
+			Name:                           graphql.String(property["name"].(string)),
+			Description:                    graphql.String(property["description"].(string)),
+			Categories:                     ToDataSubCategoryInputList(property["categories"].([]interface{})),
+			Purposes:                       ToPurposeSubCategoryInputList(property["purposes"].([]interface{})),
+			Attributes:                     ToAttributeInputList(property["attributes"].([]interface{})),
+			AccessRequestVisibilityEnabled: graphql.Boolean(property["access_request_visibility_enabled"].(bool)),
+			ErasureRequestRedactionEnabled: graphql.Boolean(property["erasure_request_redaction_enabled"].(bool)),
 		}
 	}
 	return vals
