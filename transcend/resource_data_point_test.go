@@ -148,11 +148,11 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 4)
 
-	assert.True(t, properties[3]["access_request_visibility_enabled"].(bool))
-	assert.False(t, properties[3]["erasure_request_redaction_enabled"].(bool))
+	assert.True(t, properties[2]["access_request_visibility_enabled"].(bool))
+	assert.False(t, properties[2]["erasure_request_redaction_enabled"].(bool))
 
-	assert.False(t, properties[4]["access_request_visibility_enabled"].(bool))
-	assert.True(t, properties[4]["erasure_request_redaction_enabled"].(bool))
+	assert.False(t, properties[3]["access_request_visibility_enabled"].(bool))
+	assert.True(t, properties[3]["erasure_request_redaction_enabled"].(bool))
 }
 
 func TestCanChangeSubDataPoints(t *testing.T) {
