@@ -31,6 +31,8 @@ variable "properties" {
       key    = string
       values = list(string)
     }))
+    access_request_visibility_enabled = bool
+    erasure_request_redaction_enabled = bool
   }))
   default = [{
     name        = "test"
@@ -38,6 +40,8 @@ variable "properties" {
     categories  = []
     purposes    = []
     attributes  = []
+    access_request_visibility_enabled = false
+    erasure_request_redaction_enabled = false
   }]
 }
 
@@ -59,6 +63,8 @@ resource "transcend_data_point" "point" {
     content {
       name        = properties.value["name"]
       description = properties.value["description"]
+      access_request_visibility_enabled = properties.value["access_request_visibility_enabled"]
+      erasure_request_redaction_enabled = properties.value["erasure_request_redaction_enabled"]
 
       dynamic "categories" {
         for_each = properties.value["categories"]

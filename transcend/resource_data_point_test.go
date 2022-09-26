@@ -112,18 +112,22 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
-				"name":        "subDataPoint1",
-				"description": "1",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint1",
+				"description":                       "1",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
-				"name":        "subDataPoint2",
-				"description": "2",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint2",
+				"description":                       "2",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
 				"name":                              "subDataPoint3",
@@ -131,7 +135,8 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 				"categories":                        []map[string]interface{}{},
 				"purposes":                          []map[string]interface{}{},
 				"attributes":                        []map[string]interface{}{},
-				"access_request_visibility_enabled": true,
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
 				"name":                              "subDataPoint4",
@@ -139,7 +144,8 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 				"categories":                        []map[string]interface{}{},
 				"purposes":                          []map[string]interface{}{},
 				"attributes":                        []map[string]interface{}{},
-				"erasure_request_redaction_enabled": true,
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -165,41 +171,50 @@ func TestCanChangeSubDataPointsVisibilitySettings(t *testing.T) {
 	})
 	defer terraform.Destroy(t, options)
 	deployDataPoint(t, options)
-	// DO NOT SUBMIT: Add more assertions
 	properties := terraform.OutputListOfObjects(t, options, "properties")
 	assert.Len(t, properties, 1)
+	assert.True(t, properties[0]["access_request_visibility_enabled"].(bool))
+	assert.True(t, properties[0]["erasure_request_redaction_enabled"].(bool))
 }
 
 func TestCanChangeSubDataPoints(t *testing.T) {
 	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
-				"name":        "subDataPoint1",
-				"description": "1",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint1",
+				"description":                       "1",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
-				"name":        "subDataPoint2",
-				"description": "2",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint2",
+				"description":                       "2",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
-				"name":        "subDataPoint3",
-				"description": "3",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint3",
+				"description":                       "3",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 			{
-				"name":        "subDataPoint4",
-				"description": "4",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint4",
+				"description":                       "4",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -211,11 +226,13 @@ func TestCanChangeSubDataPoints(t *testing.T) {
 	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
-				"name":        "someSubDataPoint",
-				"description": "some description",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "someSubDataPoint",
+				"description":                       "some description",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -229,11 +246,13 @@ func TestCanPaginateSubDataPoints(t *testing.T) {
 	properties := make([]map[string]interface{}, numSubDataPoints)
 	for i := 0; i < numSubDataPoints; i++ {
 		properties[i] = map[string]interface{}{
-			"name":        "subDataPoint" + strconv.Itoa(i),
-			"description": "subDataPoint number " + strconv.Itoa(i),
-			"categories":  []map[string]interface{}{},
-			"purposes":    []map[string]interface{}{},
-			"attributes":  []map[string]interface{}{},
+			"name":                              "subDataPoint" + strconv.Itoa(i),
+			"description":                       "subDataPoint number " + strconv.Itoa(i),
+			"categories":                        []map[string]interface{}{},
+			"purposes":                          []map[string]interface{}{},
+			"attributes":                        []map[string]interface{}{},
+			"access_request_visibility_enabled": false,
+			"erasure_request_redaction_enabled": false,
 		}
 	}
 
@@ -250,11 +269,13 @@ func TestCanChangeSubDataPointDescription(t *testing.T) {
 	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
-				"name":        "subDataPoint1",
-				"description": "some description",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint1",
+				"description":                       "some description",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -267,11 +288,13 @@ func TestCanChangeSubDataPointDescription(t *testing.T) {
 	options = prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
-				"name":        "subDataPoint1",
-				"description": "some other description",
-				"categories":  []map[string]interface{}{},
-				"purposes":    []map[string]interface{}{},
-				"attributes":  []map[string]interface{}{},
+				"name":                              "subDataPoint1",
+				"description":                       "some other description",
+				"categories":                        []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -291,8 +314,10 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 					{"name": "Email", "category": "CONTACT"},
 					{"name": "Phone", "category": "CONTACT"},
 				},
-				"purposes":   []map[string]interface{}{},
-				"attributes": []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -314,8 +339,10 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 				"categories": []map[string]interface{}{
 					{"name": "Email", "category": "CONTACT"},
 				},
-				"purposes":   []map[string]interface{}{},
-				"attributes": []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -335,8 +362,10 @@ func TestCanChangeSubDataPointCategories(t *testing.T) {
 				"categories": []map[string]interface{}{
 					{"name": "Phone", "category": "CONTACT"},
 				},
-				"purposes":   []map[string]interface{}{},
-				"attributes": []map[string]interface{}{},
+				"purposes":                          []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -361,7 +390,9 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 					{"name": "Other", "purpose": "HR"},
 					{"name": "Other", "purpose": "LEGAL"},
 				},
-				"attributes": []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -384,7 +415,9 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 				"purposes": []map[string]interface{}{
 					{"name": "Other", "purpose": "LEGAL"},
 				},
-				"attributes": []map[string]interface{}{},
+				"attributes":                        []map[string]interface{}{},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -407,6 +440,8 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 				"attributes": []map[string]interface{}{
 					{"key": "Foo", "values": []string{"bar", "bazz"}},
 				},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
@@ -432,6 +467,8 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 				"attributes": []map[string]interface{}{
 					{"key": "Foo", "values": []string{"bar"}},
 				},
+				"access_request_visibility_enabled": false,
+				"erasure_request_redaction_enabled": false,
 			},
 		},
 	})
