@@ -155,7 +155,7 @@ func TestCanCreateDataPointWithSubDataPoints(t *testing.T) {
 	assert.Len(t, properties, 4)
 }
 
-func TestCanChangeSubDataPointsVisibilitySettings(t *testing.T) {
+func TestCanSetSubDataPointsVisibilitySettings(t *testing.T) {
 	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
 			{
@@ -175,6 +175,18 @@ func TestCanChangeSubDataPointsVisibilitySettings(t *testing.T) {
 	assert.Len(t, properties, 1)
 	assert.True(t, properties[0]["access_request_visibility_enabled"].(bool))
 	assert.True(t, properties[0]["erasure_request_redaction_enabled"].(bool))
+}
+
+func TestCanSetDataPointPath(t *testing.T) {
+	options := prepareDataPointOptions(t, map[string]interface{}{
+		"path": []string{"foo", "bar"},
+	})
+	defer terraform.Destroy(t, options)
+	deployDataPoint(t, options)
+	path := terraform.OutputList(t, options, "path")
+	assert.Len(t, path, 2)
+	assert.Equal(t, path[0], "foo")
+	assert.Equal(t, path[1], "bar")
 }
 
 func TestCanChangeSubDataPoints(t *testing.T) {
