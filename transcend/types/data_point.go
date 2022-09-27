@@ -17,6 +17,7 @@ type DataPoint struct {
 	Description struct {
 		DefaultMessage graphql.String `json:"defaultMessage"`
 	} `json:"description"`
+	Path []graphql.String `json:"path"`
 	// DataCollection struct {
 	// 	DataCategoryId graphql.String `json:"dataCategoryId"`
 	// } `json:"dataCollection"`
@@ -61,6 +62,7 @@ type DataPointUpdatableFields struct {
 	Title         graphql.String               `json:"title"`
 	Description   graphql.String               `json:"description"`
 	SubDataPoints []DataPointSubDataPointInput `json:"subDataPoints,omitempty"`
+	Path          []graphql.String             `json:"path,omitempty"`
 
 	// TODO: Add more fields
 	// enabledActions
@@ -99,6 +101,7 @@ func MakeUpdateOrCreateDataPointInput(d *schema.ResourceData) UpdateOrCreateData
 			Title:         graphql.String(d.Get("title").(string)),
 			Description:   graphql.String(d.Get("description").(string)),
 			SubDataPoints: ToDataPointSubDataPointInputList(d.Get("properties").(*schema.Set)),
+			Path:          ToStringList(d.Get("path").([]interface{})),
 		},
 	}
 }
@@ -108,6 +111,7 @@ func ReadDataPointIntoState(d *schema.ResourceData, dataPoint DataPoint, propert
 	d.Set("data_silo_id", dataPoint.DataSilo.ID)
 	d.Set("title", dataPoint.Title.DefaultMessage)
 	d.Set("description", dataPoint.Description.DefaultMessage)
+	d.Set("path", FromStringList(dataPoint.Path))
 	d.Set("properties", FromDataPointSubDataPointInputList(properties))
 }
 

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.8.2"
+      version = "0.8.3"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -15,6 +15,10 @@ variable "name" {}
 variable "title" {}
 variable "description" { default = null }
 variable "data_silo_type" { default = "server" }
+variable "path" {
+  type    = list(string)
+  default = []
+}
 variable "properties" {
   type = list(object({
     name        = string
@@ -35,11 +39,11 @@ variable "properties" {
     erasure_request_redaction_enabled = bool
   }))
   default = [{
-    name        = "test"
-    description = "test"
-    categories  = []
-    purposes    = []
-    attributes  = []
+    name                              = "test"
+    description                       = "test"
+    categories                        = []
+    purposes                          = []
+    attributes                        = []
     access_request_visibility_enabled = false
     erasure_request_redaction_enabled = false
   }]
@@ -57,12 +61,13 @@ resource "transcend_data_point" "point" {
   name         = var.name
   title        = var.title
   description  = var.description
+  path         = var.path
 
   dynamic "properties" {
     for_each = var.properties
     content {
-      name        = properties.value["name"]
-      description = properties.value["description"]
+      name                              = properties.value["name"]
+      description                       = properties.value["description"]
       access_request_visibility_enabled = properties.value["access_request_visibility_enabled"]
       erasure_request_redaction_enabled = properties.value["erasure_request_redaction_enabled"]
 
@@ -95,6 +100,10 @@ resource "transcend_data_point" "point" {
 
 output "properties" {
   value = transcend_data_point.point.properties
+}
+
+output "path" {
+  value = transcend_data_point.point.path
 }
 
 output "dataSiloId" {

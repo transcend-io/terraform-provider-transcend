@@ -61,6 +61,15 @@ resource "transcend_data_point" "customer" {
 ### Optional
 
 - `description` (String) A description for the datapoint
+- `path` (List of String) Usually only relevant for databases,
+this field should include any schema information for a given datapoint.
+			
+Examples:
+- In postgres, it's possible to have multiple tables with the same name under
+different schemas. e.g., "public", "test". So here you'd specify ["public"] or ["test"]
+- In Snowflake, it's possible to have different databases with different schemas,
+so you can specify ["ANALYTICS", "public"] to indicate that the datapoint belongs to
+the "public" schema of the "ANALYTICS" database.
 
 ### Read-Only
 
