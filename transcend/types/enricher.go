@@ -39,6 +39,7 @@ type EnricherUpdatableFields struct {
 	Headers         []CustomHeaderInput `json:"headers,omitempty"`
 	Actions         []RequestAction     `json:"actions,omitempty"`
 	Type            EnricherType        `json:"type"`
+	PhoneNumbers    []graphql.String    `json:"phoneNumbers"`
 
 	// TODO: Add more fields
 	// DataSiloId
@@ -69,6 +70,8 @@ func MakeEnricherUpdatableFields(d *schema.ResourceData) EnricherUpdatableFields
 		Identifiers:     ToStringList(d.Get("output_identifiers").([]interface{})),
 		InputIdentifier: graphql.String(d.Get("input_identifier").(string)),
 		Type:            EnricherType(d.Get("type").(string)),
+		// This is not a fully supported type, but it must be present on the creation mutation
+		PhoneNumbers: []graphql.String{},
 	}
 }
 
