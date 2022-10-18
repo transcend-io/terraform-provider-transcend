@@ -2,6 +2,7 @@ package transcend
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -45,14 +46,14 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	url := d.Get("url").(string)
+	backendUrl := d.Get("url").(string)
 	backendApiKey := d.Get("key").(string)
 	sombraInternalKey := d.Get("internal_sombra_key").(string)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	if url == "" || backendApiKey == "" {
+	if backendUrl == "" || backendApiKey == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Unable to authenticate provider",
@@ -61,7 +62,15 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-	url = url + "graphql"
+	graphQlUrl, err := url.JoinPath(backendUrl, "/graphql")
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error generating graphql url",
+			Detail:   "Details: " + err.Error(),
+		})
+		return nil, diags
+	}
 
-	return NewClient(url, backendApiKey, sombraInternalKey), nil
+	return NewClient(graphQlUrl, backendApiKey, sombraInternalKey), nil
 }

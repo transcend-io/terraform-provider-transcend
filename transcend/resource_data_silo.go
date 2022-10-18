@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"net/url"
 	"strings"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
@@ -442,7 +443,20 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
-		sombraResponse, err := client.sombraClient.Post(string(sombraUrlQuery.Organization.Sombra.CustomerUrl)+"v1/register-saas", "application/json", bytes.NewReader(jsonBody))
+		registerSaasEndpoint, err := url.JoinPath(string(sombraUrlQuery.Organization.Sombra.CustomerUrl), "/v1/register-saas")
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error constructing sombra url for the register saas route",
+				Detail:   "Details: " + err.Error(),
+			})
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
+			return diags
+		}
+		sombraResponse, err := client.sombraClient.Post(registerSaasEndpoint, "application/json", bytes.NewReader(jsonBody))
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
