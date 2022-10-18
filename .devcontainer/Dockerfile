@@ -1,6 +1,6 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.238.1/containers/go/.devcontainer/base.Dockerfile
 
-ARG VARIANT="1.18-bullseye"
+ARG VARIANT="1.19-bullseye"
 FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
 ARG NODE_VERSION="none"

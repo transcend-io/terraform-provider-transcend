@@ -3,7 +3,7 @@ HOSTNAME=transcend.com
 NAMESPACE=cli
 NAME=transcend
 BINARY=terraform-provider-${NAME}
-VERSION=0.8.4
+VERSION=0.8.5
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 

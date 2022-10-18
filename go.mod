@@ -1,6 +1,6 @@
 module github.com/transcend-io/terraform-provider-transcend
 
-go 1.17
+go 1.19
 
 require (
 	github.com/gruntwork-io/terratest v0.40.18
