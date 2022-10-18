@@ -39,7 +39,8 @@ type DataSiloUpdatableFields struct {
 }
 
 type CreateDataSilosInput struct {
-	Name graphql.String `json:"name"`
+	Name  graphql.String `json:"name"`
+	Title graphql.String `json:"title"`
 }
 
 type UpdateDataSiloInput struct {
@@ -194,7 +195,8 @@ func GetIntegrationName(d *schema.ResourceData) string {
 
 func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
 	return CreateDataSilosInput{
-		Name: graphql.String(GetIntegrationName(d)),
+		Name:  graphql.String(GetIntegrationName(d)),
+		Title: graphql.String(d.Get("title").(string)),
 	}
 }
 
