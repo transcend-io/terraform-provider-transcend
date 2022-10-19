@@ -13,7 +13,7 @@ provider "transcend" {
 
 variable "title" {}
 variable "plugin_config" {
-  type = set(object({
+  type = list(object({
     enabled                    = bool
     type                       = string
     schedule_frequency_minutes = number
@@ -42,12 +42,15 @@ resource "transcend_data_silo_connection" "connection" {
 }
 
 resource "transcend_data_silo_plugin" "plugin" {
-  for_each = var.plugin_config
+  for_each = {
+    for config in var.plugin_config :
+    config.type => config
+  }
 
   data_silo_id = transcend_data_silo.silo.id
 
+  type                       = each.key
   enabled                    = each.value["enabled"]
-  type                       = each.value["type"]
   schedule_frequency_minutes = each.value["schedule_frequency_minutes"]
   schedule_start_at          = each.value["schedule_start_at"]
   schedule_now               = each.value["schedule_now"]
