@@ -32,7 +32,7 @@ func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (ty
 }
 
 func TestCanCreateAndDestroyDataSiloPluginSeparatelyFromDataSilo(t *testing.T) {
-	options := prepareDataSiloOptions(t, map[string]interface{}{
+	options := prepareDataSiloPluginOptions(t, map[string]interface{}{
 		"title": t.Name(),
 		"plugin_config": []map[string]interface{}{
 			{
@@ -46,7 +46,7 @@ func TestCanCreateAndDestroyDataSiloPluginSeparatelyFromDataSilo(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _ := deployDataSiloPlugin(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 }
