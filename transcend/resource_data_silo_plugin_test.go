@@ -33,7 +33,7 @@ func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (ty
 	return silo, plugin
 }
 
-func TestCanCreateAndDestroyDataSiloPluginSeparatelyFromDataSilo(t *testing.T) {
+func TestCanUseSeparatePluginResource(t *testing.T) {
 	options := prepareDataSiloPluginOptions(t, map[string]interface{}{
 		"title": t.Name(),
 		"plugin_config": []map[string]interface{}{
