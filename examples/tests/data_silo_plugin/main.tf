@@ -23,20 +23,21 @@ variable "plugin_config" {
 }
 
 resource "transcend_data_silo" "silo" {
-  type                 = "amazonWebServices"
-  title                = var.title
+  type            = "amazonWebServices"
+  title           = var.title
+  skip_connecting = true
 }
 
 resource "transcend_data_silo_connection" "connection" {
   data_silo_id = transcend_data_silo.silo.id
 
   plaintext_context {
-    name = "role"
+    name  = "role"
     value = "TranscendAWSIntegrationRole"
   }
 
   plaintext_context {
-    name = "accountId"
+    name  = "accountId"
     value = "590309927493"
   }
 }

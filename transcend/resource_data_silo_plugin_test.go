@@ -24,7 +24,9 @@ func prepareDataSiloPluginOptions(t *testing.T, vars map[string]interface{}) *te
 }
 
 func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
-	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
+	// TODO: Use the Idempotent version eventually
+	terraform.InitAndApply(t, terraformOptions)
+	// terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	plugin := lookupDataSiloPlugin(t, terraform.Output(t, terraformOptions, "dataSiloId"))
@@ -37,7 +39,7 @@ func TestCanCreateAndDestroyDataSiloPluginSeparatelyFromDataSilo(t *testing.T) {
 		"plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
-				"type":                       "DATA_POINT_DISCOVERY",
+				"type":                       "DATA_SILO_DISCOVERY",
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",

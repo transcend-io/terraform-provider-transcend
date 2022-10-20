@@ -10,5 +10,5 @@ func getEnv(key, fallback string) string {
 }
 
 func getTestClient() *Client {
-	return NewClient(getEnv("TRANSCEND_URL", "https://yo.com:4001/graphql"), os.Getenv("TRANSCEND_KEY"), "")
+	return NewClient(getEnv("TRANSCEND_URL", "https://yo.com:4001/"), os.Getenv("TRANSCEND_KEY"), "")
 }

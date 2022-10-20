@@ -36,6 +36,7 @@ func resourceDataSiloPlugin() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Type of plugin",
+				ForceNew:    true,
 			},
 			"schedule_frequency_minutes": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -70,6 +71,7 @@ func resourceDataSiloPluginCreate(ctx context.Context, d *schema.ResourceData, m
 
 func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
+	var diags diag.Diagnostics
 
 	var pluginQuery struct {
 		Plugins struct {
@@ -77,7 +79,7 @@ func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m i
 		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
 	}
 	pluginVars := map[string]interface{}{
-		"dataSiloId": graphql.String(d.Get("id").(string)),
+		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
 	if err != nil {
@@ -85,11 +87,17 @@ func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	if len(pluginQuery.Plugins.Plugins) == 1 {
-		types.ReadDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
+		types.ReadStandaloneDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
 		d.SetId(string(pluginQuery.Plugins.Plugins[0].ID))
+	} else {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error querying plugin",
+			Detail:   "Error when querying for data silo plugin: Found undexpected number of plugins",
+		})
 	}
 
-	return nil
+	return diags
 }
 
 func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -98,7 +106,33 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	// Plugins already exist when a data silo is created, they are just disabled.
 	// So here we fetch the ID / settings on the existing plugin
-	resourceDataSiloPluginRead(ctx, d, m)
+	// Read the data silo plugin information
+	var pluginQuery struct {
+		Plugins struct {
+			Plugins []types.Plugin
+		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+	}
+	pluginVars := map[string]interface{}{
+		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
+	}
+	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error finding data silo plugin for data silo",
+			Detail:   "Error when reading data silo plugin: " + err.Error(),
+		})
+		return diags
+	}
+	if len(pluginQuery.Plugins.Plugins) != 1 {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error finding exactly one data silo plugin for data silo",
+			Detail:   "Error when reading data silo plugin",
+		})
+		return diags
+	}
+	d.Set("id", pluginQuery.Plugins.Plugins[0].ID)
 
 	var updateMutation struct {
 		UpdateDataSiloPlugin struct {
@@ -106,9 +140,9 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 		} `graphql:"updateDataSiloPlugin(input: $input)"`
 	}
 	updateVars := map[string]interface{}{
-		"input": types.MakeUpdatePluginInput(d, graphql.String(d.Get("id").(string))),
+		"input": types.MakeStandaloneUpdatePluginInput(d),
 	}
-	err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
+	err = client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -132,7 +166,7 @@ func resourceDataSiloPluginDelete(ctx context.Context, d *schema.ResourceData, m
 			Plugin types.Plugin
 		} `graphql:"updateDataSiloPlugin(input: $input)"`
 	}
-	input := types.MakeUpdatePluginInput(d, graphql.String(d.Get("id").(string)))
+	input := types.MakeStandaloneUpdatePluginInput(d)
 	input.Enabled = false
 	updateVars := map[string]interface{}{
 		"input": input,
