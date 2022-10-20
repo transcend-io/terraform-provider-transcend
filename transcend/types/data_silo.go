@@ -124,10 +124,21 @@ type Plugin struct {
 type UpdatePluginInput struct {
 	DataSiloID               graphql.ID      `json:"dataSiloId"`
 	PluginID                 graphql.ID      `json:"pluginId"`
-	Enabled                  graphql.Boolean `json:"enabled,omitempty"`
+	Enabled                  graphql.Boolean `json:"enabled"`
 	ScheduleFrequencyMinutes graphql.String  `json:"scheduleFrequency"`
 	ScheduleStartAt          graphql.String  `json:"scheduleStartAt"`
 	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
+}
+
+func MakeStandaloneUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
+	return UpdatePluginInput{
+		PluginID:                 graphql.String(d.Get("id").(string)),
+		DataSiloID:               graphql.String(d.Get("data_silo_id").(string)),
+		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
+		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(d.Get("schedule_frequency_minutes").(int) * 1000 * 60)),
+		ScheduleStartAt:          graphql.String(d.Get("schedule_start_at").(string)),
+		ScheduleNow:              graphql.Boolean(d.Get("schedule_now").(bool)),
+	}
 }
 
 func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) UpdatePluginInput {
@@ -142,6 +153,21 @@ func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) Upda
 		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
 		ScheduleNow:              graphql.Boolean(configuration["schedule_now"].(bool)),
 	}
+}
+
+func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
+	frequency, err := strconv.Atoi(string(plugin.ScheduleFrequency))
+	if err != nil {
+		return
+	}
+
+	d.Set("enabled", plugin.Enabled)
+	d.Set("id", plugin.ID)
+	d.Set("data_silo_id", plugin.DataSilo.ID)
+	d.Set("type", plugin.Type)
+	d.Set("schedule_frequency_minutes", frequency/60/1000)
+	d.Set("schedule_start_at", plugin.ScheduleStartAt)
+	d.Set("last_enabled_at", plugin.LastEnabledAt)
 }
 
 func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
@@ -259,7 +285,6 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	d.Set("connection_state", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))
 	d.Set("headers", FlattenHeaders(&silo.Headers))
-	d.Set("plaintext_context", FromPlaintextContextList(silo.PlaintextContext))
 
 	// TODO: Support these fields being read in
 	// d.Set("data_subject_block_list", flattenDataSiloBlockList(silo))
