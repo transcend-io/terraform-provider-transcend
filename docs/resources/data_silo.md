@@ -316,6 +316,7 @@ resource "transcend_data_silo" "database" {
 
   secret_context {
     name  = "driver"
+    # See "SQLDriverWithDataMapping" in https://github.com/transcend-io/privacy-types/blob/main/src/database.ts
     value = "PostgreSQL Unicode"
   }
   secret_context {
