@@ -10,12 +10,12 @@ import (
 	graphql "github.com/hasura/go-graphql-client"
 )
 
-func resourceDataSiloPlugin() *schema.Resource {
+func resourceDataSiloDiscoveryPlugin() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataSiloDiscoveryPluginCreate,
-		ReadContext:   resourceDataSiloPluginRead,
-		UpdateContext: resourceDataSiloPluginUpdate,
-		DeleteContext: resourceDataSiloPluginDelete,
+		ReadContext:   resourceDataSiloDiscoveryPluginRead,
+		UpdateContext: resourceDataSiloDiscoveryPluginUpdate,
+		DeleteContext: resourceDataSiloDiscoveryPluginDelete,
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -31,12 +31,6 @@ func resourceDataSiloPlugin() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: "State to toggle plugin to",
-			},
-			"type": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Type of plugin",
-				ForceNew:    true,
 			},
 			"schedule_frequency_minutes": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -65,21 +59,22 @@ func resourceDataSiloPlugin() *schema.Resource {
 	}
 }
 
-func resourceDataSiloPluginCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceDataSiloPluginUpdate(ctx, d, m)
+func resourceDataSiloDiscoveryPluginCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceDataSiloDiscoveryPluginUpdate(ctx, d, m)
 }
 
-func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDataSiloDiscoveryPluginRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	var diags diag.Diagnostics
 
 	var pluginQuery struct {
 		Plugins struct {
 			Plugins []types.Plugin
-		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId, type: $type })"`
 	}
 	pluginVars := map[string]interface{}{
 		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
+		"type":       graphql.String("DATA_SILO_DISCOVERY"),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
 	if err != nil {
@@ -100,7 +95,7 @@ func resourceDataSiloPluginRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDataSiloDiscoveryPluginUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	var diags diag.Diagnostics
 
@@ -110,10 +105,11 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 	var pluginQuery struct {
 		Plugins struct {
 			Plugins []types.Plugin
-		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId })"`
+		} `graphql:"plugins(filterBy: { dataSiloId: $dataSiloId, type: $type })"`
 	}
 	pluginVars := map[string]interface{}{
 		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
+		"type":       graphql.String("DATA_SILO_DISCOVERY"),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
 	if err != nil {
@@ -152,14 +148,14 @@ func resourceDataSiloPluginUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diags
 	}
 
-	return resourceDataSiloPluginRead(ctx, d, m)
+	return resourceDataSiloDiscoveryPluginRead(ctx, d, m)
 }
 
 // Plugins cannot be deleted, but they can be disabled, so we do that here
-func resourceDataSiloPluginDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDataSiloDiscoveryPluginDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	var diags diag.Diagnostics
-	resourceDataSiloPluginRead(ctx, d, m)
+	resourceDataSiloDiscoveryPluginRead(ctx, d, m)
 
 	var updateMutation struct {
 		UpdateDataSiloPlugin struct {
