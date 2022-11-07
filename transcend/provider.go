@@ -37,7 +37,8 @@ func Provider() *schema.Provider {
 			"transcend_enricher":             resourceEnricher(),
 			"transcend_data_silo":            resourceDataSilo(),
 			"transcend_data_silo_connection": resourceDataSiloConnection(),
-			"transcend_data_silo_plugin":     resourceDataSiloPlugin(),
+			// FIXME: Remove this resource mapping, and add resource mapping for the new plugins.
+			"transcend_data_silo_plugin": resourceDataSiloPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_identifier": dataSourceIdentifier(),
