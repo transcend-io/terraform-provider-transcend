@@ -121,10 +121,10 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"plugin_configuration": &schema.Schema{
+			"data_silo_discovery_plugin": &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "This is where you configure how often you'd like data silo and data point plugins to run, if enabled.",
+				Description: "Configuration for the Data Silo discovery plugin for data silos.",
 				MinItems:    0,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -139,10 +139,129 @@ func resourceDataSilo() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": &schema.Schema{
+						"schedule_frequency_minutes": &schema.Schema{
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
+						},
+						"schedule_start_at": &schema.Schema{
 							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Type of plugin",
+							Optional:    true,
+							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
+						},
+						"schedule_now": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether we should schedule a run immediately after this request",
+						},
+						"last_enabled_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The date at which this data silo was last enabled",
+						},
+					},
+				},
+			},
+			// FIXME: Do we even want to add support for this plugin type?
+			"data_point_discovery_plugin": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "[DEPRECATED] Configuration for the Data Point discovery plugin for data silos.",
+				MinItems:    0,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: "State to toggle plugin to",
+						},
+						"id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"schedule_frequency_minutes": &schema.Schema{
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
+						},
+						"schedule_start_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
+						},
+						"schedule_now": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether we should schedule a run immediately after this request",
+						},
+						"last_enabled_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The date at which this data silo was last enabled",
+						},
+					},
+				},
+			},
+			"schema_discovery_plugin": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Configuration for the Schema Discovery plugin for data silos.",
+				MinItems:    0,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: "State to toggle plugin to",
+						},
+						"id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"schedule_frequency_minutes": &schema.Schema{
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
+						},
+						"schedule_start_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
+						},
+						"schedule_now": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether we should schedule a run immediately after this request",
+						},
+						"last_enabled_at": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The date at which this data silo was last enabled",
+						},
+					},
+				},
+			},
+			"content_classification_plugin": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
+				MinItems:    0,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: "State to toggle plugin to",
+						},
+						"id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"schedule_frequency_minutes": &schema.Schema{
 							Type:        schema.TypeInt,
