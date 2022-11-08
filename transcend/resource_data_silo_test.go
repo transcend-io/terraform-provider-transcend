@@ -114,12 +114,14 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 func TestCanConnectSiloPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
-		"data_silo_discovery_plugin_config": map[string]interface{}{
-			"enabled":                    true,
-			"schedule_frequency_minutes": 120,
-			// Schedule far in the future so that the test works for a long time
-			"schedule_start_at": "2122-09-06T17:51:13.000Z",
-			"schedule_now":      false,
+		"data_silo_discovery_plugin_config": []map[string]interface{}{
+			{
+				"enabled":                    true,
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+				"schedule_now":      false,
+			},
 		},
 	})
 	defer terraform.Destroy(t, options)
@@ -135,12 +137,14 @@ func TestCanConnectSchemaDiscoveryPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"type":            "amazonS3",
 		"skip_connecting": false,
-		"schema_discovery_plugin_config": map[string]interface{}{
-			"enabled":                    true,
-			"schedule_frequency_minutes": 120,
-			// Schedule far in the future so that the test works for a long time
-			"schedule_start_at": "2122-09-06T17:51:13.000Z",
-			"schedule_now":      false,
+		"schema_discovery_plugin_config": []map[string]interface{}{
+			{
+				"enabled":                    true,
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+				"schedule_now":      false,
+			},
 		},
 	})
 	defer terraform.Destroy(t, options)

@@ -53,24 +53,22 @@ variable "secret_context" {
   default = []
 }
 variable "schema_discovery_plugin_config" {
-  type = object({
+  type = list(object({
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
     schedule_now               = bool
-  })
-  nullable = true
-  default  = null
+  }))
+  default = []
 }
 variable "data_silo_discovery_plugin_config" {
-  type = object({
+  type = list(object({
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
     schedule_now               = bool
-  })
-  nullable = true
-  default  = null
+  }))
+  default = []
 }
 
 resource "transcend_data_silo" "silo" {
@@ -84,20 +82,24 @@ resource "transcend_data_silo" "silo" {
   outer_type           = var.outer_type
   skip_connecting      = var.skip_connecting
 
-  schema_discovery_plugin {
-    count                      = var.schema_discovery_plugin_config == null ? 0 : 1
-    enabled                    = var.schema_discovery_plugin_config.value["enabled"]
-    schedule_frequency_minutes = var.schema_discovery_plugin_config.value["schedule_frequency_minutes"]
-    schedule_start_at          = var.schema_discovery_plugin_config.value["schedule_start_at"]
-    schedule_now               = var.schema_discovery_plugin_config.value["schedule_now"]
+  dynamic "schema_discovery_plugin" {
+    for_each = var.schema_discovery_plugin_config
+    content {
+      enabled                    = schema_discovery_plugin.value["enabled"]
+      schedule_frequency_minutes = schema_discovery_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = schema_discovery_plugin.value["schedule_start_at"]
+      schedule_now               = schema_discovery_plugin.value["schedule_now"]
+    }
   }
 
-  data_silo_discovery_plugin {
-    count                      = var.data_silo_discovery_plugin_config == null ? 0 : 1
-    enabled                    = var.data_silo_discovery_plugin_config.value["enabled"]
-    schedule_frequency_minutes = var.data_silo_discovery_plugin_config.value["schedule_frequency_minutes"]
-    schedule_start_at          = var.data_silo_discovery_plugin_config.value["schedule_start_at"]
-    schedule_now               = var.data_silo_discovery_plugin_config.value["schedule_now"]
+  dynamic "data_silo_discovery_plugin" {
+    for_each = var.data_silo_discovery_plugin_config
+    content {
+      enabled                    = data_silo_discovery_plugin.value["enabled"]
+      schedule_frequency_minutes = data_silo_discovery_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = data_silo_discovery_plugin.value["schedule_start_at"]
+      schedule_now               = data_silo_discovery_plugin.value["schedule_now"]
+    }
   }
 
   dynamic "plaintext_context" {
