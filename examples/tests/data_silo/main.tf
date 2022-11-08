@@ -103,7 +103,7 @@ resource "transcend_data_silo" "silo" {
   }
 
   dynamic "plaintext_context" {
-    for_each = (var.type == "amazonWebServices" || var.type == "amazonS3") && !var.skip_connecting ? [
+    for_each = (var.type == "amazonWebServices" || var.type == "amazonS3" || var.type == "amazonDynamodb") && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
     ] : []

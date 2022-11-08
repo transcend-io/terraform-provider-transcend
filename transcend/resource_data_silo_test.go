@@ -136,7 +136,7 @@ func TestCanConnectSiloPlugin(t *testing.T) {
 func TestCanConnectSchemaDiscoveryPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"type":            "amazonDynamodb",
-		"skip_connecting": true,
+		"skip_connecting": false,
 		"schema_discovery_plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
