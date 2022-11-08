@@ -426,10 +426,10 @@ to search for integration metadata based on a title substring. Make sure you are
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
-- `data_silo_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover other data silos. (see [below for nested schema](#nestedblock--plugin_configuration))
-- `schema_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover the schema of your information stored in a data silo. (see [below for nested schema](#nestedblock--plugin_configuration))
-- `content_classification_plugin` (Block Set) This is where you configure a plugin that is used to classify the results of the discovered schemas from the schema discovery plugin. (see [below for nested schema](#nestedblock--plugin_configuration))
-- `data_point_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover and classify the schema of the information stored in a data silo. This plugin type is DEPRECATED, and we recommend setting up the Schema Discovery, and Content Classification plugins to achieve the same result, more efficiently. (see [below for nested schema](#nestedblock--plugin_configuration))
+- `data_silo_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover other data silos. (see [below for nested schema](#nestedblock--data_silo_discovery_plugin))
+- `schema_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover the schema of your information stored in a data silo. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
+- `content_classification_plugin` (Block Set) This is where you configure a plugin that is used to classify the results of the discovered schemas from the schema discovery plugin. (see [below for nested schema](#nestedblock--content_classification_plugin))
+- `data_point_discovery_plugin` (Block Set) This is where you configure a plugin that is used to discover and classify the schema of the information stored in a data silo. This plugin type is DEPRECATED, and we recommend setting up the Schema Discovery, and Content Classification plugins to achieve the same result, more efficiently. (see [below for nested schema](#nestedblock--data_point_discovery_plugin))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
@@ -465,9 +465,69 @@ Required:
 - `name` (String) The name of the plaintext input
 - `value` (String) The value of the plaintext input
 
-<a id="nestedblock--plugin_configuration"></a>
+<a id="nestedblock--data_silo_discovery_plugin"></a>
 
-### Nested Schema for `plugin_configuration`
+### Nested Schema for `data_silo_discovery_plugin`
+
+Required:
+
+- `type` (String) Type of plugin
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
+<a id="nestedblock--schema_discovery_plugin"></a>
+
+### Nested Schema for `schema_discovery_plugin`
+
+Required:
+
+- `type` (String) Type of plugin
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
+<a id="nestedblock--content_classification_plugin"></a>
+
+### Nested Schema for `content_classification_plugin`
+
+Required:
+
+- `type` (String) Type of plugin
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
+<a id="nestedblock--data_point_discovery_plugin"></a>
+
+### Nested Schema for `data_point_discovery_plugin`
 
 Required:
 
