@@ -111,9 +111,19 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
 
-func TestCanConnectSiloPlugin(t *testing.T) {
+func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
+		"type":            "amazonDynamodb",
 		"skip_connecting": false,
+		"schema_discovery_plugin_config": []map[string]interface{}{
+			{
+				"enabled":                    true,
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+				"schedule_now":      false,
+			},
+		},
 		"data_silo_discovery_plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
@@ -128,31 +138,11 @@ func TestCanConnectSiloPlugin(t *testing.T) {
 	silo, plugins := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 1)
+	assert.Len(t, plugins, 2)
 	assert.True(t, bool(plugins[0].Enabled))
 	assert.NotEmpty(t, plugins[0].ID)
-}
-
-func TestCanConnectSchemaDiscoveryPlugin(t *testing.T) {
-	options := prepareDataSiloOptions(t, map[string]interface{}{
-		"skip_connecting": false,
-		"schema_discovery_plugin_config": []map[string]interface{}{
-			{
-				"enabled":                    true,
-				"schedule_frequency_minutes": 120,
-				// Schedule far in the future so that the test works for a long time
-				"schedule_start_at": "2122-09-06T17:51:13.000Z",
-				"schedule_now":      false,
-			},
-		},
-	})
-	defer terraform.Destroy(t, options)
-	silo, plugins := deployDataSilo(t, options)
-	assert.Equal(t, graphql.String(t.Name()), silo.Title)
-	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 1)
-	assert.True(t, bool(plugins[0].Enabled))
-	assert.NotEmpty(t, plugins[0].ID)
+	assert.True(t, bool(plugins[1].Enabled))
+	assert.NotEmpty(t, plugins[1].ID)
 }
 
 func TestCanChangeTitle(t *testing.T) {

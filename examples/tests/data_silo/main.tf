@@ -13,7 +13,7 @@ provider "transcend" {
 
 variable "title" {}
 variable "outer_type" { default = null }
-variable "type" { default = "amazonDynamodb" }
+variable "type" { default = "amazonWebServices" }
 variable "description" { default = "some description" }
 variable "owner_emails" {
   type    = list(string)
