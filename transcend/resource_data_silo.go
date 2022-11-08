@@ -3,6 +3,7 @@ package transcend
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -22,55 +23,55 @@ func resourceDataSilo() *schema.Resource {
 		UpdateContext: resourceDataSilosUpdate,
 		DeleteContext: resourceDataSilosDelete,
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"title": &schema.Schema{
+			"title": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The title of the data silo",
 			},
-			"link": &schema.Schema{
+			"link": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The link to the data silo",
 			},
-			"aws_external_id": &schema.Schema{
+			"aws_external_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The external ID for the AWS IAM Role for AWS data silos",
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Type of silo",
 				ForceNew:    true,
 			},
-			"has_avc_functionality": &schema.Schema{
+			"has_avc_functionality": {
 				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Whether the data silo supports automated vendor coordination",
 			},
-			"headers": &schema.Schema{
+			"headers": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Custom headers to include in outbound webhook",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The name of the custom header",
 						},
-						"value": &schema.Schema{
+						"value": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Sensitive:   true,
 							Description: "The value of the custom header",
 						},
-						"is_secret": &schema.Schema{
+						"is_secret": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "When true, the value of this header will be considered sensitive",
@@ -82,18 +83,18 @@ func resourceDataSilo() *schema.Resource {
 			// queried the catalog for if the values should be secret or not? In the statefile, all values would be secretive,
 			// but the provider could separate out plaintext from secret context values and give better error messages if there are
 			// missing fields or if invalid field names are provided.
-			"plaintext_context": &schema.Schema{
+			"plaintext_context": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "This is where you put non-secretive values that go in the form when connecting a data silo",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The name of the plaintext input",
 						},
-						"value": &schema.Schema{
+						"value": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The value of the plaintext input",
@@ -101,18 +102,18 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"secret_context": &schema.Schema{
+			"secret_context": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The name of the input",
 						},
-						"value": &schema.Schema{
+						"value": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The value of the input in plaintext",
@@ -121,7 +122,7 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"data_silo_discovery_plugin": &schema.Schema{
+			"data_silo_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Data Silo discovery plugin for data silos.",
@@ -129,32 +130,32 @@ func resourceDataSilo() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled": &schema.Schema{
+						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							Description: "State to toggle plugin to",
 						},
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"schedule_frequency_minutes": &schema.Schema{
+						"schedule_frequency_minutes": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 						},
-						"schedule_start_at": &schema.Schema{
+						"schedule_start_at": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": &schema.Schema{
+						"schedule_now": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Whether we should schedule a run immediately after this request",
 						},
-						"last_enabled_at": &schema.Schema{
+						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The date at which this data silo was last enabled",
@@ -162,7 +163,7 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"data_point_discovery_plugin": &schema.Schema{
+			"data_point_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "[DEPRECATED] Configuration for the Data Point discovery plugin for data silos.",
@@ -170,32 +171,32 @@ func resourceDataSilo() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled": &schema.Schema{
+						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							Description: "State to toggle plugin to",
 						},
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"schedule_frequency_minutes": &schema.Schema{
+						"schedule_frequency_minutes": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 						},
-						"schedule_start_at": &schema.Schema{
+						"schedule_start_at": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": &schema.Schema{
+						"schedule_now": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Whether we should schedule a run immediately after this request",
 						},
-						"last_enabled_at": &schema.Schema{
+						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The date at which this data silo was last enabled",
@@ -203,7 +204,7 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"schema_discovery_plugin": &schema.Schema{
+			"schema_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Schema Discovery plugin for data silos.",
@@ -211,32 +212,32 @@ func resourceDataSilo() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled": &schema.Schema{
+						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							Description: "State to toggle plugin to",
 						},
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"schedule_frequency_minutes": &schema.Schema{
+						"schedule_frequency_minutes": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 						},
-						"schedule_start_at": &schema.Schema{
+						"schedule_start_at": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": &schema.Schema{
+						"schedule_now": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Whether we should schedule a run immediately after this request",
 						},
-						"last_enabled_at": &schema.Schema{
+						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The date at which this data silo was last enabled",
@@ -244,7 +245,7 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"content_classification_plugin": &schema.Schema{
+			"content_classification_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
@@ -252,32 +253,32 @@ func resourceDataSilo() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled": &schema.Schema{
+						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							Description: "State to toggle plugin to",
 						},
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"schedule_frequency_minutes": &schema.Schema{
+						"schedule_frequency_minutes": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 						},
-						"schedule_start_at": &schema.Schema{
+						"schedule_start_at": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": &schema.Schema{
+						"schedule_now": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Whether we should schedule a run immediately after this request",
 						},
-						"last_enabled_at": &schema.Schema{
+						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The date at which this data silo was last enabled",
@@ -285,12 +286,12 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			"outer_type": &schema.Schema{
+			"outer_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)",
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The description of the data silo",
@@ -300,7 +301,7 @@ func resourceDataSilo() *schema.Resource {
 			// 	Optional:    true,
 			// 	Description: "The id of template to use when prompting via email",
 			// },
-			"url": &schema.Schema{
+			"url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The URL of the server to post to if a server silo",
@@ -318,23 +319,23 @@ func resourceDataSilo() *schema.Resource {
 					return diags
 				},
 			},
-			"notify_email_address": &schema.Schema{
+			"notify_email_address": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The email address that should be notified whenever new requests are made",
 			},
-			"is_live": &schema.Schema{
+			"is_live": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether the data silo should be live",
 			},
-			"skip_connecting": &schema.Schema{
+			"skip_connecting": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment",
 			},
-			"connection_state": &schema.Schema{
+			"connection_state": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The current state of the integration",
@@ -368,7 +369,7 @@ func resourceDataSilo() *schema.Resource {
 			// 	},
 			// 	Description: "The list of subject IDs to block list from this data silo",
 			// },
-			"owner_emails": &schema.Schema{
+			"owner_emails": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -677,19 +678,22 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				} `graphql:"updateDataSiloPlugin(input: $input)"`
 			}
 
-			configuration := make(map[string]interface{})
+			var configuration interface{}
 			switch plugin.Type {
 			case "SCHEMA_DISCOVERY":
-				configuration = d.Get("schema_discovery_plugin").(map[string]interface{})
+				configuration = d.Get("schema_discovery_plugin")
 			case "CONTENT_CLASSIFICATION":
-				configuration = d.Get("content_classification_plugin").(map[string]interface{})
+				configuration = d.Get("content_classification_plugin")
 			case "DATA_SILO_DISCOVERY":
-				configuration = d.Get("data_silo_discovery_plugin").(map[string]interface{})
+				configuration = d.Get("data_silo_discovery_plugin")
 			case "DATA_POINT_DISCOVERY":
-				configuration = d.Get("data_point_discovery_plugin").(map[string]interface{})
+				configuration = d.Get("data_point_discovery_plugin")
 			default:
 				configuration = nil
 			}
+
+			// FIXME: Remove
+			fmt.Println(fmt.Sprintf("====> CONFIG %v", configuration))
 
 			if configuration == nil {
 				diags = append(diags, diag.Diagnostic{
@@ -699,7 +703,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				})
 			} else {
 				updateVars := map[string]interface{}{
-					"input": types.MakeUpdatePluginInput(d, configuration, plugin.ID),
+					"input": types.MakeUpdatePluginInput(d, configuration.(map[string]interface{}), plugin.ID),
 				}
 
 				err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
