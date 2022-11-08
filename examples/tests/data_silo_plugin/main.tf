@@ -42,7 +42,7 @@ resource "transcend_data_silo_connection" "connection" {
   }
 }
 
-resource "transcend_data_silo_plugin" "plugin" {
+resource "transcend_data_silo_discovery_plugin" "plugin" {
   for_each = {
     for config in var.plugin_config :
     config.type => config
