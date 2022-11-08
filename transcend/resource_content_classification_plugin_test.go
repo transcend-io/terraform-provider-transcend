@@ -17,7 +17,7 @@ func prepareContentClassificationPluginOptions(t *testing.T, vars map[string]int
 	}
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/tests/data_silo_plugin",
+		TerraformDir: "../examples/tests/content_classification_plugin",
 		Vars:         defaultVars,
 	})
 	return terraformOptions

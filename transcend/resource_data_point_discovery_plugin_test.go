@@ -17,7 +17,7 @@ func prepareDataPointDiscoveryPluginOptions(t *testing.T, vars map[string]interf
 	}
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/tests/data_silo_plugin",
+		TerraformDir: "../examples/tests/data_point_discovery_plugin",
 		Vars:         defaultVars,
 	})
 	return terraformOptions
