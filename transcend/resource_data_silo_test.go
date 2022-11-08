@@ -113,7 +113,6 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 
 func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
-		"type":            "amazonDynamodb",
 		"skip_connecting": false,
 		"schema_discovery_plugin_config": []map[string]interface{}{
 			{
