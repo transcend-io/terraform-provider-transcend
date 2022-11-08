@@ -114,7 +114,7 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 func TestCanConnectSiloPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
-		"data_silo_discovery_plugin_confing": map[string]interface{}{
+		"data_silo_discovery_plugin_config": map[string]interface{}{
 			"enabled":                    true,
 			"schedule_frequency_minutes": 120,
 			// Schedule far in the future so that the test works for a long time

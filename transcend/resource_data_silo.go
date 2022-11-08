@@ -162,7 +162,6 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
-			// FIXME: Do we even want to add support for this plugin type?
 			"data_point_discovery_plugin": &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
