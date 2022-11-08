@@ -10,20 +10,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func prepareDataSiloPluginOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
+func prepareSchemaDiscoveryPluginOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{"title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v
 	}
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/tests/data_silo_plugin",
+		TerraformDir: "../examples/tests/schema_discovery_plugin",
 		Vars:         defaultVars,
 	})
 	return terraformOptions
 }
 
-func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
+func deploySchemaDiscoveryPlugin(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
 	// TODO: Use the Idempotent version eventually
 	terraform.InitAndApply(t, terraformOptions)
 	// terraform.InitAndApplyAndIdempotent(t, terraformOptions)
@@ -33,22 +33,19 @@ func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (ty
 	return silo, plugin
 }
 
-func TestCanUseSeparatePluginResource(t *testing.T) {
-	options := prepareDataSiloPluginOptions(t, map[string]interface{}{
+func TestCanUseSeparateSchemaDiscoveryPluginResource(t *testing.T) {
+	options := prepareSchemaDiscoveryPluginOptions(t, map[string]interface{}{
 		"title": t.Name(),
-		"plugin_config": []map[string]interface{}{
-			{
-				"enabled":                    true,
-				"type":                       "DATA_SILO_DISCOVERY",
-				"schedule_frequency_minutes": 120,
-				// Schedule far in the future so that the test works for a long time
-				"schedule_start_at": "2122-09-06T17:51:13.000Z",
-				"schedule_now":      false,
-			},
+		"plugin_config": map[string]interface{}{
+			"enabled":                    true,
+			"schedule_frequency_minutes": 120,
+			// Schedule far in the future so that the test works for a long time
+			"schedule_start_at": "2122-09-06T17:51:13.000Z",
+			"schedule_now":      false,
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSiloPlugin(t, options)
+	silo, _ := deploySchemaDiscoveryPlugin(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 }

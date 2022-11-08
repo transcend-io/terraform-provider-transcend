@@ -12,19 +12,19 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"url": &schema.Schema{
+			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_URL", "https://api.transcend.io/"),
 				Description: "The custom Transcend backend URL to talk to. Typically can be left to the default production URL.",
 			},
-			"key": &schema.Schema{
+			"key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_KEY", nil),
 				Description: "The API Key to use to talk to Transcend. Ensure it has the scopes to perform whatever actions you need. Can be set using the TRANSCEND_KEY environment variable.",
 			},
-			"internal_sombra_key": &schema.Schema{
+			"internal_sombra_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_KEY", nil),
@@ -32,12 +32,15 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"transcend_api_key":              resourceAPIKey(),
-			"transcend_data_point":           resourceDataPoint(),
-			"transcend_enricher":             resourceEnricher(),
-			"transcend_data_silo":            resourceDataSilo(),
-			"transcend_data_silo_connection": resourceDataSiloConnection(),
-			"transcend_data_silo_plugin":     resourceDataSiloPlugin(),
+			"transcend_api_key":                       resourceAPIKey(),
+			"transcend_data_point":                    resourceDataPoint(),
+			"transcend_enricher":                      resourceEnricher(),
+			"transcend_data_silo":                     resourceDataSilo(),
+			"transcend_data_silo_connection":          resourceDataSiloConnection(),
+			"transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
+			"transcend_content_classification_plugin": resourceContentClassificationPlugin(),
+			"transcend_data_silo_discovery_plugin":    resourceDataSiloDiscoveryPlugin(),
+			"transcend_data_point_discovery_plugin":   resourceDataPointDiscoveryPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_identifier": dataSourceIdentifier(),

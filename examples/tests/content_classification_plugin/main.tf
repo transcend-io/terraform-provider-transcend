@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.9.1"
+      version = "0.9.2"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -13,17 +13,16 @@ provider "transcend" {
 
 variable "title" {}
 variable "plugin_config" {
-  type = list(object({
+  type = object({
     enabled                    = bool
-    type                       = string
     schedule_frequency_minutes = number
     schedule_start_at          = string
     schedule_now               = bool
-  }))
+  })
 }
 
 resource "transcend_data_silo" "silo" {
-  type            = "amazonWebServices"
+  type            = "amazonDynamodb"
   title           = var.title
   skip_connecting = true
 }
@@ -42,19 +41,14 @@ resource "transcend_data_silo_connection" "connection" {
   }
 }
 
-resource "transcend_data_silo_plugin" "plugin" {
-  for_each = {
-    for config in var.plugin_config :
-    config.type => config
-  }
+resource "transcend_content_classification_plugin" "plugin" {
 
   data_silo_id = transcend_data_silo.silo.id
 
-  type                       = each.key
-  enabled                    = each.value["enabled"]
-  schedule_frequency_minutes = each.value["schedule_frequency_minutes"]
-  schedule_start_at          = each.value["schedule_start_at"]
-  schedule_now               = each.value["schedule_now"]
+  enabled                    = var.plugin_config["enabled"]
+  schedule_frequency_minutes = var.plugin_config["schedule_frequency_minutes"]
+  schedule_start_at          = var.plugin_config["schedule_start_at"]
+  schedule_now               = var.plugin_config["schedule_now"]
 
   depends_on = [transcend_data_silo_connection.connection]
 }

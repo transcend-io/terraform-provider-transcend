@@ -306,9 +306,8 @@ module "postgresDb" {
 resource "transcend_data_silo" "database" {
   type = "database"
 
-  plugin_configuration {
+  schema_discovery_plugin {
     enabled                    = true
-    type                       = "DATA_POINT_DISCOVERY"
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
     schedule_now               = false
@@ -337,16 +336,15 @@ This type of setup works for many types of relational databases including Postgr
 
 Sometimes when you connect a data silo, you don't actually have data in that silo, but may want to connect that silo so that Transcend can find other silos from that tool. An example might be connecting Okta to find SaaS tools you use, or connecting AWS to find your S3 buckets and databases.
 
-To do so, add a `plugin_configuration` block inside any data silo that supports silo discovery like so:
+To do so, add a `data_silo_discovery_plugin` block inside any data silo that supports silo discovery like so:
 
 ```terraform
 resource "transcend_data_silo" "aws" {
   type        = "amazonWebServices"
   description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
 
-  plugin_configuration {
+  data_silo_discovery_plugin {
     enabled                    = true
-    type                       = "DATA_SILO_DISCOVERY"
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
     schedule_now               = false
@@ -362,15 +360,22 @@ resource "transcend_data_silo" "aws" {
 
 Sometimes when you connect a data silo, you don't know what data is inside that silo, and want Transcend to try to classify the data for you. This is called data point discovery, and can be performed by certain integrations such as Salesforce, Amazon S3/Dynamodb, Mongodb, Snowflake, and more.
 
-To do so, add a `plugin_configuration` block inside any data silo that supports data point discovery like so:
+To do so, add the `schema_discovery_plugin` and `content_classification_plugin` blocks inside any data silo that supports data point discovery like so:
 
 ```terraform
 resource "transcend_data_silo" "aws" {
-  type = "amazonS3"
+  type        = "amazonWebServices"
+  description = "Amazon Web Services (AWS) provides information technology infrastructure services to businesses in the form of web services."
 
-  plugin_configuration {
+  schema_discovery_plugin {
     enabled                    = true
-    type                       = "DATA_POINT_DISCOVERY"
+    schedule_frequency_minutes = 1440 # 1 day
+    schedule_start_at          = "2022-09-06T17:51:13.000Z"
+    schedule_now               = false
+  }
+
+  content_classification_plugin {
+    enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
     schedule_now               = false
@@ -424,6 +429,9 @@ to search for integration metadata based on a title substring. Make sure you are
 
 ### Optional
 
+- `content_classification_plugin` (Block List, Max: 1) Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin. (see [below for nested schema](#nestedblock--content_classification_plugin))
+- `data_point_discovery_plugin` (Block List, Max: 1) [DEPRECATED] Configuration for the Data Point discovery plugin for data silos. (see [below for nested schema](#nestedblock--data_point_discovery_plugin))
+- `data_silo_discovery_plugin` (Block List, Max: 1) Configuration for the Data Silo discovery plugin for data silos. (see [below for nested schema](#nestedblock--data_silo_discovery_plugin))
 - `description` (String) The description of the data silo
 - `headers` (Block List) Custom headers to include in outbound webhook (see [below for nested schema](#nestedblock--headers))
 - `is_live` (Boolean) Whether the data silo should be live
@@ -431,7 +439,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
-- `plugin_configuration` (Block List, Max: 1) This is where you configure how often you'd like data silo and data point plugins to run, if enabled. (see [below for nested schema](#nestedblock--plugin_configuration))
+- `schema_discovery_plugin` (Block List, Max: 1) Configuration for the Schema Discovery plugin for data silos. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `title` (String) The title of the data silo
@@ -444,6 +452,54 @@ to search for integration metadata based on a title substring. Make sure you are
 - `has_avc_functionality` (Boolean) Whether the data silo supports automated vendor coordination
 - `id` (String) The ID of this resource.
 - `link` (String) The link to the data silo
+
+<a id="nestedblock--content_classification_plugin"></a>
+### Nested Schema for `content_classification_plugin`
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
+
+<a id="nestedblock--data_point_discovery_plugin"></a>
+### Nested Schema for `data_point_discovery_plugin`
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
+
+<a id="nestedblock--data_silo_discovery_plugin"></a>
+### Nested Schema for `data_silo_discovery_plugin`
+
+Optional:
+
+- `enabled` (Boolean) State to toggle plugin to
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_enabled_at` (String) The date at which this data silo was last enabled
+
 
 <a id="nestedblock--headers"></a>
 ### Nested Schema for `headers`
@@ -467,12 +523,8 @@ Required:
 - `value` (String) The value of the plaintext input
 
 
-<a id="nestedblock--plugin_configuration"></a>
-### Nested Schema for `plugin_configuration`
-
-Required:
-
-- `type` (String) Type of plugin
+<a id="nestedblock--schema_discovery_plugin"></a>
+### Nested Schema for `schema_discovery_plugin`
 
 Optional:
 

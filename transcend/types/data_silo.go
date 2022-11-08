@@ -141,10 +141,7 @@ func MakeStandaloneUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
 	}
 }
 
-func MakeUpdatePluginInput(d *schema.ResourceData, pluginId graphql.String) UpdatePluginInput {
-	configurations := d.Get("plugin_configuration").([]interface{})
-	configuration := configurations[0].(map[string]interface{})
-
+func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]interface{}, pluginId graphql.String) UpdatePluginInput {
 	return UpdatePluginInput{
 		DataSiloID:               graphql.String(d.Get("id").(string)),
 		PluginID:                 pluginId,
@@ -164,28 +161,35 @@ func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin
 	d.Set("enabled", plugin.Enabled)
 	d.Set("id", plugin.ID)
 	d.Set("data_silo_id", plugin.DataSilo.ID)
-	d.Set("type", plugin.Type)
 	d.Set("schedule_frequency_minutes", frequency/60/1000)
 	d.Set("schedule_start_at", plugin.ScheduleStartAt)
 	d.Set("last_enabled_at", plugin.LastEnabledAt)
 }
 
-func ReadDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
-	frequency, err := strconv.Atoi(string(plugin.ScheduleFrequency))
-	if err != nil {
-		return
-	}
+func ReadDataSiloPluginsIntoState(d *schema.ResourceData, plugins []Plugin) {
+	for _, plugin := range plugins {
+		frequency, err := strconv.Atoi(string(plugin.ScheduleFrequency))
+		if err == nil {
+			configuration := map[string]interface{}{
+				"enabled":                    plugin.Enabled,
+				"id":                         plugin.ID,
+				"schedule_frequency_minutes": frequency / 60 / 1000,
+				"schedule_start_at":          plugin.ScheduleStartAt,
+				"last_enabled_at":            plugin.LastRunAt,
+			}
 
-	configuration := map[string]interface{}{
-		"enabled":                    plugin.Enabled,
-		"id":                         plugin.ID,
-		"type":                       plugin.Type,
-		"schedule_frequency_minutes": frequency / 60 / 1000,
-		"schedule_start_at":          plugin.ScheduleStartAt,
-		"last_enabled_at":            plugin.LastRunAt,
+			switch plugin.Type {
+			case "SCHEMA_DISCOVERY":
+				d.Set("schema_discovery_plugin", []interface{}{configuration})
+			case "CONTENT_CLASSIFICATION":
+				d.Set("content_classification_plugin", []interface{}{configuration})
+			case "DATA_SILO_DISCOVERY":
+				d.Set("data_silo_discovery_plugin", []interface{}{configuration})
+			case "DATA_POINT_DISCOVERY_PLUGIN":
+				d.Set("data_point_discovery_plugin", []interface{}{configuration})
+			}
+		}
 	}
-
-	d.Set("plugin_configuration", []interface{}{configuration})
 }
 
 func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {

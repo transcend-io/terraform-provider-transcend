@@ -1,11 +1,11 @@
 ---
-page_title: "transcend_data_silo_plugin Resource - terraform-provider-transcend"
+page_title: "transcend_data_silo_discovery_plugin Resource - terraform-provider-transcend"
 subcategory: ""
 description: |-
   
 ---
 
-# transcend_data_silo_plugin (Resource)
+# transcend_data_silo_discovery_plugin (Resource)
 
 
 
@@ -22,7 +22,7 @@ resource "transcend_data_silo" "aws" {
   # we create the IAM Role, which must use the `aws_external_id` output from this resource. So instead, we set
   # `skip_connecting` to `true` here and use a `transcend_data_silo_connection` resource below
   skip_connecting = true
-  lifecycle { ignore_changes = [plaintext_context, plugin_configuration] }
+  lifecycle { ignore_changes = [plaintext_context, data_silo_discovery_plugin] }
 }
 
 data "aws_caller_identity" "current" {}
@@ -40,10 +40,9 @@ resource "transcend_data_silo_connection" "connection" {
   }
 }
 
-resource "transcend_data_silo_plugin" "plugin" {
+resource "transcend_data_silo_discovery_plugin" "plugin" {
   data_silo_id = transcend_data_silo.aws.id
 
-  type                       = "DATA_SILO_DISCOVERY"
   enabled                    = true
   schedule_frequency_minutes = 120
   schedule_start_at          = "2122-09-06T17:51:13.000Z"
@@ -53,7 +52,7 @@ resource "transcend_data_silo_plugin" "plugin" {
 }
 
 output "plugin_info" {
-  value = transcend_data_silo_plugin.plugin
+  value = transcend_data_silo_discovery_plugin.plugin
 }
 ```
 
@@ -65,7 +64,6 @@ The above example shows how you can use this resource to setup a plugin after a 
 ### Required
 
 - `data_silo_id` (String) The ID of the data silo to connect
-- `type` (String) Type of plugin
 
 ### Optional
 
@@ -84,5 +82,5 @@ The above example shows how you can use this resource to setup a plugin after a 
 Import is supported using the following syntax:
 
 ```shell
-terraform import transcend_data_silo_connection.connection <data_silo_id_from_silo_url>
+terraform import transcend_data_silo_discovery_plugin.connection <data_silo_id_from_silo_url>
 ```

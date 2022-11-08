@@ -111,13 +111,21 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
 
-func TestCanConnectSiloPlugin(t *testing.T) {
+func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
-		"plugin_config": []map[string]interface{}{
+		"schema_discovery_plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
-				"type":                       "DATA_SILO_DISCOVERY",
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+				"schedule_now":      false,
+			},
+		},
+		"content_classification_plugin_config": []map[string]interface{}{
+			{
+				"enabled":                    true,
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",
@@ -129,33 +137,15 @@ func TestCanConnectSiloPlugin(t *testing.T) {
 	silo, plugins := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 1)
-	assert.True(t, bool(plugins[0].Enabled))
-	assert.NotEmpty(t, plugins[0].ID)
-}
-
-func TestCanConnectDataPointsPlugin(t *testing.T) {
-	options := prepareDataSiloOptions(t, map[string]interface{}{
-		"type":            "amazonS3",
-		"skip_connecting": false,
-		"plugin_config": []map[string]interface{}{
-			{
-				"enabled":                    true,
-				"type":                       "DATA_POINT_DISCOVERY",
-				"schedule_frequency_minutes": 120,
-				// Schedule far in the future so that the test works for a long time
-				"schedule_start_at": "2122-09-06T17:51:13.000Z",
-				"schedule_now":      false,
-			},
-		},
-	})
-	defer terraform.Destroy(t, options)
-	silo, plugins := deployDataSilo(t, options)
-	assert.Equal(t, graphql.String(t.Name()), silo.Title)
-	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 1)
-	assert.True(t, bool(plugins[0].Enabled))
-	assert.NotEmpty(t, plugins[0].ID)
+	assert.Len(t, plugins, 3)
+	for _, plugin := range plugins {
+		if plugin.Type == "DATA_POINT_DISCOVERY" {
+			assert.False(t, bool(plugin.Enabled))
+		} else {
+			assert.True(t, bool(plugin.Enabled))
+		}
+		assert.NotEmpty(t, plugin.ID)
+	}
 }
 
 func TestCanChangeTitle(t *testing.T) {

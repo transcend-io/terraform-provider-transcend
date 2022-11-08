@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.9.1"
+      version = "0.9.2"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -13,7 +13,7 @@ provider "transcend" {
 
 variable "title" {}
 variable "outer_type" { default = null }
-variable "type" { default = "amazonWebServices" }
+variable "type" { default = "amazonDynamodb" }
 variable "description" { default = "some description" }
 variable "owner_emails" {
   type    = list(string)
@@ -52,10 +52,27 @@ variable "secret_context" {
   }))
   default = []
 }
-variable "plugin_config" {
+variable "schema_discovery_plugin_config" {
   type = list(object({
     enabled                    = bool
-    type                       = string
+    schedule_frequency_minutes = number
+    schedule_start_at          = string
+    schedule_now               = bool
+  }))
+  default = []
+}
+variable "data_silo_discovery_plugin_config" {
+  type = list(object({
+    enabled                    = bool
+    schedule_frequency_minutes = number
+    schedule_start_at          = string
+    schedule_now               = bool
+  }))
+  default = []
+}
+variable "content_classification_plugin_config" {
+  type = list(object({
+    enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
     schedule_now               = bool
@@ -74,19 +91,38 @@ resource "transcend_data_silo" "silo" {
   outer_type           = var.outer_type
   skip_connecting      = var.skip_connecting
 
-  dynamic "plugin_configuration" {
-    for_each = var.plugin_config
+  dynamic "schema_discovery_plugin" {
+    for_each = var.schema_discovery_plugin_config
     content {
-      enabled                    = plugin_configuration.value["enabled"]
-      type                       = plugin_configuration.value["type"]
-      schedule_frequency_minutes = plugin_configuration.value["schedule_frequency_minutes"]
-      schedule_start_at          = plugin_configuration.value["schedule_start_at"]
-      schedule_now               = plugin_configuration.value["schedule_now"]
+      enabled                    = schema_discovery_plugin.value["enabled"]
+      schedule_frequency_minutes = schema_discovery_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = schema_discovery_plugin.value["schedule_start_at"]
+      schedule_now               = schema_discovery_plugin.value["schedule_now"]
+    }
+  }
+
+  dynamic "data_silo_discovery_plugin" {
+    for_each = var.data_silo_discovery_plugin_config
+    content {
+      enabled                    = data_silo_discovery_plugin.value["enabled"]
+      schedule_frequency_minutes = data_silo_discovery_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = data_silo_discovery_plugin.value["schedule_start_at"]
+      schedule_now               = data_silo_discovery_plugin.value["schedule_now"]
+    }
+  }
+
+  dynamic "content_classification_plugin" {
+    for_each = var.content_classification_plugin_config
+    content {
+      enabled                    = content_classification_plugin.value["enabled"]
+      schedule_frequency_minutes = content_classification_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = content_classification_plugin.value["schedule_start_at"]
+      schedule_now               = content_classification_plugin.value["schedule_now"]
     }
   }
 
   dynamic "plaintext_context" {
-    for_each = (var.type == "amazonWebServices" || var.type == "amazonS3") && !var.skip_connecting ? [
+    for_each = (var.type == "amazonWebServices" || var.type == "amazonS3" || var.type == "amazonDynamodb") && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
     ] : []
