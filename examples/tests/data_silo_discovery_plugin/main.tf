@@ -13,12 +13,12 @@ provider "transcend" {
 
 variable "title" {}
 variable "plugin_config" {
-  type = list(object({
+  type = object({
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
     schedule_now               = bool
-  }))
+  })
 }
 
 resource "transcend_data_silo" "silo" {
@@ -42,14 +42,12 @@ resource "transcend_data_silo_connection" "connection" {
 }
 
 resource "trasncend_data_silo_discovery_plugin" "plugin" {
-  for_each = var.plugin_config
-
   data_silo_id = transcend_data_silo.silo.id
 
-  enabled                    = each.value["enabled"]
-  schedule_frequency_minutes = each.value["schedule_frequency_minutes"]
-  schedule_start_at          = each.value["schedule_start_at"]
-  schedule_now               = each.value["schedule_now"]
+  enabled                    = var.plugin_config["enabled"]
+  schedule_frequency_minutes = var.plugin_config["schedule_frequency_minutes"]
+  schedule_start_at          = var.plugin_config["schedule_start_at"]
+  schedule_now               = var.plugin_config["schedule_now"]
 
   depends_on = [transcend_data_silo_connection.connection]
 }
