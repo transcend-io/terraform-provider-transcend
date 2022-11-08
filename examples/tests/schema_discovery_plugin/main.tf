@@ -22,9 +22,9 @@ variable "plugin_config" {
 }
 
 resource "transcend_data_silo" "silo" {
-  type            = "amazonDynamodb"
-  title           = var.title
-  skip_connecting = true
+  type          = "snowflake"
+  title         = var.title
+  ip_connecting = true
 }
 
 resource "transcend_data_silo_connection" "connection" {
