@@ -123,11 +123,9 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_silo_discovery_plugin": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "Configuration for the Data Silo discovery plugin for data silos.",
-				MinItems:    0,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -164,11 +162,9 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_point_discovery_plugin": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "[DEPRECATED] Configuration for the Data Point discovery plugin for data silos.",
-				MinItems:    0,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -205,11 +201,9 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"schema_discovery_plugin": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "Configuration for the Schema Discovery plugin for data silos.",
-				MinItems:    0,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -246,11 +240,9 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"content_classification_plugin": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
-				MinItems:    0,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
