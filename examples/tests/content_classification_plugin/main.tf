@@ -22,7 +22,7 @@ variable "plugin_config" {
 }
 
 resource "transcend_data_silo" "silo" {
-  type            = "snowflake"
+  type            = "salesforce"
   title           = var.title
   skip_connecting = true
 }
