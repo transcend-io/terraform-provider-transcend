@@ -3,7 +3,6 @@ package transcend
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -123,7 +122,7 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_silo_discovery_plugin": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "Configuration for the Data Silo discovery plugin for data silos.",
 				Elem: &schema.Resource{
@@ -162,7 +161,7 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_point_discovery_plugin": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "[DEPRECATED] Configuration for the Data Point discovery plugin for data silos.",
 				Elem: &schema.Resource{
@@ -201,7 +200,7 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"schema_discovery_plugin": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "Configuration for the Schema Discovery plugin for data silos.",
 				Elem: &schema.Resource{
@@ -240,7 +239,7 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"content_classification_plugin": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
 				Elem: &schema.Resource{
@@ -683,9 +682,6 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			default:
 				configuration = nil
 			}
-
-			// FIXME: Remove
-			fmt.Printf(fmt.Sprintf("====> CONFIG %v", configuration))
 
 			if configuration == nil {
 				diags = append(diags, diag.Diagnostic{
