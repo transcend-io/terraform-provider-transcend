@@ -161,7 +161,6 @@ func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin
 	d.Set("enabled", plugin.Enabled)
 	d.Set("id", plugin.ID)
 	d.Set("data_silo_id", plugin.DataSilo.ID)
-	d.Set("type", plugin.Type)
 	d.Set("schedule_frequency_minutes", frequency/60/1000)
 	d.Set("schedule_start_at", plugin.ScheduleStartAt)
 	d.Set("last_enabled_at", plugin.LastEnabledAt)
