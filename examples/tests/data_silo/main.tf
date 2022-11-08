@@ -60,6 +60,7 @@ variable "schema_discovery_plugin_config" {
     schedule_now               = bool
   })
   nullable = true
+  default  = null
 }
 variable "data_silo_discovery_plugin_config" {
   type = object({
@@ -69,6 +70,7 @@ variable "data_silo_discovery_plugin_config" {
     schedule_now               = bool
   })
   nullable = true
+  default  = null
 }
 
 resource "transcend_data_silo" "silo" {
