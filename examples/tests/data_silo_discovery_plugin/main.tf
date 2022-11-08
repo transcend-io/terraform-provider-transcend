@@ -41,7 +41,7 @@ resource "transcend_data_silo_connection" "connection" {
   }
 }
 
-resource "trasncend_data_silo_discovery_plugin" "plugin" {
+resource "transcend_data_silo_discovery_plugin" "plugin" {
   data_silo_id = transcend_data_silo.silo.id
 
   enabled                    = var.plugin_config["enabled"]
