@@ -47,10 +47,10 @@ resource "transcend_data_silo_discovery_plugin" "plugin" {
 
   data_silo_id = transcend_data_silo.silo.id
 
-  enabled                    = each.key["enabled"]
-  schedule_frequency_minutes = each.key["schedule_frequency_minutes"]
-  schedule_start_at          = each.key["schedule_start_at"]
-  schedule_now               = each.key["schedule_now"]
+  enabled                    = each.value["enabled"]
+  schedule_frequency_minutes = each.value["schedule_frequency_minutes"]
+  schedule_start_at          = each.value["schedule_start_at"]
+  schedule_now               = each.value["schedule_now"]
 
   depends_on = [transcend_data_silo_connection.connection]
 }
