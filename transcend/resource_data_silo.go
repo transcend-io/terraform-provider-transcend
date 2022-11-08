@@ -3,6 +3,7 @@ package transcend
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -677,29 +678,29 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				} `graphql:"updateDataSiloPlugin(input: $input)"`
 			}
 
-			var configuration interface{}
+			var configuration []interface{}
 			switch plugin.Type {
 			case "SCHEMA_DISCOVERY":
-				configuration = d.Get("schema_discovery_plugin").([]interface{})[0]
+				configuration = d.Get("schema_discovery_plugin").([]interface{})
 			case "CONTENT_CLASSIFICATION":
-				configuration = d.Get("content_classification_plugin").([]interface{})[0]
+				configuration = d.Get("content_classification_plugin").([]interface{})
 			case "DATA_SILO_DISCOVERY":
-				configuration = d.Get("data_silo_discovery_plugin").([]interface{})[0]
+				configuration = d.Get("data_silo_discovery_plugin").([]interface{})
 			case "DATA_POINT_DISCOVERY":
-				configuration = d.Get("data_point_discovery_plugin").([]interface{})[0]
+				configuration = d.Get("data_point_discovery_plugin").([]interface{})
 			default:
 				configuration = nil
 			}
 
-			if configuration == nil {
+			if len(configuration) == 0 {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
 					Summary:  "Error updating data silo plugin",
-					Detail:   "Error when updating data silo plugin: " + err.Error(),
+					Detail:   fmt.Sprintf("No configuration found for plugin type %s.", plugin.Type),
 				})
 			} else {
 				updateVars := map[string]interface{}{
-					"input": types.MakeUpdatePluginInput(d, configuration.(map[string]interface{}), plugin.ID),
+					"input": types.MakeUpdatePluginInput(d, configuration[0].(map[string]interface{}), plugin.ID),
 				}
 
 				err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
