@@ -181,13 +181,13 @@ func ReadDataSiloPluginsIntoState(d *schema.ResourceData, plugins []Plugin) {
 
 			switch plugin.Type {
 			case "SCHEMA_DISCOVERY":
-				d.Set("schema_discovery_plugin", configuration)
+				d.Set("schema_discovery_plugin", []interface{}{configuration})
 			case "CONTENT_CLASSIFICATION":
-				d.Set("content_classification_plugin", configuration)
+				d.Set("content_classification_plugin", []interface{}{configuration})
 			case "DATA_SILO_DISCOVERY":
-				d.Set("data_silo_discovery_plugin", configuration)
+				d.Set("data_silo_discovery_plugin", []interface{}{configuration})
 			case "DATA_POINT_DISCOVERY_PLUGIN":
-				d.Set("data_point_discovery_plugin", configuration)
+				d.Set("data_point_discovery_plugin", []interface{}{configuration})
 			}
 		}
 	}

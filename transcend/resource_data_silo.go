@@ -122,9 +122,11 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_silo_discovery_plugin": {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Data Silo discovery plugin for data silos.",
+				MinItems:    0,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -161,9 +163,11 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"data_point_discovery_plugin": {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "[DEPRECATED] Configuration for the Data Point discovery plugin for data silos.",
+				MinItems:    0,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -200,9 +204,11 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"schema_discovery_plugin": {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Schema Discovery plugin for data silos.",
+				MinItems:    0,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -239,9 +245,11 @@ func resourceDataSilo() *schema.Resource {
 				},
 			},
 			"content_classification_plugin": {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
+				MinItems:    0,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -438,7 +446,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	// Read the data silo plugin information
-	if d.Get("schema_discovery_plugin") != nil || d.Get("content_classification_plugin") != nil || d.Get("data_silo_discovery_plugin") != nil || d.Get("data_point_discovery_plugin") != nil {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("data_point_discovery_plugin") != nil && len(d.Get("data_point_discovery_plugin").([]interface{})) == 1) {
 		var pluginQuery struct {
 			Plugins struct {
 				Plugins []types.Plugin
@@ -634,7 +642,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	// Handle the plugin settings if defined
-	if d.Get("schema_discovery_plugin") != nil || d.Get("content_classification_plugin") != nil || d.Get("data_silo_discovery_plugin") != nil || d.Get("data_point_discovery_plugin") != nil {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("data_point_discovery_plugin") != nil && len(d.Get("data_point_discovery_plugin").([]interface{})) == 1) {
 		// Read the data silo plugin information
 		var pluginQuery struct {
 			Plugins struct {
@@ -672,13 +680,13 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			var configuration interface{}
 			switch plugin.Type {
 			case "SCHEMA_DISCOVERY":
-				configuration = d.Get("schema_discovery_plugin")
+				configuration = d.Get("schema_discovery_plugin").([]interface{})[0]
 			case "CONTENT_CLASSIFICATION":
-				configuration = d.Get("content_classification_plugin")
+				configuration = d.Get("content_classification_plugin").([]interface{})[0]
 			case "DATA_SILO_DISCOVERY":
-				configuration = d.Get("data_silo_discovery_plugin")
+				configuration = d.Get("data_silo_discovery_plugin").([]interface{})[0]
 			case "DATA_POINT_DISCOVERY":
-				configuration = d.Get("data_point_discovery_plugin")
+				configuration = d.Get("data_point_discovery_plugin").([]interface{})[0]
 			default:
 				configuration = nil
 			}
