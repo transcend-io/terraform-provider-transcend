@@ -146,11 +146,11 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	silo, plugins := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 2)
-	assert.True(t, bool(plugins[0].Enabled))
-	assert.NotEmpty(t, plugins[0].ID)
-	assert.True(t, bool(plugins[1].Enabled))
-	assert.NotEmpty(t, plugins[1].ID)
+	assert.Len(t, plugins, 3)
+	for _, plugin := range plugins {
+		assert.True(t, bool(plugin.Enabled))
+		assert.NotEmpty(t, plugin.ID)
+	}
 }
 
 func TestCanChangeTitle(t *testing.T) {
