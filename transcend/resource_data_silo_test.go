@@ -135,7 +135,7 @@ func TestCanConnectSchemaDiscoveryPlugin(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"type":            "amazonS3",
 		"skip_connecting": false,
-		"schema_discovery_plugin": map[string]interface{}{
+		"schema_discovery_plugin_config": map[string]interface{}{
 			"enabled":                    true,
 			"schedule_frequency_minutes": 120,
 			// Schedule far in the future so that the test works for a long time
