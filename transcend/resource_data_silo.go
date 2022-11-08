@@ -447,7 +447,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	// Read the data silo plugin information
-	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
+	if d.Get("schema_discovery_plugin") != nil || d.Get("content_classification_plugin") != nil || d.Get("data_silo_discovery_plugin") != nil || d.Get("data_point_discovery_plugin") != nil {
 		var pluginQuery struct {
 			Plugins struct {
 				Plugins []types.Plugin
@@ -461,8 +461,8 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 
-		if len(pluginQuery.Plugins.Plugins) == 1 {
-			types.ReadDataSiloPluginIntoState(d, pluginQuery.Plugins.Plugins[0])
+		if len(pluginQuery.Plugins.Plugins) > 0 {
+			types.ReadDataSiloPluginsIntoState(d, pluginQuery.Plugins.Plugins)
 		}
 	}
 
@@ -643,7 +643,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	// Handle the plugin settings if defined
-	if d.Get("plugin_configuration") != nil && len(d.Get("plugin_configuration").([]interface{})) == 1 {
+	if d.Get("schema_discovery_plugin") != nil || d.Get("content_classification_plugin") != nil || d.Get("data_silo_discovery_plugin") != nil || d.Get("data_point_discovery_plugin") != nil {
 		// Read the data silo plugin information
 		var pluginQuery struct {
 			Plugins struct {
@@ -662,33 +662,59 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			})
 			return diags
 		}
-		if len(pluginQuery.Plugins.Plugins) != 1 {
+		if len(pluginQuery.Plugins.Plugins) == 0 {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Error finding exactly one data silo plugin for data silo",
+				Summary:  "Error finding exactly any plugin for data silo",
 				Detail:   "Error when reading data silo plugin",
 			})
 			return diags
 		}
 
-		var updateMutation struct {
-			UpdateDataSiloPlugin struct {
-				Plugin types.Plugin
-			} `graphql:"updateDataSiloPlugin(input: $input)"`
-		}
-		updateVars := map[string]interface{}{
-			"input": types.MakeUpdatePluginInput(d, pluginQuery.Plugins.Plugins[0].ID),
+		for _, plugin := range pluginQuery.Plugins.Plugins {
+			var updateMutation struct {
+				UpdateDataSiloPlugin struct {
+					Plugin types.Plugin
+				} `graphql:"updateDataSiloPlugin(input: $input)"`
+			}
+
+			configuration := make(map[string]interface{})
+			switch plugin.Type {
+			case "SCHEMA_DISCOVERY":
+				configuration = d.Get("schema_discovery_plugin").(map[string]interface{})
+			case "CONTENT_CLASSIFICATION":
+				configuration = d.Get("content_classification_plugin").(map[string]interface{})
+			case "DATA_SILO_DISCOVERY":
+				configuration = d.Get("data_silo_discovery_plugin").(map[string]interface{})
+			case "DATA_POINT_DISCOVERY":
+				configuration = d.Get("data_point_discovery_plugin").(map[string]interface{})
+			default:
+				configuration = nil
+			}
+
+			if configuration == nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Error updating data silo plugin",
+					Detail:   "Error when updating data silo plugin: " + err.Error(),
+				})
+			} else {
+				updateVars := map[string]interface{}{
+					"input": types.MakeUpdatePluginInput(d, configuration, plugin.ID),
+				}
+
+				err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
+				if err != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Error,
+						Summary:  "Error updating data silo plugin",
+						Detail:   "Error when updating data silo plugin: " + err.Error(),
+					})
+					return diags
+				}
+			}
 		}
 
-		err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSiloPlugin"))
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Error updating data silo plugin",
-				Detail:   "Error when updating data silo plugin: " + err.Error(),
-			})
-			return diags
-		}
 	}
 
 	return resourceDataSilosRead(ctx, d, m)

@@ -153,9 +153,8 @@ module "postgresDb" {
 resource "transcend_data_silo" "database" {
   type = "database"
 
-  plugin_configuration {
+  schema_discovery_plugin {
     enabled                    = true
-    type                       = "DATA_POINT_DISCOVERY"
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
     schedule_now               = false
