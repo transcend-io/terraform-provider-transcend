@@ -693,7 +693,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 
 			// FIXME: Remove
-			fmt.Println(fmt.Sprintf("====> CONFIG %v", configuration))
+			fmt.Printf(fmt.Sprintf("====> CONFIG %v", configuration))
 
 			if configuration == nil {
 				diags = append(diags, diag.Diagnostic{
