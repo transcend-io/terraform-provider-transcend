@@ -17,37 +17,37 @@ func resourceContentClassificationPlugin() *schema.Resource {
 		UpdateContext: resourceContentClassificationPluginUpdate,
 		DeleteContext: resourceContentClassificationPluginDelete,
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"data_silo_id": &schema.Schema{
+			"data_silo_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The ID of the data silo to connect",
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
 				Description: "State to toggle plugin to",
 			},
-			"schedule_frequency_minutes": &schema.Schema{
+			"schedule_frequency_minutes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 			},
-			"schedule_start_at": &schema.Schema{
+			"schedule_start_at": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 			},
-			"schedule_now": &schema.Schema{
+			"schedule_now": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether we should schedule a run immediately after this request",
 			},
-			"last_enabled_at": &schema.Schema{
+			"last_enabled_at": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The date at which this data silo was last enabled",
@@ -74,7 +74,7 @@ func resourceContentClassificationPluginRead(ctx context.Context, d *schema.Reso
 	}
 	pluginVars := map[string]interface{}{
 		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
-		"type":       graphql.String("CONTENT_CLASSIFICATION"),
+		"type":       types.PluginType("CONTENT_CLASSIFICATION"),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
 	if err != nil {
@@ -109,7 +109,7 @@ func resourceContentClassificationPluginUpdate(ctx context.Context, d *schema.Re
 	}
 	pluginVars := map[string]interface{}{
 		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
-		"type":       graphql.String("CONTENT_CLASSIFICATION"),
+		"type":       types.PluginType("CONTENT_CLASSIFICATION"),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
 	if err != nil {
