@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func prepareDataSiloPluginOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
+func prepareDataSiloDiscoveryPluginOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	defaultVars := map[string]interface{}{"title": t.Name()}
 	for k, v := range vars {
 		defaultVars[k] = v
@@ -23,7 +23,7 @@ func prepareDataSiloPluginOptions(t *testing.T, vars map[string]interface{}) *te
 	return terraformOptions
 }
 
-func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
+func deployDataSiloDiscoveryPlugin(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
 	// TODO: Use the Idempotent version eventually
 	terraform.InitAndApply(t, terraformOptions)
 	// terraform.InitAndApplyAndIdempotent(t, terraformOptions)
@@ -33,13 +33,12 @@ func deployDataSiloPlugin(t *testing.T, terraformOptions *terraform.Options) (ty
 	return silo, plugin
 }
 
-func TestCanUseSeparatePluginResource(t *testing.T) {
+func TestCanUseSeparateDataSiloDiscoveryPluginResource(t *testing.T) {
 	options := prepareDataSiloDiscoveryPluginOptions(t, map[string]interface{}{
 		"title": t.Name(),
 		"plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
-				"type":                       "DATA_SILO_DISCOVERY",
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",
