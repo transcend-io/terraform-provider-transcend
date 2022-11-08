@@ -2,6 +2,7 @@ package transcend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
@@ -112,6 +113,12 @@ func resourceContentClassificationPluginUpdate(ctx context.Context, d *schema.Re
 		"type":       types.PluginType("CONTENT_CLASSIFICATION"),
 	}
 	err := client.graphql.Query(context.Background(), &pluginQuery, pluginVars, graphql.OperationName("Plugins"))
+	// FIXME: Remove once done.
+	diags = append(diags, diag.Diagnostic{
+		Severity: diag.Warning,
+		Summary:  fmt.Sprintf("Found %d plugins", len(pluginQuery.Plugins.Plugins)),
+		Detail:   fmt.Sprintf("Found %d plugins", len(pluginQuery.Plugins.Plugins)),
+	})
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
