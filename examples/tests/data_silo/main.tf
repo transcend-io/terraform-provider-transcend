@@ -86,18 +86,18 @@ resource "transcend_data_silo" "silo" {
 
   schema_discovery_plugin {
     count                      = var.schema_discovery_plugin_config == null ? 0 : 1
-    enabled                    = schema_discovery_plugin_config.value["enabled"]
-    schedule_frequency_minutes = schema_discovery_plugin_config.value["schedule_frequency_minutes"]
-    schedule_start_at          = schema_discovery_plugin_config.value["schedule_start_at"]
-    schedule_now               = schema_discovery_plugin_config.value["schedule_now"]
+    enabled                    = var.schema_discovery_plugin_config.value["enabled"]
+    schedule_frequency_minutes = var.schema_discovery_plugin_config.value["schedule_frequency_minutes"]
+    schedule_start_at          = var.schema_discovery_plugin_config.value["schedule_start_at"]
+    schedule_now               = var.schema_discovery_plugin_config.value["schedule_now"]
   }
 
   data_silo_discovery_plugin {
     count                      = var.data_silo_discovery_plugin_config == null ? 0 : 1
-    enabled                    = data_silo_discovery_plugin_config.value["enabled"]
-    schedule_frequency_minutes = data_silo_discovery_plugin_config.value["schedule_frequency_minutes"]
-    schedule_start_at          = data_silo_discovery_plugin_config.value["schedule_start_at"]
-    schedule_now               = data_silo_discovery_plugin_config.value["schedule_now"]
+    enabled                    = var.data_silo_discovery_plugin_config.value["enabled"]
+    schedule_frequency_minutes = var.data_silo_discovery_plugin_config.value["schedule_frequency_minutes"]
+    schedule_start_at          = var.data_silo_discovery_plugin_config.value["schedule_start_at"]
+    schedule_now               = var.data_silo_discovery_plugin_config.value["schedule_now"]
   }
 
   dynamic "plaintext_context" {
