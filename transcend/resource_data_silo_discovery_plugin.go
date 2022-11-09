@@ -83,7 +83,7 @@ func resourceDataSiloDiscoveryPluginRead(ctx context.Context, d *schema.Resource
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error querying plugin",
-			Detail:   "Error when querying for data silo plugin: Found undexpected number of plugins",
+			Detail:   "Error when querying for data silo plugin: Found unexpected number of plugins",
 		})
 	}
 
