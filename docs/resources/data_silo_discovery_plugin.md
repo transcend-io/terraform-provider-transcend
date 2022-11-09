@@ -46,7 +46,6 @@ resource "transcend_data_silo_discovery_plugin" "plugin" {
   enabled                    = true
   schedule_frequency_minutes = 120
   schedule_start_at          = "2122-09-06T17:51:13.000Z"
-  schedule_now               = false
 
   depends_on = [transcend_data_silo_connection.connection]
 }
@@ -69,7 +68,6 @@ The above example shows how you can use this resource to setup a plugin after a 
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 ### Read-Only

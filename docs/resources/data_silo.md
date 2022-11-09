@@ -310,7 +310,6 @@ resource "transcend_data_silo" "database" {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   secret_context {
@@ -347,7 +346,6 @@ resource "transcend_data_silo" "aws" {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   # ...other fields...
@@ -371,14 +369,12 @@ resource "transcend_data_silo" "aws" {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   content_classification_plugin {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   # ...other fields...
@@ -460,7 +456,6 @@ Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
@@ -476,7 +471,6 @@ Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
@@ -492,7 +486,6 @@ Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
@@ -530,7 +523,6 @@ Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:

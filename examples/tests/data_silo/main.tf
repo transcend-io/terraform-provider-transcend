@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.9.2"
+      version = "0.10.0"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -57,7 +57,6 @@ variable "schema_discovery_plugin_config" {
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
-    schedule_now               = bool
   }))
   default = []
 }
@@ -66,7 +65,6 @@ variable "data_silo_discovery_plugin_config" {
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
-    schedule_now               = bool
   }))
   default = []
 }
@@ -75,7 +73,6 @@ variable "content_classification_plugin_config" {
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
-    schedule_now               = bool
   }))
   default = []
 }
@@ -97,7 +94,6 @@ resource "transcend_data_silo" "silo" {
       enabled                    = schema_discovery_plugin.value["enabled"]
       schedule_frequency_minutes = schema_discovery_plugin.value["schedule_frequency_minutes"]
       schedule_start_at          = schema_discovery_plugin.value["schedule_start_at"]
-      schedule_now               = schema_discovery_plugin.value["schedule_now"]
     }
   }
 
@@ -107,7 +103,6 @@ resource "transcend_data_silo" "silo" {
       enabled                    = data_silo_discovery_plugin.value["enabled"]
       schedule_frequency_minutes = data_silo_discovery_plugin.value["schedule_frequency_minutes"]
       schedule_start_at          = data_silo_discovery_plugin.value["schedule_start_at"]
-      schedule_now               = data_silo_discovery_plugin.value["schedule_now"]
     }
   }
 
@@ -117,7 +112,6 @@ resource "transcend_data_silo" "silo" {
       enabled                    = content_classification_plugin.value["enabled"]
       schedule_frequency_minutes = content_classification_plugin.value["schedule_frequency_minutes"]
       schedule_start_at          = content_classification_plugin.value["schedule_start_at"]
-      schedule_now               = content_classification_plugin.value["schedule_now"]
     }
   }
 
