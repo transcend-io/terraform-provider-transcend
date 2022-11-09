@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.9.2"
+      version = "0.10.0"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -17,7 +17,6 @@ variable "plugin_config" {
     enabled                    = bool
     schedule_frequency_minutes = number
     schedule_start_at          = string
-    schedule_now               = bool
   })
 }
 
@@ -47,7 +46,6 @@ resource "transcend_schema_discovery_plugin" "plugin" {
   enabled                    = var.plugin_config["enabled"]
   schedule_frequency_minutes = var.plugin_config["schedule_frequency_minutes"]
   schedule_start_at          = var.plugin_config["schedule_start_at"]
-  schedule_now               = var.plugin_config["schedule_now"]
 
   depends_on = [transcend_data_silo_connection.connection]
 }

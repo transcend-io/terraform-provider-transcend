@@ -150,11 +150,6 @@ func resourceDataSilo() *schema.Resource {
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Whether we should schedule a run immediately after this request",
-						},
 						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -190,11 +185,6 @@ func resourceDataSilo() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
-						},
-						"schedule_now": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Whether we should schedule a run immediately after this request",
 						},
 						"last_enabled_at": {
 							Type:        schema.TypeString,
@@ -232,11 +222,6 @@ func resourceDataSilo() *schema.Resource {
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 						},
-						"schedule_now": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Whether we should schedule a run immediately after this request",
-						},
 						"last_enabled_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -272,11 +257,6 @@ func resourceDataSilo() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The updated start time when we should start scheduling this plugin, in ISO format",
-						},
-						"schedule_now": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Whether we should schedule a run immediately after this request",
 						},
 						"last_enabled_at": {
 							Type:        schema.TypeString,

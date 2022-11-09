@@ -6,14 +6,12 @@ resource "transcend_data_silo" "aws" {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   content_classification_plugin {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
-    schedule_now               = false
   }
 
   # ...other fields...

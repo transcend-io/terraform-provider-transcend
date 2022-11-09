@@ -30,7 +30,6 @@ resource "transcend_data_silo_discovery_plugin" "plugin" {
   enabled                    = true
   schedule_frequency_minutes = 120
   schedule_start_at          = "2122-09-06T17:51:13.000Z"
-  schedule_now               = false
 
   depends_on = [transcend_data_silo_connection.connection]
 }

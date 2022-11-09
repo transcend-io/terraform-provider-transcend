@@ -137,7 +137,7 @@ func MakeStandaloneUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
 		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
 		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(d.Get("schedule_frequency_minutes").(int) * 1000 * 60)),
 		ScheduleStartAt:          graphql.String(d.Get("schedule_start_at").(string)),
-		ScheduleNow:              graphql.Boolean(d.Get("schedule_now").(bool)),
+		ScheduleNow:              graphql.Boolean(false),
 	}
 }
 
@@ -148,7 +148,6 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
 		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
 		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
-		ScheduleNow:              graphql.Boolean(configuration["schedule_now"].(bool)),
 	}
 }
 
