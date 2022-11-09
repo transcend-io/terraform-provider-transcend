@@ -43,6 +43,9 @@
 	"remoteUser": "vscode",
 	"features": {
 		"terraform": "1.2",
-		"github-cli": "latest"
+		"github-cli": "latest",
+                "ghcr.io/devcontainers/features/sshd:1": {
+                  "version": "latest"
+                }
 	}
 }
