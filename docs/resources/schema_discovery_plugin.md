@@ -23,7 +23,6 @@ description: |-
 
 - `enabled` (Boolean) State to toggle plugin to
 - `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_now` (Boolean) Whether we should schedule a run immediately after this request
 - `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 ### Read-Only
