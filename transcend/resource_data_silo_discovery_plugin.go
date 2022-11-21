@@ -34,12 +34,12 @@ func resourceDataSiloDiscoveryPlugin() *schema.Resource {
 			},
 			"schedule_frequency_minutes": {
 				Type:        schema.TypeInt,
-				Optional:    true,
+				Required:    true,
 				Description: "The updated frequency with which we should schedule this plugin, in milliseconds",
 			},
 			"schedule_start_at": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The updated start time when we should start scheduling this plugin, in ISO format",
 			},
 			"last_enabled_at": {
