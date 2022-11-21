@@ -452,11 +452,14 @@ to search for integration metadata based on a title substring. Make sure you are
 <a id="nestedblock--content_classification_plugin"></a>
 ### Nested Schema for `content_classification_plugin`
 
+Required:
+
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
 Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
 
@@ -467,11 +470,14 @@ Read-Only:
 <a id="nestedblock--data_point_discovery_plugin"></a>
 ### Nested Schema for `data_point_discovery_plugin`
 
+Required:
+
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
 Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
 
@@ -482,11 +488,14 @@ Read-Only:
 <a id="nestedblock--data_silo_discovery_plugin"></a>
 ### Nested Schema for `data_silo_discovery_plugin`
 
+Required:
+
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
 Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
 
@@ -519,11 +528,14 @@ Required:
 <a id="nestedblock--schema_discovery_plugin"></a>
 ### Nested Schema for `schema_discovery_plugin`
 
+Required:
+
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
+
 Optional:
 
 - `enabled` (Boolean) State to toggle plugin to
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 Read-Only:
 

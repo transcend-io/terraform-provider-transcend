@@ -63,12 +63,12 @@ The above example shows how you can use this resource to setup a plugin after a 
 ### Required
 
 - `data_silo_id` (String) The ID of the data silo to connect
+- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
+- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 ### Optional
 
 - `enabled` (Boolean) State to toggle plugin to
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
 
 ### Read-Only
 
