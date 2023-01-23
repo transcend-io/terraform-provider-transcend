@@ -184,9 +184,6 @@ func ReadDataSiloPluginsIntoState(d *schema.ResourceData, plugins []Plugin) {
 				d.Set("content_classification_plugin", []interface{}{configuration})
 			case "DATA_SILO_DISCOVERY":
 				d.Set("data_silo_discovery_plugin", []interface{}{configuration})
-			case "DATA_POINT_DISCOVERY_PLUGIN":
-				d.Set("data_point_discovery_plugin", []interface{}{configuration})
-			}
 		}
 	}
 }
