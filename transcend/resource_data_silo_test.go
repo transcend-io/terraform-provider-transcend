@@ -135,13 +135,9 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	silo, plugins := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
-	assert.Len(t, plugins, 3)
+	assert.Len(t, plugins, 2)
 	for _, plugin := range plugins {
-		if plugin.Type == "DATA_POINT_DISCOVERY" {
-			assert.False(t, bool(plugin.Enabled))
-		} else {
-			assert.True(t, bool(plugin.Enabled))
-		}
+		assert.True(t, bool(plugin.Enabled))
 		assert.NotEmpty(t, plugin.ID)
 	}
 }
