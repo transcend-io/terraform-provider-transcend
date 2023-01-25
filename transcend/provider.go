@@ -40,7 +40,6 @@ func Provider() *schema.Provider {
 			"transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
 			"transcend_content_classification_plugin": resourceContentClassificationPlugin(),
 			"transcend_data_silo_discovery_plugin":    resourceDataSiloDiscoveryPlugin(),
-			"transcend_data_point_discovery_plugin":   resourceDataPointDiscoveryPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_identifier": dataSourceIdentifier(),

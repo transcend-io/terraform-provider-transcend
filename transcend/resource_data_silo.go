@@ -427,7 +427,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	// Read the data silo plugin information
-	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("data_point_discovery_plugin") != nil && len(d.Get("data_point_discovery_plugin").([]interface{})) == 1) {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) {
 		var pluginQuery struct {
 			Plugins struct {
 				Plugins []types.Plugin
@@ -623,7 +623,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	// Handle the plugin settings if defined
-	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("data_point_discovery_plugin") != nil && len(d.Get("data_point_discovery_plugin").([]interface{})) == 1) {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) {
 		// Read the data silo plugin information
 		var pluginQuery struct {
 			Plugins struct {
@@ -666,8 +666,6 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				configuration = d.Get("content_classification_plugin").([]interface{})
 			case "DATA_SILO_DISCOVERY":
 				configuration = d.Get("data_silo_discovery_plugin").([]interface{})
-			case "DATA_POINT_DISCOVERY":
-				configuration = d.Get("data_point_discovery_plugin").([]interface{})
 			default:
 				configuration = nil
 			}
