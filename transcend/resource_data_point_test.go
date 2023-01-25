@@ -441,6 +441,7 @@ func TestCanChangeSubDataPointPurposes(t *testing.T) {
 	}, properties[0]["purposes"].([]map[string]interface{}))
 }
 
+// check this test pass
 func TestCanChangeSubDataPointAttributes(t *testing.T) {
 	options := prepareDataPointOptions(t, map[string]interface{}{
 		"properties": []map[string]interface{}{
