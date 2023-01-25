@@ -450,7 +450,7 @@ func TestCanChangeSubDataPointAttributes(t *testing.T) {
 				"categories":  []map[string]interface{}{},
 				"purposes":    []map[string]interface{}{},
 				"attributes": []map[string]interface{}{
-					{"key": "Foo", "values": []interface{}{"bar", "bazz"}},
+					{"key": "Foo", "values": []string{"bar", "bazz"}},
 				},
 				"access_request_visibility_enabled": false,
 				"erasure_request_redaction_enabled": false,
