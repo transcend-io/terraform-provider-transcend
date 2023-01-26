@@ -224,7 +224,7 @@ func FromAttributeInputList(attributes []AttributeValues) []map[string]interface
 	for i, attribute := range attributes {
 		vals[i] = map[string]interface{}{
 			"key":    attribute.AttributeKey.Name,
-			"values": attribute.Name,
+			"values": []graphql.String{attribute.Name},
 		}
 	}
 	return vals
