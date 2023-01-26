@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	graphql "github.com/hasura/go-graphql-client"
 )
@@ -222,12 +220,11 @@ func ToAttributeInputList(attributes []interface{}) []AttributeInput {
 }
 
 func FromAttributeInputList(attributes []AttributeValues) []map[string]interface{} {
-	fmt.Printf("Attributes: %v\n", attributes)
 	vals := make([]map[string]interface{}, len(attributes))
 	for i, attribute := range attributes {
 		vals[i] = map[string]interface{}{
 			"key":    attribute.AttributeKey.Name,
-			"values": attribute.Name,
+			"values": []graphql.String{attribute.Name},
 		}
 	}
 	return vals
