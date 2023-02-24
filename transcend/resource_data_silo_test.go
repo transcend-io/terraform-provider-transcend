@@ -162,6 +162,99 @@ func TestCanChangeDescription(t *testing.T) {
 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Description)
 }
 
+func TestCanChangeSaasContext(t *testing.T) {
+	options := prepareDataSiloOptions(t, map[string]interface{}{
+		"skip_connecting": false,
+		"type":            "datadog",
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": os.Getenv("DD_API_KEY"),
+			},
+			{
+				"name":  "applicationKey",
+				"value": os.Getenv("DD_APP_KEY"),
+			},
+			{
+				"name":  "queryTemplate",
+				"value": "service:programmatic-remote-seeding AND @email:{{identifier}}",
+			},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	silo, _ := deployDataSilo(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{
+		"skip_connecting": false,
+		"type":            "datadog",
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": os.Getenv("DD_API_KEY"),
+			},
+			{
+				"name":  "applicationKey",
+				"value": os.Getenv("DD_APP_KEY"),
+			},
+			{
+				"name":  "queryTemplate",
+				"value": "service:a-different-service AND @email:{{identifier}}",
+			},
+		},
+	}))
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+}
+
+func TestThatChangingSaasContextToInvalidValueDoesNotDestroySilo(t *testing.T) {
+	options := prepareDataSiloOptions(t, map[string]interface{}{
+		"skip_connecting": false,
+		"type":            "datadog",
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": os.Getenv("DD_API_KEY"),
+			},
+			{
+				"name":  "applicationKey",
+				"value": os.Getenv("DD_APP_KEY"),
+			},
+			{
+				"name":  "queryTemplate",
+				"value": "service:programmatic-remote-seeding AND @email:{{identifier}}",
+			},
+		},
+	})
+	defer terraform.Destroy(t, options)
+	silo, _ := deployDataSilo(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+
+	updatedOptions := prepareDataSiloOptions(t, map[string]interface{}{
+		"skip_connecting": false,
+		"type":            "datadog",
+		"secret_context": []map[string]interface{}{
+			{
+				"name":  "apiKey",
+				"value": "not-an-api-key-at-least-most-likely-unless-uuid-changes-formats-and-this-string-is-randomly-generated",
+			},
+			{
+				"name":  "applicationKey",
+				"value": "applicationKeyMcApplicationKeyFace",
+			},
+			{
+				"name":  "queryTemplate",
+				"value": "service:a-different-service AND @email:{{identifier}}",
+			},
+		},
+	})
+	terraform.ApplyE(t, updatedOptions)
+	assert.NotEmpty(t, terraform.Output(t, updatedOptions, "dataSiloId"))
+	updatedSilo := lookupDataSilo(t, terraform.Output(t, updatedOptions, "dataSiloId"))
+	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), updatedSilo.ConnectionState)
+}
+
 func TestCanChangeUrl(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.webhook", "type": "server"})
 	defer terraform.Destroy(t, options)
