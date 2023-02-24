@@ -473,9 +473,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Summary:  "Error updating data silos",
 			Detail:   "Error when updating data silo: " + err.Error(),
 		})
-		deletionDiags := resourceDataSilosDelete(ctx, d, m)
-		if deletionDiags.HasError() {
-			diags = append(diags, deletionDiags...)
+		if d.IsNewResource() {
+			deletionDiags := resourceDataSilosDelete(ctx, d, m)
+			if deletionDiags.HasError() {
+				diags = append(diags, deletionDiags...)
+			}
 		}
 		return diags
 	}
@@ -500,9 +502,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error Finding sombra URL",
 				Detail:   "Error when updating data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -521,9 +525,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error Finding saas context metadata",
 				Detail:   "Error when updating data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -536,9 +542,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error encoding secret map to create saas context",
 				Detail:   "Error when updating data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -549,9 +557,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error constructing sombra url for the register saas route",
 				Detail:   "Details: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -562,9 +572,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error creating SaaS context for the secret values",
 				Detail:   "Error when updating data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -575,9 +587,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error reading response of the new SaaS context",
 				Detail:   "Error when updating data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -587,9 +601,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error creating a new SaaS context",
 				Detail:   string(saasContext),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
@@ -614,9 +630,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Summary:  "Error connecting data silos",
 				Detail:   "Error when connecting data silo: " + err.Error(),
 			})
-			deletionDiags := resourceDataSilosDelete(ctx, d, m)
-			if deletionDiags.HasError() {
-				diags = append(diags, deletionDiags...)
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
 			}
 			return diags
 		}
