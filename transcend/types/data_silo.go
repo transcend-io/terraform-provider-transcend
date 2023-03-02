@@ -17,6 +17,7 @@ type DataSiloUpdatableFields struct {
 	OwnerEmails             []graphql.String    `json:"ownerEmails"`
 	DataSubjectBlockListIds []graphql.String    `json:"dataSubjectBlockListIds"`
 	Headers                 []CustomHeaderInput `json:"headers"`
+	SombraId                graphql.String      `json:"sombraId,omitempty"`
 
 	// TODO: Support more fields
 	// Identifiers             []graphql.String    `json:"identifiers"`
@@ -198,6 +199,7 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
+		SombraId:           graphql.String(d.Get("sombraId").(string)),
 
 		// TODO: Add more fields
 		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),

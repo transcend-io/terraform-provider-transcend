@@ -492,6 +492,25 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var saasContext []byte
 	if d.Get("secret_context") != nil {
 		// Lookup the sombra URL to talk to
+		// var sombraUrlQuery struct {}
+		// if d.Get("sombraId") != nil {
+		// 	sombraUrlQuery = {
+		// 		Organization struct {
+		// 				Sombras struct {
+		// 					SombraId graphql.String `graphql:"sombraId"`
+		// 				}`graphql:"sombras"`
+		// 			}`graphql:"organization"`
+		// 	}
+		// } else {
+		// 	sombraUrlQuery = {
+		// 		Organization struct {
+		// 			Sombra struct {
+		// 				CustomerUrl  graphql.String `graphql:"customerUrl"`
+		// 				HostedMethod graphql.String `graphql:"hostedMethod"`
+		// 			} `graphql:"sombra"`
+		// 		} `graphql:"organization"`
+		// 	}
+		// }
 		var sombraUrlQuery struct {
 			Organization struct {
 				Sombra struct {
