@@ -365,6 +365,11 @@ func resourceDataSilo() *schema.Resource {
 			// 	},
 			// 	Description: "The names of the teams that should be responsible for this data silo",
 			// },
+			"sombraId": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Id of sombra instance used to talk to this data silo",
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
