@@ -492,26 +492,13 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var saasContext []byte
 	if d.Get("secret_context") != nil {
 		// Lookup the sombra URL to talk to
-		// var sombraUrlQuery struct {}
-		// if d.Get("sombraId") != nil {
-		// 	sombraUrlQuery = {
-		// 		Organization struct {
-		// 				Sombras struct {
-		// 					SombraId graphql.String `graphql:"sombraId"`
-		// 				}`graphql:"sombras"`
-		// 			}`graphql:"organization"`
-		// 	}
-		// } else {
-		// 	sombraUrlQuery = {
-		// 		Organization struct {
-		// 			Sombra struct {
-		// 				CustomerUrl  graphql.String `graphql:"customerUrl"`
-		// 				HostedMethod graphql.String `graphql:"hostedMethod"`
-		// 			} `graphql:"sombra"`
-		// 		} `graphql:"organization"`
-		// 	}
-		// }
-		var sombraUrlQuery struct {
+		var queryBySombraId struct {
+			Sombras struct {
+				CustomerUrl  graphql.String `graphql:"customerUrl"`
+				HostedMethod graphql.String `graphql:"hostedMethod"`
+			} `graphql:"sombras(id: $sombraId)"`
+		}
+		var queryPrimarySombra struct {
 			Organization struct {
 				Sombra struct {
 					CustomerUrl  graphql.String `graphql:"customerUrl"`
@@ -519,6 +506,17 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				} `graphql:"sombra"`
 			} `graphql:"organization"`
 		}
+		var sombraUrlQuery interface{}
+		var sombraCustomerUrl string
+
+		if d.Get("sombraId") != nil {
+			sombraUrlQuery = &queryBySombraId
+			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
+		} else {
+			sombraUrlQuery = &queryPrimarySombra
+			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
+		}
+
 		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
@@ -574,7 +572,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
-		registerSaasEndpoint, err := url.JoinPath(string(sombraUrlQuery.Organization.Sombra.CustomerUrl), "/v1/register-saas")
+		registerSaasEndpoint, err := url.JoinPath(sombraCustomerUrl, "/v1/register-saas")
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
