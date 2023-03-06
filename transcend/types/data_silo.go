@@ -92,6 +92,7 @@ type DataSilo struct {
 	OuterType        graphql.String          `json:"outerType"`
 	PlaintextContext []PlaintextContextInput `json:"plaintextContext"`
 	ConnectionState  DataSiloConnectionState `json:"connectionState"`
+	SombraId         graphql.String          `json:"sombraId,omitempty"`
 
 	// TODO: Add support to DataSiloInput first
 	// Identifiers        []struct {
