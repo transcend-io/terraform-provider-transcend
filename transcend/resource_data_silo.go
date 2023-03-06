@@ -496,7 +496,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Sombras struct {
 				CustomerUrl  graphql.String `graphql:"customerUrl"`
 				HostedMethod graphql.String `graphql:"hostedMethod"`
-			} `graphql:"sombras(id: $sombra_id)"`
+			} `graphql:"sombras(id: [$sombra_id])"`
 		}
 		var queryPrimarySombra struct {
 			Organization struct {
