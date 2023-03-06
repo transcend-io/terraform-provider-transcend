@@ -87,7 +87,7 @@ resource "transcend_data_silo" "silo" {
   notify_email_address = var.notify_email_address
   outer_type           = var.outer_type
   skip_connecting      = var.skip_connecting
-  sombraId             = var.sombraId
+  sombra_id             = var.sombra_id
 
   dynamic "schema_discovery_plugin" {
     for_each = var.schema_discovery_plugin_config
