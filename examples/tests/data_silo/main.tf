@@ -78,6 +78,7 @@ variable "content_classification_plugin_config" {
 }
 variable "sombra_id" {
   type    = string
+  default = null
 }
 
 resource "transcend_data_silo" "silo" {
