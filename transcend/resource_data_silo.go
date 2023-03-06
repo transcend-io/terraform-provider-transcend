@@ -509,9 +509,9 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		var sombraUrlQuery interface{}
 
 		if d.Get("sombra_id") != nil {
-			sombraUrlQuery = &queryBySombraId
+			sombraUrlQuery = queryBySombraId
 		} else {
-			sombraUrlQuery = &queryPrimarySombra
+			sombraUrlQuery = queryPrimarySombra
 		}
 
 		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
