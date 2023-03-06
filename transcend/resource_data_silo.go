@@ -496,7 +496,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Sombras struct {
 				CustomerUrl  graphql.String `graphql:"customerUrl"`
 				HostedMethod graphql.String `graphql:"hostedMethod"`
-			} `graphql:"sombras(id: $sombraId)"`
+			} `graphql:"sombras(id: $sombra_id)"`
 		}
 		var queryPrimarySombra struct {
 			Organization struct {
@@ -509,7 +509,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		var sombraUrlQuery interface{}
 		var sombraCustomerUrl string
 
-		if d.Get("sombraId") != nil {
+		if d.Get("sombra_id") != nil {
 			sombraUrlQuery = &queryBySombraId
 			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
 		} else {
