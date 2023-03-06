@@ -506,15 +506,15 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				} `graphql:"sombra"`
 			} `graphql:"organization"`
 		}
-		var sombraUrlQuery interface{}
 
-		if d.Get("sombra_id") != nil {
-			sombraUrlQuery = queryBySombraId
+		var err error
+		shouldRetrievePrimarySombra := d.Get("sombra_id").(bool)
+		if shouldRetrievePrimarySombra {
+			err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		} else {
-			sombraUrlQuery = queryPrimarySombra
+			err = client.graphql.Query(context.Background(), &queryBySombraId, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		}
 
-		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -532,10 +532,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 		// Set sombra customer url
 		var sombraCustomerUrl string
-		if d.Get("sombra_id") != nil {
-			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
-		} else {
+		if shouldRetrievePrimarySombra {
 			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
+
+		} else {
+			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
 		}
 
 		// Lookup the saas context metadata
