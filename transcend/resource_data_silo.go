@@ -496,7 +496,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			Sombras struct {
 				CustomerUrl  graphql.String `graphql:"customerUrl"`
 				HostedMethod graphql.String `graphql:"hostedMethod"`
-			} `graphql:"sombras(id: [$sombra_id])"`
+			} `graphql:"sombras(ids: [$sombra_id])"`
 		}
 		var queryPrimarySombra struct {
 			Organization struct {
@@ -507,14 +507,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			} `graphql:"organization"`
 		}
 		var sombraUrlQuery interface{}
-		var sombraCustomerUrl string
 
 		if d.Get("sombra_id") != nil {
 			sombraUrlQuery = &queryBySombraId
-			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
 		} else {
 			sombraUrlQuery = &queryPrimarySombra
-			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
 		}
 
 		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
@@ -532,6 +529,15 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
+
+		// Set sombra customer url
+		var sombraCustomerUrl string
+		if d.Get("sombra_id") != nil {
+			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
+		} else {
+			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
+		}
+
 		// Lookup the saas context metadata
 		var catalogQuery struct {
 			Catalog struct {
