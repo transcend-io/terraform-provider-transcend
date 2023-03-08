@@ -1,0 +1,18 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+You can search for a sombra id by the sombra url, which can be retrieved from the TRANSCEND INGRESS URL column in the admin dashboard under Infrastructure > Sombra. 
+
+{{ tffile "examples/sombra/main.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
