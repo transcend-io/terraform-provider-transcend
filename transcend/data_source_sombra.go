@@ -19,7 +19,7 @@ func dataSourceSombra() *schema.Resource {
 			},
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    false,
+				Required:    true,
 				Description: "The url to lookup a sombra instance by",
 			},
 		},
@@ -32,9 +32,7 @@ func dataSourceSombraRead(ctx context.Context, d *schema.ResourceData, m interfa
 	var diags diag.Diagnostics
 
 	var query struct {
-		Sombras struct {
-			Nodes []types.Sombra
-		} `graphql:"sombras(filterBy: { urls: [$url] })"`
+		Sombras []types.Sombra `graphql:"sombras(filterBy: { urls: [$url] })"`
 	}
 
 	vars := map[string]interface{}{
@@ -50,7 +48,7 @@ func dataSourceSombraRead(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-	if len(query.Sombras.Nodes) == 0 {
+	if len(query.Sombras) == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error finding sombra with text " + d.Get("url").(string),
@@ -58,7 +56,7 @@ func dataSourceSombraRead(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 		return diags
 	}
-	if len(query.Sombras.Nodes) > 1 {
+	if len(query.Sombras) > 1 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error finding sombra with text " + d.Get("url").(string),
@@ -67,7 +65,7 @@ func dataSourceSombraRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diags
 	}
 
-	sombra := query.Sombras.Nodes[0]
+	sombra := query.Sombras[0]
 	d.Set("id", sombra.ID)
 	d.SetId(string(sombra.ID))
 
