@@ -11,7 +11,7 @@ description: |-
 
 ## Example Usage
 
-Sombra can be set via the sombra url, which can be found in Admin Dashboard. Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
+Sombra can be set via the sombra url, which can be found in [Admin Dashboard](https://app.transcend.io/infrastructure/sombra/sombras). Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
 
 ```terraform
 data "transcend_sombra" "test" {
