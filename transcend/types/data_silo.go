@@ -132,6 +132,11 @@ type UpdatePluginInput struct {
 	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
 }
 
+type SombraOutput struct {
+	CustomerUrl  graphql.String `graphql:"customerUrl"`
+	HostedMethod graphql.String `graphql:"hostedMethod"`
+}
+
 func MakeStandaloneUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
 	return UpdatePluginInput{
 		PluginID:                 graphql.String(d.Get("id").(string)),

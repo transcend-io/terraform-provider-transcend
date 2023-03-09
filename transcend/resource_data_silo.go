@@ -493,10 +493,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	if d.Get("secret_context") != nil {
 		// Lookup the sombra URL to talk to
 		var queryBySombraId struct {
-			Sombras struct {
-				CustomerUrl  graphql.String `graphql:"customerUrl"`
-				HostedMethod graphql.String `graphql:"hostedMethod"`
-			} `graphql:"sombras(ids: [$sombra_id])"`
+			Sombras []types.SombraOutput `graphql:"sombras(filterBy: {ids: [$sombra_id]})"`
 		}
 		var queryPrimarySombra struct {
 			Organization struct {
@@ -511,7 +508,8 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		if d.Get("sombra_id") == nil {
 			err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		} else {
-			err = client.graphql.Query(context.Background(), &queryBySombraId, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
+			queryBySombraIdVars := map[string]interface{}{"sombra_id": graphql.ID(d.Get("sombra_id").(string))}
+			err = client.graphql.Query(context.Background(), &queryBySombraId, queryBySombraIdVars, graphql.OperationName("SombraUrlQuery"))
 		}
 
 		if err != nil {
@@ -534,7 +532,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		if d.Get("sombra_id") == nil {
 			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
 		} else {
-			sombraCustomerUrl = string(queryBySombraId.Sombras.CustomerUrl)
+			sombraCustomerUrl = string(queryBySombraId.Sombras[0].CustomerUrl)
 		}
 
 		// Lookup the saas context metadata
