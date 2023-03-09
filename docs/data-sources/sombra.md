@@ -11,10 +11,11 @@ description: |-
 
 ## Example Usage
 
-You can search for a sombra id by the sombra url, which can be retrieved from the TRANSCEND INGRESS URL column in the admin dashboard under Infrastructure > Sombra. 
+A sombra ID can be resolved through entry of the sombra url, which can be found in Admin Dashboard. Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
 
 ```terraform
 data "transcend_sombra" "test" {
+  // sombra URL can be retrieved from the TRANSCEND INGRESS URL column in the admin dashboard under Infrastructure > Sombra
   url = "https://test.sombra.trancsend.com/"
 }
 ```
