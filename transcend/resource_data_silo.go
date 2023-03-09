@@ -505,10 +505,11 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		}
 
 		var err error
-		if d.Get("sombra_id") == nil {
+		sombraId := d.Get("sombra_id")
+		if sombraId == nil || sombraId == "" {
 			err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
 		} else {
-			queryBySombraIdVars := map[string]interface{}{"sombra_id": graphql.ID(d.Get("sombra_id").(string))}
+			var queryBySombraIdVars = map[string]interface{}{"sombra_id": sombraId.(string)}
 			err = client.graphql.Query(context.Background(), &queryBySombraId, queryBySombraIdVars, graphql.OperationName("SombraUrlQuery"))
 		}
 
@@ -529,7 +530,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 		// Set sombra customer url
 		var sombraCustomerUrl string
-		if d.Get("sombra_id") == nil {
+		if sombraId == nil || sombraId == "" {
 			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
 		} else {
 			sombraCustomerUrl = string(queryBySombraId.Sombras[0].CustomerUrl)
