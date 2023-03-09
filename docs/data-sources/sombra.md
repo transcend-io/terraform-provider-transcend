@@ -11,7 +11,7 @@ description: |-
 
 ## Example Usage
 
-A sombra ID can be resolved through entry of the sombra url, which can be found in Admin Dashboard. Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
+Sombra can be set via the sombra url, which can be found in Admin Dashboard. Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
 
 ```terraform
 data "transcend_sombra" "test" {
