@@ -349,8 +349,8 @@ func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
 }
 
 func TestCanAddSombraId(t *testing.T) {
-	options := prepareDataSiloOptions(t, map[string]interface{}{"sombra_id": "1c4a7263-ec8c-47e5-bd02-41381e14fb11"})
+	options := prepareDataSiloOptions(t, map[string]interface{}{"sombra_id": "118d4f5e-f38c-47a1-b7a5-82cfacfe28c3"})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
-	assert.Equal(t, graphql.String("1c4a7263-ec8c-47e5-bd02-41381e14fb11"), silo.SombraId)
+	assert.Equal(t, graphql.String("118d4f5e-f38c-47a1-b7a5-82cfacfe28c3"), silo.SombraId)
 }
