@@ -365,6 +365,11 @@ func resourceDataSilo() *schema.Resource {
 			// 	},
 			// 	Description: "The names of the teams that should be responsible for this data silo",
 			// },
+			"sombra_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Id of sombra instance used to talk to this data silo",
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -487,7 +492,10 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	var saasContext []byte
 	if d.Get("secret_context") != nil {
 		// Lookup the sombra URL to talk to
-		var sombraUrlQuery struct {
+		var queryBySombraId struct {
+			Sombras []types.SombraOutput `graphql:"sombras(filterBy: {ids: [$sombra_id]})"`
+		}
+		var queryPrimarySombra struct {
 			Organization struct {
 				Sombra struct {
 					CustomerUrl  graphql.String `graphql:"customerUrl"`
@@ -495,7 +503,16 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				} `graphql:"sombra"`
 			} `graphql:"organization"`
 		}
-		err = client.graphql.Query(context.Background(), &sombraUrlQuery, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
+
+		var err error
+		sombraId := d.Get("sombra_id")
+		if sombraId == nil || sombraId == "" {
+			err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
+		} else {
+			var queryBySombraIdVars = map[string]interface{}{"sombra_id": sombraId.(string)}
+			err = client.graphql.Query(context.Background(), &queryBySombraId, queryBySombraIdVars, graphql.OperationName("SombraUrlQuery"))
+		}
+
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -510,6 +527,15 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
+
+		// Set sombra customer url
+		var sombraCustomerUrl string
+		if sombraId == nil || sombraId == "" {
+			sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
+		} else {
+			sombraCustomerUrl = string(queryBySombraId.Sombras[0].CustomerUrl)
+		}
+
 		// Lookup the saas context metadata
 		var catalogQuery struct {
 			Catalog struct {
@@ -550,7 +576,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
-		registerSaasEndpoint, err := url.JoinPath(string(sombraUrlQuery.Organization.Sombra.CustomerUrl), "/v1/register-saas")
+		registerSaasEndpoint, err := url.JoinPath(sombraCustomerUrl, "/v1/register-saas")
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,

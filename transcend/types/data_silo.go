@@ -17,6 +17,7 @@ type DataSiloUpdatableFields struct {
 	OwnerEmails             []graphql.String    `json:"ownerEmails"`
 	DataSubjectBlockListIds []graphql.String    `json:"dataSubjectBlockListIds"`
 	Headers                 []CustomHeaderInput `json:"headers"`
+	SombraId                graphql.String      `json:"sombraId,omitempty"`
 
 	// TODO: Support more fields
 	// Identifiers             []graphql.String    `json:"identifiers"`
@@ -91,6 +92,7 @@ type DataSilo struct {
 	OuterType        graphql.String          `json:"outerType"`
 	PlaintextContext []PlaintextContextInput `json:"plaintextContext"`
 	ConnectionState  DataSiloConnectionState `json:"connectionState"`
+	SombraId         graphql.String          `json:"sombraId,omitempty"`
 
 	// TODO: Add support to DataSiloInput first
 	// Identifiers        []struct {
@@ -128,6 +130,11 @@ type UpdatePluginInput struct {
 	ScheduleFrequencyMinutes graphql.String  `json:"scheduleFrequency"`
 	ScheduleStartAt          graphql.String  `json:"scheduleStartAt"`
 	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
+}
+
+type SombraOutput struct {
+	CustomerUrl  graphql.String `graphql:"customerUrl"`
+	HostedMethod graphql.String `graphql:"hostedMethod"`
 }
 
 func MakeStandaloneUpdatePluginInput(d *schema.ResourceData) UpdatePluginInput {
@@ -198,6 +205,7 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
+		SombraId:           graphql.String(d.Get("sombra_id").(string)),
 
 		// TODO: Add more fields
 		// DataSubjectBlockListIds: toStringList(d.Get("data_subject_block_list_ids")),

@@ -1,0 +1,18 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+Sombra can be set via the sombra url, which can be found in [Admin Dashboard](https://app.transcend.io/infrastructure/sombra/sombras). Use the URL in the TRANSCEND INGRESS URL column in the Sombra table found under Infrastructure. 
+
+{{ tffile "examples/sombra/main.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

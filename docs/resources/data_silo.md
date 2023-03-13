@@ -438,6 +438,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `schema_discovery_plugin` (Block List, Max: 1) Configuration for the Schema Discovery plugin for data silos. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
+- `sombra_id` (String) Id of sombra instance used to talk to this data silo
 - `title` (String) The title of the data silo
 - `url` (String) The URL of the server to post to if a server silo
 

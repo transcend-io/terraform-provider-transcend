@@ -347,3 +347,10 @@ func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
 	assert.Equal(t, graphql.String("not.real.email@transcend.io"), silo.NotifyEmailAddress)
 	assert.Empty(t, silo.OuterType)
 }
+
+func TestCanAddSombraId(t *testing.T) {
+	options := prepareDataSiloOptions(t, map[string]interface{}{"sombra_id": "118d4f5e-f38c-47a1-b7a5-82cfacfe28c3"})
+	defer terraform.Destroy(t, options)
+	silo, _ := deployDataSilo(t, options)
+	assert.Equal(t, graphql.String("118d4f5e-f38c-47a1-b7a5-82cfacfe28c3"), silo.SombraId)
+}
