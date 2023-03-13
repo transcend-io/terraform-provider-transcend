@@ -60,7 +60,7 @@ func dataSourceSombraRead(ctx context.Context, d *schema.ResourceData, m interfa
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error finding sombra with text " + d.Get("url").(string),
-			Detail:   "Found multiple sombras for given text",
+			Detail:   "Found multiple sombras for given url",
 		})
 		return diags
 	}
