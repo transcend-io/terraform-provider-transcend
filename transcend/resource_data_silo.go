@@ -461,9 +461,9 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	// Perform updates to most fields on the data silo
 	var updateMutation struct {
-		UpdateDataSilo struct {
-			DataSilo types.DataSilo
-		} `graphql:"updateDataSilo(input: $input)"`
+		UpdateDataSilos struct {
+			DataSilos []types.DataSilo
+		} `graphql:"updateDataSilos(input: { dataSilos: [$input] })"`
 	}
 	updateVars := map[string]interface{}{
 		"input": types.UpdateDataSiloInput{
@@ -471,7 +471,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			DataSiloUpdatableFields: types.CreateDataSiloUpdatableFields(d),
 		},
 	}
-	err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSilo"))
+	err := client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDataSilos"))
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
