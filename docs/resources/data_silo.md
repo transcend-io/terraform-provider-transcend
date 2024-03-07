@@ -434,6 +434,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `notify_email_address` (String) The email address that should be notified whenever new requests are made
 - `outer_type` (String) The catalog name responsible for the cosmetics of the integration (name, description, logo, email fields)
 - `owner_emails` (List of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
+- `owner_teams` (List of String) The emails of the teams to assign as owners of this data silo. These names must have matching teams in Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
 - `schema_discovery_plugin` (Block List, Max: 1) Configuration for the Schema Discovery plugin for data silos. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))

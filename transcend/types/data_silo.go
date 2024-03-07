@@ -15,6 +15,7 @@ type DataSiloUpdatableFields struct {
 	NotifyEmailAddress      graphql.String      `json:"notifyEmailAddress,omitempty"`
 	IsLive                  graphql.Boolean     `json:"isLive"`
 	OwnerEmails             []graphql.String    `json:"ownerEmails"`
+	OwnerTeams              []graphql.String    `json:"teamNames"`
 	DataSubjectBlockListIds []graphql.String    `json:"dataSubjectBlockListIds"`
 	Headers                 []CustomHeaderInput `json:"headers"`
 	SombraId                graphql.String      `json:"sombraId,omitempty"`
@@ -85,6 +86,10 @@ type DataSilo struct {
 		ID    graphql.String `json:"id"`
 		Email graphql.String `json:"email"`
 	} `json:"owners"`
+	Teams []struct {
+		ID   graphql.String `json:"id"`
+		Name graphql.String `json:"name"`
+	} `json:"teams"`
 	SubjectBlocklist []struct {
 		ID graphql.String `json:"id"`
 	} `json:"subjectBlocklist"`
@@ -204,6 +209,7 @@ func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFiel
 		NotifyEmailAddress: graphql.String(d.Get("notify_email_address").(string)),
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
 		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
+		OwnerTeams:         ToStringList(d.Get("owner_teams").([]interface{})),
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
 		SombraId:           graphql.String(d.Get("sombra_id").(string)),
 
@@ -293,6 +299,7 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 	}
 	d.Set("connection_state", silo.ConnectionState)
 	d.Set("owner_emails", FlattenOwners(silo))
+	d.Set("owner_teams", FlattenOwnerTeams(silo))
 	d.Set("headers", FlattenHeaders(&silo.Headers))
 
 	// TODO: Support these fields being read in
@@ -310,6 +317,15 @@ func FlattenOwners(dataSilo DataSilo) []interface{} {
 	ret := make([]interface{}, len(owners))
 	for i, owner := range owners {
 		ret[i] = owner.Email
+	}
+	return ret
+}
+
+func FlattenOwnerTeams(dataSilo DataSilo) []interface{} {
+	teams := dataSilo.Teams
+	ret := make([]interface{}, len(teams))
+	for i, team := range teams {
+		ret[i] = team.Name
 	}
 	return ret
 }

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.15.0"
+      version = "0.16.0"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -16,6 +16,10 @@ variable "outer_type" { default = null }
 variable "type" { default = "amazonDynamodb" }
 variable "description" { default = "some description" }
 variable "owner_emails" {
+  type    = list(string)
+  default = []
+}
+variable "owner_teams" {
   type    = list(string)
   default = []
 }
@@ -86,6 +90,7 @@ resource "transcend_data_silo" "silo" {
   title                = var.title
   description          = var.description
   owner_emails         = var.owner_emails
+  owner_teams          = var.owner_teams
   is_live              = var.is_live
   url                  = var.url
   notify_email_address = var.notify_email_address
