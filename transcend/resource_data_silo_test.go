@@ -298,6 +298,16 @@ func TestCanChangeOwners(t *testing.T) {
 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.Owners[0].Email)
 }
 
+func TestCanChangeOwnerTeams(t *testing.T) {
+	options := prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Engineers"}})
+	defer terraform.Destroy(t, options)
+	silo, _ := deployDataSilo(t, options)
+	assert.Equal(t, graphql.String("Engineers"), silo.Teams[0].Name)
+
+	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Legal"}}))
+	assert.Equal(t, graphql.String("Legal"), silo.Teams[0].Name)
+}
+
 func TestCanChangeHeaders(t *testing.T) {
 	options := prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
 		{

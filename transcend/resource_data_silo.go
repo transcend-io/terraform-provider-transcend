@@ -357,6 +357,14 @@ func resourceDataSilo() *schema.Resource {
 				},
 				Description: "The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.",
 			},
+			"owner_teams": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The emails of the teams to assign as owners of this data silo. These names must have matching teams in Transcend.",
+			},
 			// "team_names": &schema.Schema{
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,

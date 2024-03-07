@@ -19,6 +19,10 @@ variable "owner_emails" {
   type    = list(string)
   default = []
 }
+variable "owner_teams" {
+  type    = list(string)
+  default = []
+}
 variable "is_live" {
   type    = bool
   default = false
@@ -86,6 +90,7 @@ resource "transcend_data_silo" "silo" {
   title                = var.title
   description          = var.description
   owner_emails         = var.owner_emails
+  owner_teams          = var.owner_teams
   is_live              = var.is_live
   url                  = var.url
   notify_email_address = var.notify_email_address
