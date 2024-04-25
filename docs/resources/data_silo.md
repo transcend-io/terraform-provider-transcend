@@ -402,6 +402,9 @@ query {
           name
           type
           isPlaintext
+          options {
+            name
+          }
         }
       }
       promptEmailTemplateId
