@@ -331,6 +331,8 @@ resource "transcend_data_silo" "database" {
 
 This type of setup works for many types of relational databases including Postgres, Amazon Redshift, Snowflake, MySQL, Google BigQuery, MariaDb, and Microsoft SQL. We are always adding support for more relational database types, please reach out to support if you are wanting to connect a type you don't see existing documentation for.
 
+To determine the value of the "driver" - you can follow the instructions in the [Lookup up data silo metadata](#looking-up-data-silo-metadata) section below to see the set of selected driver options.
+
 ### Adding a Data Silo Plugin
 
 Sometimes when you connect a data silo, you don't actually have data in that silo, but may want to connect that silo so that Transcend can find other silos from that tool. An example might be connecting Okta to find SaaS tools you use, or connecting AWS to find your S3 buckets and databases.
