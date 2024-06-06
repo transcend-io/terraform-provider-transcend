@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "transcend" {
-  url = "https://api.dev.trancsend.com/"
+  url = "https://api.staging.transcen.dental/"
 }
 
 variable "title" {}

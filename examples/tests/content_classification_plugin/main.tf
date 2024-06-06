@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "transcend" {
-  url = "https://api.dev.trancsend.com/"
+  url = "https://api.staging.transcen.dental/"
 }
 
 variable "title" {}
@@ -37,6 +37,12 @@ resource "transcend_data_silo_connection" "connection" {
   plaintext_context {
     name  = "accountId"
     value = "590309927493"
+  }
+
+  // DO NOT SUBMIT: Do I need this on all connections? and to update docs?
+  plaintext_context {
+    name  = "externalId"
+    value = ""
   }
 }
 
