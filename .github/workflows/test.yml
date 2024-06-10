@@ -27,6 +27,9 @@ jobs:
           go-version-file: 'go.mod'
       - run: go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
       - run: go generate ./...
+        env:
+          # See: https://github.com/hashicorp/terraform-plugin-docs/issues/12
+          TRANSCEND_KEY: 'fake-key-because-env-needed-for-doc-generation'
       - name: git diff
         run: |
           git diff --exit-code || \
