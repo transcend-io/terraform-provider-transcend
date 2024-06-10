@@ -17,19 +17,19 @@ func dataSourceDataSilo() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"discoveredByDataSiloId": &schema.Schema{
+			"discoverdby": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    false,
+				Optional:    true,
 				Description: "The ID of the parent data silo that discovered this data silo",
 			},
 			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    false,
+				Optional:    true,
 				Description: "The type of the data silo",
 			},
 			"title": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    false,
+				Optional:    true,
 				Description: "The title of the data silo",
 			},
 		},
@@ -47,7 +47,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	vars := map[string]interface{}{
 		"filterByInput": types.DataSiloFilter{
-			DiscoveredBy: types.WrapValueToList(d.Get("discoveredByDataSiloId")),
+			DiscoveredBy: types.WrapValueToList(d.Get("discoverdby")),
 			Type:         types.WrapValueToList(d.Get("type")),
 			Title:        types.WrapValueToList(d.Get("title")),
 		},
