@@ -46,7 +46,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	vars := map[string]interface{}{
-		"filterByInput": types.DataSiloFilter{
+		"filterByInput": types.DataSiloFiltersInput{
 			DiscoveredBy: types.WrapValueToList(d.Get("discoveredby")),
 			Type:         types.WrapValueToList(d.Get("type")),
 			Title:        types.WrapValueToList(d.Get("title")),
