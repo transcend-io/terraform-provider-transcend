@@ -39,10 +39,15 @@ resource "transcend_data_silo_connection" "connection" {
     value = "590309927493"
   }
 
-  // DO NOT SUBMIT: Do I need this on all connections? and to update docs?
   plaintext_context {
-    name  = "externalId"
-    value = ""
+    name  = "region"
+    value = "eu-west-1"
+  }
+
+  // Enable item-level access
+  plaintext_context {
+    name  = "database"
+    value = "true"
   }
 }
 

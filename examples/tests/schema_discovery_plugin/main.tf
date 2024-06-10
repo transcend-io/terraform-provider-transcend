@@ -38,6 +38,17 @@ resource "transcend_data_silo_connection" "connection" {
     name  = "accountId"
     value = "590309927493"
   }
+
+  plaintext_context {
+    name  = "region"
+    value = "eu-west-1"
+  }
+
+  // Enable item-level access
+  plaintext_context {
+    name  = "database"
+    value = "true"
+  }
 }
 
 resource "transcend_schema_discovery_plugin" "plugin" {
