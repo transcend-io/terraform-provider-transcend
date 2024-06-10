@@ -1,14 +1,14 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.16.0"
+      version = "0.17.0"
       source  = "transcend.com/cli/transcend"
     }
   }
 }
 
 provider "transcend" {
-  url = "https://api.dev.trancsend.com/"
+  url = "https://api.staging.transcen.dental/"
 }
 
 variable "title" {}
@@ -129,6 +129,8 @@ resource "transcend_data_silo" "silo" {
     for_each = (var.type == "amazonWebServices" || var.type == "amazonS3" || var.type == "amazonDynamodb") && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
+      { name = "region", value = "eu-west-1" },
+      { name = "database", value = "true" }
     ] : []
     content {
       name  = plaintext_context.value["name"]

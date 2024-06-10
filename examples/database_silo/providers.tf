@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.16.0"
+      version = "0.17.0"
       source  = "transcend.com/cli/transcend"
     }
     aws = {
@@ -13,7 +13,7 @@ terraform {
 
 # Set TRANSCEND_KEY and TRANSCEND_URL locally, or define in this block
 provider "transcend" {
-  url = "https://api.dev.trancsend.com/"
+  url = "https://api.staging.transcen.dental/"
 }
 
 provider "aws" {
