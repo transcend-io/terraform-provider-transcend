@@ -42,10 +42,24 @@ func WrapValueToList(orig interface{}) []graphql.String {
 	if orig == nil {
 		return []graphql.String{}
 	}
+	if (orig.(string)) == "" {
+		return []graphql.String{}
+	}
 	vals := make([]graphql.String, 1)
 	vals[0] = graphql.String(orig.(string))
 	return vals
+}
 
+func WrapValueToIDList(orig interface{}) []graphql.ID {
+	if orig == nil {
+		return []graphql.ID{}
+	}
+	if (orig.(string)) == "" {
+		return []graphql.ID{}
+	}
+	vals := make([]graphql.ID, 1)
+	vals[0] = graphql.ID(orig.(string))
+	return vals
 }
 
 func ToRequestActionList(origs []interface{}) []RequestAction {

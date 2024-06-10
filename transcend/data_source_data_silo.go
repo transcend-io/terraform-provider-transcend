@@ -42,15 +42,27 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 	var diags diag.Diagnostics
 
 	var query struct {
-		DataSilos []types.DataSilo `graphql:"dataSilos(filterBy: $filterByInput)"`
+		DataSilos types.DataSilosPayload `graphql:"dataSilos(filterBy: $filterByInput)"`
+	}
+
+	filters := types.DataSiloFiltersInput{}
+	discoveredByList := types.WrapValueToIDList(d.Get("discoveredby"))
+	if len(discoveredByList) > 0 {
+		filters.DiscoveredBy = discoveredByList
+	}
+
+	typeList := types.WrapValueToList(d.Get("type"))
+	if len(typeList) > 0 {
+		filters.Type = typeList
+	}
+
+	titleList := types.WrapValueToList(d.Get("title"))
+	if len(titleList) > 0 {
+		filters.Title = titleList
 	}
 
 	vars := map[string]interface{}{
-		"filterByInput": types.DataSiloFiltersInput{
-			DiscoveredBy: types.WrapValueToList(d.Get("discoveredby")),
-			Type:         types.WrapValueToList(d.Get("type")),
-			Title:        types.WrapValueToList(d.Get("title")),
-		},
+		"filterByInput": filters,
 	}
 
 	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DataSilos"))
@@ -62,7 +74,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 		})
 		return diags
 	}
-	if len(query.DataSilos) == 0 {
+	if len(query.DataSilos.Nodes) == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error finding data silo",
@@ -70,7 +82,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 		})
 		return diags
 	}
-	if len(query.DataSilos) > 1 {
+	if len(query.DataSilos.Nodes) > 1 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error finding data silos",
@@ -79,7 +91,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diags
 	}
 
-	dataSilo := query.DataSilos[0]
+	dataSilo := query.DataSilos.Nodes[0]
 	d.Set("id", dataSilo.ID)
 	d.SetId(string(dataSilo.ID))
 
