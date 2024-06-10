@@ -10,10 +10,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
+          go-version: '1.19.10'
           go-version-file: 'go.mod'
-          cache: true
       - run: go mod download
       - run: go build -v .
 
@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
+          go-version: '1.19.10'
           go-version-file: 'go.mod'
-          cache: false
       - run: go generate ./...
       - name: git diff
         run: |
@@ -41,10 +41,10 @@ jobs:
       tests: ${{ steps.list-tests.outputs.tests }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
+          go-version: '1.19.10'
           go-version-file: 'go.mod'
-          cache: true
       - run: echo "::set-output name=tests::[$(go test ./...  -list=. | grep 'Test' | sed 's/^\(.*\)$/\"\1\"/' | paste -s -d, -)]"
         id: list-tests
 
@@ -60,10 +60,10 @@ jobs:
         test: ${{ fromJSON(needs.list-test-files.outputs.tests) }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
+          go-version: '1.19.10'
           go-version-file: 'go.mod'
-          cache: true
         id: go
       - uses: hashicorp/setup-terraform@v2
         with:
