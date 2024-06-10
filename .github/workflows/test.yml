@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
-          cache: true
+          cache: false
       - run: go generate ./...
       - name: git diff
         run: |
