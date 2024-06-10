@@ -85,7 +85,7 @@ module "sombra" {
     cert       = var.tls_cert
     key        = var.tls_key
   }
-  transcend_backend_url = "https://api.dev.trancsend.com:443"
+  transcend_backend_url = "https://api.staging.transcen.dental:443"
 
   # The root secrets that you should generate yourself and keep secret
   # See https://docs.transcend.io/docs/security/end-to-end-encryption/deploying-sombra#6.-cycle-your-keys for information on how to generate these values
