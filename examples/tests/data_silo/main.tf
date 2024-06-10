@@ -129,6 +129,8 @@ resource "transcend_data_silo" "silo" {
     for_each = (var.type == "amazonWebServices" || var.type == "amazonS3" || var.type == "amazonDynamodb") && !var.skip_connecting ? [
       { name = "role", value = "TranscendAWSIntegrationRole" },
       { name = "accountId", value = "590309927493" },
+      { name = "region", value = "eu-west-1" },
+      { name = "database", value = "true" }
     ] : []
     content {
       name  = plaintext_context.value["name"]
