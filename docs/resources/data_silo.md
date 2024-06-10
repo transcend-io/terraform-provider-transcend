@@ -120,6 +120,11 @@ resource "transcend_data_silo_connection" "connection" {
     value = data.aws_caller_identity.current.account_id
   }
 
+  plaintext_context {
+    name  = "region"
+    value = "eu-west-1"
+  }
+
   depends_on = [time_sleep.pause]
 }
 ```
