@@ -68,6 +68,12 @@ type Catalog struct {
 	} `json:"integrationConfig"`
 }
 
+type DataSiloFilter struct {
+	DiscoveredBy []graphql.String `json:"discoveredBy,omitempty"`
+	Type         []graphql.String `json:"type,omitempty"`
+	Title        []graphql.String `json:"title,omitempty"`
+}
+
 type DataSilo struct {
 	ID         graphql.String `json:"id"`
 	Link       graphql.String `json:"link,omitempty"`

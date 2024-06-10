@@ -44,6 +44,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_identifier": dataSourceIdentifier(),
 			"transcend_sombra":     dataSourceSombra(),
+			"transcend_data_silo":  dataSourceDataSilo(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

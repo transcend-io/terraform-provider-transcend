@@ -38,6 +38,16 @@ func ToIDList(origs []interface{}) []graphql.ID {
 	return vals
 }
 
+func WrapValueToList(orig interface{}) []graphql.String {
+	if orig == nil {
+		return []graphql.String{}
+	}
+	vals := make([]graphql.String, 1)
+	vals[0] = graphql.String(orig.(string))
+	return vals
+
+}
+
 func ToRequestActionList(origs []interface{}) []RequestAction {
 	vals := make([]RequestAction, len(origs))
 	for i, orig := range origs {
