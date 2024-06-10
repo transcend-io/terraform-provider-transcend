@@ -17,7 +17,7 @@ description: |-
 
 ### Optional
 
-- `discoverdby` (String) The ID of the parent data silo that discovered this data silo
+- `discoveredby` (String) The ID of the parent data silo that discovered this data silo
 - `title` (String) The title of the data silo
 - `type` (String) The type of the data silo
 
