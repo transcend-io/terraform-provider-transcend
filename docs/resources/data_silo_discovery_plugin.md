@@ -80,6 +80,23 @@ The above example shows how you can use this resource to setup a plugin after a 
 - `id` (String) The ID of this resource.
 - `last_enabled_at` (String) The date at which this data silo was last enabled
 
+### Connecting discovered data silos
+
+It will take some time for silo discovery to take place. Once it has, and there are some recommendations to add as data silos, please use [the Admin Dashboard's Silo Discovery Triage view](https://app.transcend.io/data-map/data-inventory/silo-discovery/triage) to add as many recommendations to the data inventory as you'd like.
+
+Once that step is complete, you can use this provider to add connection information or plugin information to each data silo.
+
+```terraform
+data "transcend_data_silo" "silo" {
+  title = "Amazon S3 - sample-bucket-4-transcend-io - from AD"
+  discoveredby = transcend_data_silo_discovery_plugin.plugin.data_silo_id
+}
+```
+
+In this example, we use the `transcend_data_silo` data source to lookup a specific silo discovered by the plugin we setup above.
+
+We could then use the `data.transcend_data_silo.silo.id` output value, representing the ID of the new data silo, in any resource that accepts it, such as `resource_data_point`, `resource_schema_discovery_plugin`, `data_silo_connection`, or others.
+
 ## Import
 
 Import is supported using the following syntax:
