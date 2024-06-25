@@ -45,6 +45,7 @@ func Provider() *schema.Provider {
 			"transcend_identifier": dataSourceIdentifier(),
 			"transcend_sombra":     dataSourceSombra(),
 			"transcend_data_silo":  dataSourceDataSilo(),
+			"transcend_data_silos": dataSourceDataSilos(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

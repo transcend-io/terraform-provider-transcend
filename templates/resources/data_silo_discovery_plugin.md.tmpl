@@ -17,8 +17,6 @@ description: |-
 
 The above example shows how you can use this resource to setup a plugin after a silo has been connected via the `transcend_data_silo_connection` resource
 
-{{ .SchemaMarkdown | trimspace }}
-
 ### Connecting discovered data silos
 
 It will take some time for silo discovery to take place. Once it has, and there are some recommendations to add as data silos, please use [the Admin Dashboard's Silo Discovery Triage view](https://app.transcend.io/data-map/data-inventory/silo-discovery/triage) to add as many recommendations to the data inventory as you'd like.
@@ -35,6 +33,27 @@ data "transcend_data_silo" "silo" {
 In this example, we use the `transcend_data_silo` data source to lookup a specific silo discovered by the plugin we setup above.
 
 We could then use the `data.transcend_data_silo.silo.id` output value, representing the ID of the new data silo, in any resource that accepts it, such as `resource_data_point`, `resource_schema_discovery_plugin`, `data_silo_connection`, or others.
+
+You can also look up multiple silos at once using something like:
+
+```terraform
+data "transcend_data_silos" "example" {
+    discoveredby = "<some_data_silo_id>"
+}
+
+resource "transcend_data_silo_discovery_plugin" "plugins" {
+  for_each = toset(data.transcend_data_silos.example.ids)
+
+  data_silo_id = each.value
+
+  enabled                    = true
+  schedule_frequency_minutes = 120
+  schedule_start_at          = "2024-06-06T17:51:13.000Z"
+  #
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}
 
 ## Import
 
