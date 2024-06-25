@@ -42,3 +42,4 @@ terraform-provider-transcend
 # Random files we do not want commited
 local_test.sh
 examples/local/*.tf
+testtf
