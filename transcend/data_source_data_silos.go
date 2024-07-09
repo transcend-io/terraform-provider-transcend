@@ -41,7 +41,7 @@ func dataSourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m inte
 	var diags diag.Diagnostics
 
 	var query struct {
-		DataSilos types.DataSilosPayload `graphql:"dataSilos(filterBy: $filterByInput)"`
+		DataSilos types.DataSilosPayload `graphql:"dataSilos(filterBy: $filterByInput, first: 100)"`
 	}
 
 	filters := types.DataSiloFiltersInput{}
