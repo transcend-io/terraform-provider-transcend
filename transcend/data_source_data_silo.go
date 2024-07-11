@@ -14,8 +14,15 @@ func dataSourceDataSilo() *schema.Resource {
 		ReadContext: dataSourceDataSiloRead,
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID of the data silo. If not provided, the data silo will be discovered by other filters",
+			},
+			"link": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The URL of the data silo in the admin dashboard",
 			},
 			"discoveredby": &schema.Schema{
 				Type:        schema.TypeString,
@@ -30,6 +37,7 @@ func dataSourceDataSilo() *schema.Resource {
 			"title": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The title of the data silo",
 			},
 		},
@@ -46,6 +54,13 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	filters := types.DataSiloFiltersInput{}
+	inputId := d.Get("id")
+	if inputId != nil {
+		vals := make([]graphql.ID, 1)
+		vals[0] = graphql.ID(inputId.(string))
+		filters.Ids = vals
+	}
+
 	discoveredByList := types.WrapValueToIDList(d.Get("discoveredby"))
 	if len(discoveredByList) > 0 {
 		filters.DiscoveredBy = discoveredByList
@@ -94,6 +109,8 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 	dataSilo := query.DataSilos.Nodes[0]
 	d.Set("id", dataSilo.ID)
 	d.SetId(string(dataSilo.ID))
+	d.Set("title", dataSilo.Title)
+	d.Set("link", dataSilo.Link)
 
 	return diags
 }

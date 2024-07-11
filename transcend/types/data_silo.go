@@ -69,6 +69,7 @@ type Catalog struct {
 }
 
 type DataSiloFiltersInput struct {
+	Ids          []graphql.ID     `json:"ids,omitempty"`
 	DiscoveredBy []graphql.ID     `json:"discoveredBy,omitempty"`
 	Type         []graphql.String `json:"type,omitempty"`
 	Title        []graphql.String `json:"titles,omitempty"`
@@ -120,7 +121,10 @@ type DataSilo struct {
 }
 
 type DataSiloBulkPreview struct {
-	ID graphql.String `json:"id"`
+	ID    graphql.String `json:"id"`
+	Title graphql.String `json:"title"`
+	Type  graphql.String `json:"type"`
+	Link  graphql.String `json:"link"`
 }
 
 type DataSilosPayload struct {

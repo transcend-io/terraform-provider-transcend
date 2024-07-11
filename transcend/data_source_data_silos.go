@@ -68,14 +68,6 @@ func dataSourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m inte
 		})
 		return diags
 	}
-	if len(query.DataSilos.Nodes) == 0 {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Error finding data silo",
-			Detail:   "Found 0 data silos for given query",
-		})
-		return diags
-	}
 
 	ids := make([]string, len(query.DataSilos.Nodes))
 	for i, dataSilo := range query.DataSilos.Nodes {
