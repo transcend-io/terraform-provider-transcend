@@ -20,5 +20,9 @@ func TestCanLookupDataSilo(t *testing.T) {
 	terraform.InitAndApplyAndIdempotent(t, options)
 	assert.NotEmpty(t, terraform.Output(t, options, "dataSiloId"))
 	assert.NotEmpty(t, terraform.Output(t, options, "dataSiloLink"))
+	assert.NotEmpty(t, terraform.Output(t, options, "dataSiloDescription"))
 	assert.Equal(t, terraform.Output(t, options, "dataSiloTitle"), t.Name())
+
+	assert.NotEmpty(t, terraform.Output(t, options, "dataSiloOwners"))
+	assert.Contains(t, terraform.Output(t, options, "dataSiloOwners"), "david@transcend.io")
 }

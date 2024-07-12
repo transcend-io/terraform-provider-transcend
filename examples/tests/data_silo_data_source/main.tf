@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     transcend = {
-      version = "0.18.12"
+      version = "0.18.13"
       source  = "transcend.com/cli/transcend"
     }
   }
@@ -19,6 +19,7 @@ resource "transcend_data_silo" "silo" {
   type                 = "server"
   description          = "Send a webhook to a server and POST back through our API."
   skip_connecting      = true
+  owner_emails         = ["david@transcend.io"]
 }
 
 data "transcend_data_silo" "silo" {
@@ -35,4 +36,12 @@ output "dataSiloTitle" {
 
 output "dataSiloLink" {
   value = data.transcend_data_silo.silo.link
+}
+
+output "dataSiloOwners" {
+  value = data.transcend_data_silo.silo.owner_emails
+}
+
+output "dataSiloDescription" {
+  value = data.transcend_data_silo.silo.description
 }

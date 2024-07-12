@@ -17,8 +17,10 @@ description: |-
 
 ### Optional
 
+- `description` (String) The description of the data silo
 - `discoveredby` (String) The ID of the parent data silo that discovered this data silo
 - `id` (String) The ID of the data silo. If not provided, the data silo will be discovered by other filters
+- `owner_emails` (List of String) The emails of the owners of the data silo
 - `title` (String) The title of the data silo
 - `type` (String) The type of the data silo
 
