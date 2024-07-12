@@ -121,10 +121,15 @@ type DataSilo struct {
 }
 
 type DataSiloBulkPreview struct {
-	ID    graphql.String `json:"id"`
-	Title graphql.String `json:"title"`
-	Type  graphql.String `json:"type"`
-	Link  graphql.String `json:"link"`
+	ID          graphql.String `json:"id"`
+	Title       graphql.String `json:"title"`
+	Type        graphql.String `json:"type"`
+	Link        graphql.String `json:"link"`
+	Description graphql.String `json:"description"`
+	Owners      []struct {
+		ID    graphql.String `json:"id"`
+		Email graphql.String `json:"email"`
+	} `json:"owners"`
 }
 
 type DataSilosPayload struct {

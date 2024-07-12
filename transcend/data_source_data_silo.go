@@ -40,6 +40,19 @@ func dataSourceDataSilo() *schema.Resource {
 				Computed:    true,
 				Description: "The title of the data silo",
 			},
+			"description": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the data silo",
+				Computed:    true,
+			},
+			"owner_emails": &schema.Schema{
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The emails of the owners of the data silo",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -111,6 +124,14 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 	d.SetId(string(dataSilo.ID))
 	d.Set("title", dataSilo.Title)
 	d.Set("link", dataSilo.Link)
+	d.Set("description", dataSilo.Description)
+
+	owners := dataSilo.Owners
+	ownerEmails := make([]interface{}, len(owners))
+	for i, owner := range owners {
+		ownerEmails[i] = owner.Email
+	}
+	d.Set("owner_emails", ownerEmails)
 
 	return diags
 }
