@@ -614,6 +614,20 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			return diags
 		}
+		if sombraResponse.StatusCode != 200 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error creating SaaS context for the secret values. Is the internal sombra down?",
+				Detail:   "Error when updating data silo: received non-200 response from sombra",
+			})
+			if d.IsNewResource() {
+				deletionDiags := resourceDataSilosDelete(ctx, d, m)
+				if deletionDiags.HasError() {
+					diags = append(diags, deletionDiags...)
+				}
+			}
+			return diags
+		}
 		saasContext, err = io.ReadAll(sombraResponse.Body)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
