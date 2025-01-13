@@ -68,7 +68,7 @@ func dataSourceDataSiloRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	filters := types.DataSiloFiltersInput{}
 	inputId := d.Get("id")
-	if inputId != nil {
+	if inputId != nil && inputId.(string) != "" {
 		vals := make([]graphql.ID, 1)
 		vals[0] = graphql.ID(inputId.(string))
 		filters.Ids = vals
