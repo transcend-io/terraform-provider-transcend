@@ -103,6 +103,7 @@ func deployDataSilo(t *testing.T, terraformOptions *terraform.Options) (types.Da
 }
 
 func TestCanCreateAndDestroyDataSilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -111,6 +112,7 @@ func TestCanCreateAndDestroyDataSilo(t *testing.T) {
 }
 
 func TestCanConnectAwsDataSilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"skip_connecting": false})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -120,6 +122,7 @@ func TestCanConnectAwsDataSilo(t *testing.T) {
 }
 
 func TestCanConnectDatadogDataSilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
 		"type":            "datadog",
@@ -145,6 +148,7 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 }
 
 func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
 		"schema_discovery_plugin_config": []map[string]interface{}{
@@ -176,6 +180,7 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 }
 
 func TestCanChangeTitle(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -186,6 +191,7 @@ func TestCanChangeTitle(t *testing.T) {
 }
 
 func TestCanChangeDescription(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name()})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -196,6 +202,7 @@ func TestCanChangeDescription(t *testing.T) {
 }
 
 func TestCanChangeSaasContext(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
 		"type":            "datadog",
@@ -241,6 +248,7 @@ func TestCanChangeSaasContext(t *testing.T) {
 }
 
 func TestThatChangingSaasContextToInvalidValueDoesNotDestroySilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
 		"type":            "datadog",
@@ -289,6 +297,7 @@ func TestThatChangingSaasContextToInvalidValueDoesNotDestroySilo(t *testing.T) {
 }
 
 func TestCanChangeUrl(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.webhook", "type": "server"})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -299,6 +308,7 @@ func TestCanChangeUrl(t *testing.T) {
 }
 
 func TestCanChangeNotifyEmailAddress(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "david@transcend.io"})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -309,6 +319,7 @@ func TestCanChangeNotifyEmailAddress(t *testing.T) {
 }
 
 func TestCanChangeIsLive(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"is_live": false})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -322,6 +333,7 @@ func TestCanChangeIsLive(t *testing.T) {
 }
 
 func TestCanChangeOwners(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"david@transcend.io"}})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -332,6 +344,7 @@ func TestCanChangeOwners(t *testing.T) {
 }
 
 func TestCanChangeOwnerTeams(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Engineers"}})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
@@ -342,6 +355,7 @@ func TestCanChangeOwnerTeams(t *testing.T) {
 }
 
 func TestCanChangeHeaders(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
 		{
 			"name":      "someHeader",
@@ -366,6 +380,7 @@ func TestCanChangeHeaders(t *testing.T) {
 }
 
 func TestCanCreatePromptAPersonSilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"type":       "promptAPerson",
 		"outer_type": "coupa",
@@ -379,6 +394,7 @@ func TestCanCreatePromptAPersonSilo(t *testing.T) {
 }
 
 func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"type":                 "promptAPerson",
 		"notify_email_address": "not.real.email@transcend.io",
@@ -392,6 +408,7 @@ func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
 }
 
 func TestCanAddSombraId(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"sombra_id": "c29ba149-b7b4-4ff1-a93f-b24641271ea7"})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
