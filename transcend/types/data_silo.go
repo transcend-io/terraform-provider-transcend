@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"sort"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -225,14 +226,39 @@ func ReadDataSiloPluginsIntoState(d *schema.ResourceData, plugins []Plugin) {
 }
 
 func CreateDataSiloUpdatableFields(d *schema.ResourceData) DataSiloUpdatableFields {
+
+	emailsSet := d.Get("owner_emails").(*schema.Set)
+	emailsList := emailsSet.List()
+	emails := make([]string, len(emailsList))
+	for i, v := range emailsList {
+		emails[i] = v.(string)
+	}
+	sort.Strings(emails)
+	emailsGraphql := make([]graphql.String, len(emails))
+	for i, v := range emails {
+		emailsGraphql[i] = graphql.String(v)
+	}
+
+	teamsSet := d.Get("owner_teams").(*schema.Set)
+	teamsList := teamsSet.List()
+	teams := make([]string, len(teamsList))
+	for i, v := range teamsList {
+		teams[i] = v.(string)
+	}
+	sort.Strings(teams)
+	teamsGraphql := make([]graphql.String, len(teams))
+	for i, v := range teams {
+		teamsGraphql[i] = graphql.String(v)
+	}
+
 	return DataSiloUpdatableFields{
 		Title:              graphql.String(d.Get("title").(string)),
 		Description:        graphql.String(d.Get("description").(string)),
 		URL:                graphql.String(d.Get("url").(string)),
 		NotifyEmailAddress: graphql.String(d.Get("notify_email_address").(string)),
 		IsLive:             graphql.Boolean(d.Get("is_live").(bool)),
-		OwnerEmails:        ToStringList(d.Get("owner_emails").([]interface{})),
-		OwnerTeams:         ToStringList(d.Get("owner_teams").([]interface{})),
+		OwnerEmails:        emailsGraphql,
+		OwnerTeams:         teamsGraphql,
 		Headers:            ToCustomHeaderInputList((d.Get("headers").([]interface{}))),
 		SombraId:           graphql.String(d.Get("sombra_id").(string)),
 
@@ -337,20 +363,30 @@ func ReadDataSiloIntoState(d *schema.ResourceData, silo DataSilo) {
 
 func FlattenOwners(dataSilo DataSilo) []interface{} {
 	owners := dataSilo.Owners
-	ret := make([]interface{}, len(owners))
+	ret := make([]string, len(owners))
 	for i, owner := range owners {
-		ret[i] = owner.Email
+		ret[i] = string(owner.Email)
 	}
-	return ret
+	sort.Strings(ret)
+	result := make([]interface{}, len(ret))
+	for i, v := range ret {
+		result[i] = v
+	}
+	return result
 }
 
 func FlattenOwnerTeams(dataSilo DataSilo) []interface{} {
 	teams := dataSilo.Teams
-	ret := make([]interface{}, len(teams))
+	ret := make([]string, len(teams))
 	for i, team := range teams {
-		ret[i] = team.Name
+		ret[i] = string(team.Name)
 	}
-	return ret
+	sort.Strings(ret)
+	result := make([]interface{}, len(ret))
+	for i, v := range ret {
+		result[i] = v
+	}
+	return result
 }
 
 func FlattenDataSiloBlockList(dataSilo DataSilo) []interface{} {

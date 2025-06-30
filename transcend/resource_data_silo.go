@@ -350,7 +350,7 @@ func resourceDataSilo() *schema.Resource {
 			// 	Description: "The list of subject IDs to block list from this data silo",
 			// },
 			"owner_emails": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -358,7 +358,7 @@ func resourceDataSilo() *schema.Resource {
 				Description: "The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.",
 			},
 			"owner_teams": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

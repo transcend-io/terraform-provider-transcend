@@ -12,6 +12,39 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Helper to destroy any data silo with a given title before a test runs
+func destroyDataSiloByTitle(t *testing.T, title string) {
+	client := getTestClient()
+	var query struct {
+		DataSilos struct {
+			Nodes []struct {
+				ID    graphql.String `json:"id"`
+				Title graphql.String `json:"title"`
+			}
+		} `graphql:"dataSilos(filterBy: { titles: [$title] })"`
+	}
+	vars := map[string]interface{}{
+		"title": graphql.String(title),
+	}
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DataSilos"))
+	if err != nil {
+		t.Logf("Could not query for silos to destroy: %v", err)
+		return
+	}
+	for _, node := range query.DataSilos.Nodes {
+		var mutation struct {
+			DeleteDataSilos struct {
+				Success graphql.Boolean
+			} `graphql:"deleteDataSilos(input: { ids: $ids })"`
+		}
+		ids := []graphql.ID{graphql.ID(node.ID)}
+		mvars := map[string]interface{}{
+			"ids": ids,
+		}
+		_ = client.graphql.Mutate(context.Background(), &mutation, mvars, graphql.OperationName("DeleteDataSilos"))
+	}
+}
+
 func lookupDataSiloPlugin(t *testing.T, id string) []types.Plugin {
 	client := getTestClient()
 
@@ -363,4 +396,39 @@ func TestCanAddSombraId(t *testing.T) {
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("c29ba149-b7b4-4ff1-a93f-b24641271ea7"), silo.SombraId)
+}
+
+func TestOwnerEmailsOrderIndependence(t *testing.T) {
+	// Clean up any silos with the same titles before running the test
+	destroyDataSiloByTitle(t, t.Name()+"_A")
+	destroyDataSiloByTitle(t, t.Name()+"_B")
+	// Test with owner_emails in one order
+	emailsA := []string{"b@example.com", "a@example.com"}
+	emailsB := []string{"a@example.com", "b@example.com"}
+
+	optionsA := prepareDataSiloOptions(t, map[string]interface{}{
+		"owner_emails": emailsA,
+		"title":        t.Name() + "_A",
+	})
+	optionsB := prepareDataSiloOptions(t, map[string]interface{}{
+		"owner_emails": emailsB,
+		"title":        t.Name() + "_B",
+	})
+
+	defer terraform.Destroy(t, optionsA)
+	defer terraform.Destroy(t, optionsB)
+
+	siloA, _ := deployDataSilo(t, optionsA)
+	siloB, _ := deployDataSilo(t, optionsB)
+
+	// Both silos should have the same owner emails in state, regardless of input order
+	var outputA, outputB []string
+	for _, o := range siloA.Owners {
+		outputA = append(outputA, string(o.Email))
+	}
+	for _, o := range siloB.Owners {
+		outputB = append(outputB, string(o.Email))
+	}
+
+	assert.ElementsMatch(t, outputA, outputB, "Owner emails should be order-independent in state and not change between applies")
 }
