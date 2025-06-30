@@ -8,6 +8,7 @@ import (
 )
 
 func TestCanLookupDataSilo(t *testing.T) {
+	destroyDataSiloByTitle(t, t.Name())
 	vars := map[string]interface{}{
 		"title": t.Name(),
 	}
