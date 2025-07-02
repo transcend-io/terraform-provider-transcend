@@ -28,19 +28,27 @@ func (t *sombraTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return http.DefaultTransport.RoundTrip(req)
 }
 
+
 type Client struct {
-	graphql      *graphql.Client
-	sombraClient *http.Client
-	url          string
+   graphql         *graphql.Client
+   sombraClient    *http.Client
+   url             string
+   internalSombraUrl string
 }
 
-func NewClient(url, apiToken string, internalKey string) *Client {
-	backendClient := &http.Client{Transport: &backendTransport{apiToken: apiToken}}
-	sombraClient := &http.Client{Transport: &sombraTransport{apiToken: apiToken, internalKey: internalKey}}
 
-	return &Client{
-		graphql:      graphql.NewClient(url, backendClient),
-		sombraClient: sombraClient,
-		url:          url,
-	}
+func NewClient(url, apiToken string, internalKey string) *Client {
+   return NewClientWithSombraUrl(url, apiToken, internalKey, "")
+}
+
+func NewClientWithSombraUrl(url, apiToken string, internalKey string, internalSombraUrl string) *Client {
+   backendClient := &http.Client{Transport: &backendTransport{apiToken: apiToken}}
+   sombraClient := &http.Client{Transport: &sombraTransport{apiToken: apiToken, internalKey: internalKey}}
+
+   return &Client{
+	   graphql:      graphql.NewClient(url, backendClient),
+	   sombraClient: sombraClient,
+	   url:          url,
+	   internalSombraUrl: internalSombraUrl,
+   }
 }
