@@ -107,12 +107,14 @@ type DataSilo struct {
 	ConnectionState  DataSiloConnectionState `json:"connectionState"`
 	SombraId         graphql.String          `json:"sombraId,omitempty"`
 
+	// Sombra enricher identifier mappings
+	EnricherIdentifierMappings []EnricherIdentifierMapping `json:"enricherIdentifierMappings"`
 	// TODO: Add support to DataSiloInput first
 	// Identifiers        []struct {
-	// 	Name graphql.String `json:"name"`
+	//  Name graphql.String `json:"name"`
 	// } `json:"identifiers"`
 	// PromptEmailTemplate struct {
-	// 	ID graphql.String `json:"id,omitempty"`
+	//  ID graphql.String `json:"id,omitempty"`
 	// } `json:"promptEmailTemplate,omitempty"`
 
 	// TODO: Look up the schema here
@@ -291,9 +293,36 @@ func CreateDataSiloInput(d *schema.ResourceData) CreateDataSilosInput {
 }
 
 type ContextJson struct {
-	SecretMap             map[string]string `json:"secretMap"`
-	AllowedHosts          []string          `json:"allowedHosts"`
-	AllowedPlaintextPaths []string          `json:"allowedPlaintextPaths"`
+	SecretMap              map[string]string       `json:"secretMap"`
+	AllowedHosts           []string                `json:"allowedHosts"`
+	AllowedPlaintextPaths  []string                `json:"allowedPlaintextPaths"`
+	AllowedIdentifierPaths []AllowedIdentifierPath `json:"allowedIdentifierPaths,omitempty"`
+}
+
+// Represents a single allowed identifier path for Sombra integration
+type AllowedIdentifierPath struct {
+	IdentifierName string `json:"identifierName"`
+	Path           string `json:"path"`
+}
+
+// Represents the enricherIdentifierMappings structure from the backend
+type EnricherIdentifierMapping struct {
+	IdentifierName string   `json:"identifierName"`
+	Paths          []string `json:"paths"`
+}
+
+// Flattens enricherIdentifierMappings into a list of AllowedIdentifierPath
+func BuildAllowedIdentifierPaths(mappings []EnricherIdentifierMapping) []AllowedIdentifierPath {
+	var allowed []AllowedIdentifierPath
+	for _, mapping := range mappings {
+		for _, path := range mapping.Paths {
+			allowed = append(allowed, AllowedIdentifierPath{
+				IdentifierName: mapping.IdentifierName,
+				Path:           path,
+			})
+		}
+	}
+	return allowed
 }
 
 func toStringList(l []graphql.String) []string {
@@ -304,8 +333,8 @@ func toStringList(l []graphql.String) []string {
 	return ret
 }
 
-func ConstructSecretMapString(d *schema.ResourceData, allowedHosts []graphql.String, allowedPlaintextPathObjs []PlaintextInformation) ([]byte, error) {
-	// Contruct secret map
+func ConstructSecretMapString(d *schema.ResourceData, allowedHosts []graphql.String, allowedPlaintextPathObjs []PlaintextInformation, allowedIdentifierPaths []AllowedIdentifierPath) ([]byte, error) {
+	// Construct secret map
 	contextSet := d.Get("secret_context").(*schema.Set)
 	contextMap := map[string]string{}
 	for _, rawContext := range contextSet.List() {
@@ -313,16 +342,17 @@ func ConstructSecretMapString(d *schema.ResourceData, allowedHosts []graphql.Str
 		contextMap[context["name"].(string)] = context["value"].(string)
 	}
 
-	// Contruct plaintext paths
+	// Construct plaintext paths
 	allowedPlaintextPaths := make([]string, len(allowedPlaintextPathObjs))
 	for i, obj := range allowedPlaintextPathObjs {
 		allowedPlaintextPaths[i] = string(obj.Path)
 	}
 
 	return json.Marshal(ContextJson{
-		SecretMap:             contextMap,
-		AllowedHosts:          toStringList(allowedHosts),
-		AllowedPlaintextPaths: allowedPlaintextPaths,
+		SecretMap:              contextMap,
+		AllowedHosts:           toStringList(allowedHosts),
+		AllowedPlaintextPaths:  allowedPlaintextPaths,
+		AllowedIdentifierPaths: allowedIdentifierPaths,
 	})
 }
 
