@@ -11,32 +11,32 @@ import (
 // Provider -
 func Provider() *schema.Provider {
 	return &schema.Provider{
-	   Schema: map[string]*schema.Schema{
-		   "url": {
-			   Type:        schema.TypeString,
-			   Required:    true,
-			   DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_URL", "https://api.transcend.io/"),
-			   Description: "The custom Transcend backend URL to talk to. Typically can be left to the default production URL.",
-		   },
-		   "key": {
-			   Type:        schema.TypeString,
-			   Required:    true,
-			   DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_KEY", nil),
-			   Description: "The API Key to use to talk to Transcend. Ensure it has the scopes to perform whatever actions you need. Can be set using the TRANSCEND_KEY environment variable.",
-		   },
-		   "internal_sombra_key": {
-			   Type:        schema.TypeString,
-			   Optional:    true,
-			   DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_KEY", nil),
-			   Description: "The API Key to use to talk to a self-hosted sombra. Only used for enterprises with the self-hosted option",
-		   },
-		   "internal_sombra_url": {
-			   Type:        schema.TypeString,
-			   Optional:    true,
-			   DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_URL", nil),
-			   Description: "If set, this URL will be used for sombra operations instead of querying the backend. Useful for reverse proxy instances.",
-		   },
-	   },
+		Schema: map[string]*schema.Schema{
+			"url": {
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_URL", "https://api.transcend.io/"),
+				Description: "The custom Transcend backend URL to talk to. Typically can be left to the default production URL.",
+			},
+			"key": {
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_KEY", nil),
+				Description: "The API Key to use to talk to Transcend. Ensure it has the scopes to perform whatever actions you need. Can be set using the TRANSCEND_KEY environment variable.",
+			},
+			"internal_sombra_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_KEY", nil),
+				Description: "The API Key to use to talk to a self-hosted sombra. Only used for enterprises with the self-hosted option",
+			},
+			"internal_sombra_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("TRANSCEND_INTERNAL_SOMBRA_URL", nil),
+				Description: "If set, this URL will be used for sombra operations instead of querying the backend. Useful for reverse proxy instances.",
+			},
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"transcend_api_key":                       resourceAPIKey(),
 			"transcend_data_point":                    resourceDataPoint(),
@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
 			"transcend_content_classification_plugin": resourceContentClassificationPlugin(),
 			"transcend_data_silo_discovery_plugin":    resourceDataSiloDiscoveryPlugin(),
+			"transcend_identifier":                    resourceIdentifier(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"transcend_identifier": dataSourceIdentifier(),
@@ -58,10 +59,10 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-   backendUrl := d.Get("url").(string)
-   backendApiKey := d.Get("key").(string)
-   sombraInternalKey := d.Get("internal_sombra_key").(string)
-   internalSombraUrl := d.Get("internal_sombra_url").(string)
+	backendUrl := d.Get("url").(string)
+	backendApiKey := d.Get("key").(string)
+	sombraInternalKey := d.Get("internal_sombra_key").(string)
+	internalSombraUrl := d.Get("internal_sombra_url").(string)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -85,5 +86,5 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-   return NewClientWithSombraUrl(graphQlUrl, backendApiKey, sombraInternalKey, internalSombraUrl), nil
+	return NewClientWithSombraUrl(graphQlUrl, backendApiKey, sombraInternalKey, internalSombraUrl), nil
 }

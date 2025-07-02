@@ -52,9 +52,9 @@ Fill this in for each provider
 Run these commands in order to test a single test:
 
 ```bash
-make install
-find . -type f -name "*.terraform.lock.hcl" -exec rm -f {} +
-go test -v ./... -run "TestCanChangeIsLive"
+make install && \
+find . -type f -name "*.terraform.lock.hcl" -exec rm -f {} + && \
+go test -v ./... -run "TestCanCreateAndDestroyIdentifier"
 ```
 
 or to run all:
