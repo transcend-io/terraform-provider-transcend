@@ -16,6 +16,13 @@ import (
 	graphql "github.com/hasura/go-graphql-client"
 )
 
+// Helper to update ContextJson with allowedIdentifierPaths from enricherIdentifierMappings
+// enricherIdentifierMappings should be a []EnricherIdentifierMapping (from backend GraphQL response)
+// contextJson is the existing ContextJson struct
+func UpdateContextJsonWithAllowedIdentifierPaths(contextJson *types.ContextJson, mappings []types.EnricherIdentifierMapping) {
+	contextJson.AllowedIdentifierPaths = types.BuildAllowedIdentifierPaths(mappings)
+}
+
 func resourceDataSilo() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataSilosCreate,
@@ -495,60 +502,69 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diags
 	}
 
+	var allowedIdentifierPaths []types.AllowedIdentifierPath
+	if len(updateMutation.UpdateDataSilos.DataSilos) > 0 {
+		silo := updateMutation.UpdateDataSilos.DataSilos[0]
+		// Directly access the field if it exists
+		if silo.EnricherIdentifierMappings != nil {
+			allowedIdentifierPaths = types.BuildAllowedIdentifierPaths(silo.EnricherIdentifierMappings)
+		}
+	}
+
 	// Presign the SaaS context if the integration has secrets
 	// For Internal Transcend Folks, see: https://docs.google.com/document/d/1PURNdW7VI9r9kwDM4fud9Hx_58vZbhMhB8OPEYxl8O4/view#
 	var saasContext []byte
 
-   if d.Get("secret_context") != nil {
-	   // Allow override of sombra URL from provider settings
-	   var sombraCustomerUrl string
-	   if client.internalSombraUrl != "" {
-		   sombraCustomerUrl = client.internalSombraUrl
-	   } else {
-		   // Lookup the sombra URL to talk to
-		   var queryBySombraId struct {
-			   Sombras []types.SombraOutput `graphql:"sombras(filterBy: {ids: [$sombra_id]})"`
-		   }
-		   var queryPrimarySombra struct {
-			   Organization struct {
-				   Sombra struct {
-					   CustomerUrl  graphql.String `graphql:"customerUrl"`
-					   HostedMethod graphql.String `graphql:"hostedMethod"`
-				   } `graphql:"sombra"`
-			   } `graphql:"organization"`
-		   }
+	if d.Get("secret_context") != nil {
+		// Allow override of sombra URL from provider settings
+		var sombraCustomerUrl string
+		if client.internalSombraUrl != "" {
+			sombraCustomerUrl = client.internalSombraUrl
+		} else {
+			// Lookup the sombra URL to talk to
+			var queryBySombraId struct {
+				Sombras []types.SombraOutput `graphql:"sombras(filterBy: {ids: [$sombra_id]})"`
+			}
+			var queryPrimarySombra struct {
+				Organization struct {
+					Sombra struct {
+						CustomerUrl  graphql.String `graphql:"customerUrl"`
+						HostedMethod graphql.String `graphql:"hostedMethod"`
+					} `graphql:"sombra"`
+				} `graphql:"organization"`
+			}
 
-		   var err error
-		   sombraId := d.Get("sombra_id")
-		   if sombraId == nil || sombraId == "" {
-			   err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
-		   } else {
-			   var queryBySombraIdVars = map[string]interface{}{"sombra_id": sombraId.(string)}
-			   err = client.graphql.Query(context.Background(), &queryBySombraId, queryBySombraIdVars, graphql.OperationName("SombraUrlQuery"))
-		   }
+			var err error
+			sombraId := d.Get("sombra_id")
+			if sombraId == nil || sombraId == "" {
+				err = client.graphql.Query(context.Background(), &queryPrimarySombra, map[string]interface{}{}, graphql.OperationName("SombraUrlQuery"))
+			} else {
+				var queryBySombraIdVars = map[string]interface{}{"sombra_id": sombraId.(string)}
+				err = client.graphql.Query(context.Background(), &queryBySombraId, queryBySombraIdVars, graphql.OperationName("SombraUrlQuery"))
+			}
 
-		   if err != nil {
-			   diags = append(diags, diag.Diagnostic{
-				   Severity: diag.Error,
-				   Summary:  "Error Finding sombra URL",
-				   Detail:   "Error when updating data silo: " + err.Error(),
-			   })
-			   if d.IsNewResource() {
-				   deletionDiags := resourceDataSilosDelete(ctx, d, m)
-				   if deletionDiags.HasError() {
-					   diags = append(diags, deletionDiags...)
-				   }
-			   }
-			   return diags
-		   }
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Error Finding sombra URL",
+					Detail:   "Error when updating data silo: " + err.Error(),
+				})
+				if d.IsNewResource() {
+					deletionDiags := resourceDataSilosDelete(ctx, d, m)
+					if deletionDiags.HasError() {
+						diags = append(diags, deletionDiags...)
+					}
+				}
+				return diags
+			}
 
-		   // Set sombra customer url
-		   if sombraId == nil || sombraId == "" {
-			   sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
-		   } else {
-			   sombraCustomerUrl = string(queryBySombraId.Sombras[0].CustomerUrl)
-		   }
-	   }
+			// Set sombra customer url
+			if sombraId == nil || sombraId == "" {
+				sombraCustomerUrl = string(queryPrimarySombra.Organization.Sombra.CustomerUrl)
+			} else {
+				sombraCustomerUrl = string(queryBySombraId.Sombras[0].CustomerUrl)
+			}
+		}
 
 		// Lookup the saas context metadata
 		var catalogQuery struct {
@@ -575,7 +591,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		}
 		// Have sombra encrypt the secret map and parse the resulting saas context
 		allowedBaseHosts := catalogQuery.Catalog.Catalog.IntegrationConfig.ConfiguredBaseHosts.PROD
-		jsonBody, err := types.ConstructSecretMapString(d, allowedBaseHosts, catalogQuery.Catalog.Catalog.PlaintextInformation)
+		jsonBody, err := types.ConstructSecretMapString(d, allowedBaseHosts, catalogQuery.Catalog.Catalog.PlaintextInformation, allowedIdentifierPaths)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
