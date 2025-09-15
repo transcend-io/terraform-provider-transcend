@@ -43,8 +43,9 @@ func Provider() *schema.Provider {
 			"transcend_enricher":                      resourceEnricher(),
 			"transcend_data_silo":                     resourceDataSilo(),
 			"transcend_data_silo_connection":          resourceDataSiloConnection(),
-			"transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
-			"transcend_content_classification_plugin": resourceContentClassificationPlugin(),
+			// FIXME add scan resource
+			// "transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
+			// "transcend_content_classification_plugin": resourceContentClassificationPlugin(),
 			"transcend_data_silo_discovery_plugin":    resourceDataSiloDiscoveryPlugin(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{

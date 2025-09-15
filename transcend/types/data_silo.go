@@ -163,6 +163,35 @@ type UpdatePluginInput struct {
 	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
 }
 
+type DiscoClassScanConfig struct {
+	DiscoClassScanConfigID   graphql.ID         `json:"id"`
+	DataSiloID               graphql.ID         `json:"dataSiloId"`
+	Type                     DiscoClassScanType `json:"type"`
+	Enabled                  graphql.Boolean    `json:"enabled"`
+	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
+	LastDiscoClassScanId     graphql.ID         `json:"lastDiscoClassScanId"`
+	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
+	LastDiscoClassScan       struct {
+		Type        DiscoClassScanType   `json:"type"`
+		Status      DiscoClassScanStatus `json:"status"`
+		StartedAt   graphql.String       `json:"startedAt"`
+		CompletedAt graphql.String       `json:"completedAt"`
+		AvgDuration graphql.Float        `json:"avgDuration"`
+	} `json:"lastDiscoClassScan"`
+}
+
+type UpdateDiscoClassScanConfigInput struct {
+	DiscoClassScanConfigID   graphql.ID         `json:"id"`
+	Enabled                  graphql.Boolean    `json:"enabled"`
+	Type                     DiscoClassScanType `json:"type"`
+	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
+	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
+	ScanPluginConfigs        []struct {
+		Type          PluginType     `json:"type"`
+		Configuration graphql.String `json:"configuration"`
+	} `json:"scanPluginConfigs"`
+}
+
 type SombraOutput struct {
 	CustomerUrl  graphql.String `graphql:"customerUrl"`
 	HostedMethod graphql.String `graphql:"hostedMethod"`

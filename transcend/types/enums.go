@@ -10,6 +10,8 @@ type DataSiloConnectionState string
 type ScopeName string
 type EnricherType string
 type PluginType string
+type DiscoClassScanType string
+type DiscoClassScanStatus string
 
 func ToRequestActionObjectResolverList(origs []interface{}) []RequestActionObjectResolver {
 	vals := make([]RequestActionObjectResolver, len(origs))

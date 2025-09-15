@@ -377,7 +377,7 @@ resource "transcend_data_silo" "aws" {
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
   }
-
+  # FIXME - REPLACE WITH SCAN
   content_classification_plugin {
     enabled                    = true
     schedule_frequency_minutes = 1440 # 1 day
