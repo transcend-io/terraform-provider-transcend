@@ -186,10 +186,7 @@ type UpdateDiscoClassScanConfigInput struct {
 	Type                     DiscoClassScanType `json:"type"`
 	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
 	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
-	ScanPluginConfigs        []struct {
-		Type          PluginType     `json:"type"`
-		Configuration graphql.String `json:"configuration"`
-	} `json:"scanPluginConfigs"`
+	// FIXME remove or add TODO: Omitting scanPluginConfigs for now
 }
 
 type SombraOutput struct {
@@ -213,6 +210,16 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 		DataSiloID:               graphql.String(d.Get("id").(string)),
 		PluginID:                 pluginId,
 		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
+		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
+	}
+}
+
+func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.ID) UpdateDiscoClassScanConfigInput {
+	return UpdateDiscoClassScanConfigInput{
+		DiscoClassScanConfigID:   discoClassScanConfigId,
+		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
+		Type:                     DiscoClassScanType(configuration["type"].(string)),
 		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
 		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
 	}
