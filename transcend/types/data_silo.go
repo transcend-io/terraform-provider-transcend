@@ -164,12 +164,12 @@ type UpdatePluginInput struct {
 }
 
 type DiscoClassScanConfig struct {
-	DiscoClassScanConfigID   graphql.ID         `json:"id"`
-	DataSiloID               graphql.ID         `json:"dataSiloId"`
+	ID                       graphql.String     `json:"id"`
+	DataSiloID               graphql.String     `json:"dataSiloId"`
 	Type                     DiscoClassScanType `json:"type"`
 	Enabled                  graphql.Boolean    `json:"enabled"`
 	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
-	LastDiscoClassScanId     graphql.ID         `json:"lastDiscoClassScanId"`
+	LastDiscoClassScanId     graphql.String     `json:"lastDiscoClassScanId"`
 	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
 	LastDiscoClassScan       struct {
 		Type        DiscoClassScanType   `json:"type"`
@@ -215,7 +215,17 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 	}
 }
 
-func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.ID) UpdateDiscoClassScanConfigInput {
+func MakeStandaloneUpdateDiscoClassScanConfigInput(d *schema.ResourceData) UpdateDiscoClassScanConfigInput {
+	return UpdateDiscoClassScanConfigInput{
+		DiscoClassScanConfigID:   graphql.String(d.Get("id").(string)),
+		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
+		Type:                     DiscoClassScanType(d.Get("type").(string)),
+		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(d.Get("schedule_frequency_minutes").(int) * 1000 * 60)),
+		ScheduleStartAt:          graphql.String(d.Get("schedule_start_at").(string)),
+	}
+}
+
+func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.String) UpdateDiscoClassScanConfigInput {
 	return UpdateDiscoClassScanConfigInput{
 		DiscoClassScanConfigID:   discoClassScanConfigId,
 		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
