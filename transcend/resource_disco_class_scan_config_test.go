@@ -6,6 +6,7 @@ import (
 	"github.com/transcend-io/terraform-provider-transcend/transcend/types"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	graphql "github.com/hasura/go-graphql-client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,4 +31,17 @@ func deployDiscoClassScanConfig(t *testing.T, terraformOptions *terraform.Option
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	discoClassScanConfig := lookupDataSiloDiscoClassScanConfig(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	return silo, discoClassScanConfig
+}
+
+func TestCanUseSeparateDiscoClassScanConfigResource(t *testing.T) {
+	options := prepareDiscoClassScanConfigOptions(t, map[string]interface{}{
+		"enabled":                    true,
+		"schedule_frequency_minutes": 120,
+		// Schedule far in the future so that the test works for a long time
+		"schedule_start_at": "2122-09-06T17:51:13.000Z",
+	})
+	defer terraform.Destroy(t, options)
+	silo, _ := deployDiscoClassScanConfig(t, options)
+	assert.Equal(t, graphql.String(t.Name()), silo.Title)
+	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 }
