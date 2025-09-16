@@ -364,7 +364,7 @@ resource "transcend_data_silo" "aws" {
 
 ### Adding a Data Point Plugin
 
-Sometimes when you connect a data silo, you don't know what data is inside that silo, and want Transcend to try to classify the data for you. This is called discovery and classification scanning, and can be performed by certain integrations such as Salesforce, Amazon S3/Dynamodb, Mongodb, Snowflake, and more.
+Sometimes when you connect a data silo, you don't know what data is inside that silo, and want Transcend to try to classify the data for you. This is called data point discovery, and can be performed by certain integrations such as Salesforce, Amazon S3/Dynamodb, Mongodb, Snowflake, and more.
 
 To do so, add the `disco_class_scan_config` block inside any data silo that supports data point discovery like so:
 
@@ -431,11 +431,11 @@ to search for integration metadata based on a title substring. Make sure you are
 
 ### Optional
 
-- `disco_class_scan_config` (Block List, Max: 1) Configuration for the Discovery and Classification Scan for data silos. (see [below for nested schema](#nestedblock--disco_class_scan_config))
-- `content_classification_plugin` (Block List, Max: 1) [DEPRECATED - use `disco_class_scan_config` instead] Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin. (see [below for nested schema](#nestedblock--content_classification_plugin))
+- `content_classification_plugin` (Block List, Max: 1) Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin. (see [below for nested schema](#nestedblock--content_classification_plugin))
 - `data_point_discovery_plugin` (Block List, Max: 1) [DEPRECATED] Configuration for the Data Point discovery plugin for data silos. (see [below for nested schema](#nestedblock--data_point_discovery_plugin))
 - `data_silo_discovery_plugin` (Block List, Max: 1) Configuration for the Data Silo discovery plugin for data silos. (see [below for nested schema](#nestedblock--data_silo_discovery_plugin))
 - `description` (String) The description of the data silo
+- `disco_class_scan_config` (Block List, Max: 1) Configuration for the Disco Class Scan Config for data silos. (see [below for nested schema](#nestedblock--disco_class_scan_config))
 - `headers` (Block List) Custom headers to include in outbound webhook (see [below for nested schema](#nestedblock--headers))
 - `is_live` (Boolean) Whether the data silo should be live
 - `notify_email_address` (String) The email address that should be notified whenever new requests are made
@@ -443,7 +443,7 @@ to search for integration metadata based on a title substring. Make sure you are
 - `owner_emails` (Set of String) The emails of the users to assign as owners of this data silo. These emails must have matching users on Transcend.
 - `owner_teams` (Set of String) The emails of the teams to assign as owners of this data silo. These names must have matching teams in Transcend.
 - `plaintext_context` (Block Set) This is where you put non-secretive values that go in the form when connecting a data silo (see [below for nested schema](#nestedblock--plaintext_context))
-- `schema_discovery_plugin` [DEPRECATED - use `disco_class_scan_config` instead] (Block List, Max: 1) Configuration for the Schema Discovery plugin for data silos. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
+- `schema_discovery_plugin` (Block List, Max: 1) Configuration for the Schema Discovery plugin for data silos. (see [below for nested schema](#nestedblock--schema_discovery_plugin))
 - `secret_context` (Block Set) This is where you put values that go in the form when connecting a data silo. In general, most form values are secret context. (see [below for nested schema](#nestedblock--secret_context))
 - `skip_connecting` (Boolean) If true, the data silo will be left unconnected. When false, the provided credentials will be tested against a live environment
 - `sombra_id` (String) Id of sombra instance used to talk to this data silo
@@ -457,26 +457,6 @@ to search for integration metadata based on a title substring. Make sure you are
 - `has_avc_functionality` (Boolean) Whether the data silo supports automated vendor coordination
 - `id` (String) The ID of this resource.
 - `link` (String) The link to the data silo
-
-
-<a id="nestedblock--disco_class_scan_config"></a>
-### Nested Schema for `disco_class_scan_config`
-
-Required:
-
-- `schedule_frequency_minutes` (Number) The updated frequency with which we should schedule this plugin, in milliseconds
-- `schedule_start_at` (String) The updated start time when we should start scheduling this plugin, in ISO format
-
-Optional:
-
-- `type` (String) Either "FULL_SCAN", "SCAN_ONLY", or "CLASSIFICATION_ONLY" (_N.B._ not all data silos support all scan types)
-- `enabled` (Boolean) State to toggle plugin to
-
-Read-Only:
-
-- `id` (String) The ID of this resource.
-- `last_enabled_at` (String) The date at which this data silo was last enabled
-
 
 <a id="nestedblock--content_classification_plugin"></a>
 ### Nested Schema for `content_classification_plugin`
@@ -530,6 +510,22 @@ Read-Only:
 
 - `id` (String) The ID of this resource.
 - `last_enabled_at` (String) The date at which this data silo was last enabled
+
+
+<a id="nestedblock--disco_class_scan_config"></a>
+### Nested Schema for `disco_class_scan_config`
+
+Optional:
+
+- `enabled` (Boolean) Whether or not scheduling is enabled
+- `schedule_frequency_minutes` (Number) The frequency with which we should schedule this disco class scan, in minutes
+- `schedule_start_at` (String) The start time when we should start scheduling this disco class scan, in ISO format
+- `type` (String) The type of disco class scan config
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+- `last_disco_class_scan_id` (String) The ID of the last disco class scan
 
 
 <a id="nestedblock--headers"></a>
