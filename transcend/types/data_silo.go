@@ -181,6 +181,7 @@ type DiscoClassScanConfig struct {
 }
 
 type UpdateDiscoClassScanConfigInput struct {
+	DataSiloID               graphql.ID     	`json:"dataSiloId"`
 	DiscoClassScanConfigID   graphql.ID         `json:"id"`
 	Enabled                  graphql.Boolean    `json:"enabled"`
 	Type                     DiscoClassScanType `json:"type"`

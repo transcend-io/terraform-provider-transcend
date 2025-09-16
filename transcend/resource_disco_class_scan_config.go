@@ -17,21 +17,37 @@ func resourceDiscoClassScanConfig() *schema.Resource {
 		UpdateContext: resourceDiscoClassScanConfigUpdate,
 		DeleteContext: resourceDiscoClassScanConfigDelete,
 		Schema: map[string]*schema.Schema{
-			"title": {
+			"id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
+			},
+			"data_silo_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The ID of the data silo to connect",
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of disco class scan config",
 			},
 			"enabled": {
-				Type:     schema.TypeBool,
-				Required: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether or not scheduling is enabled",
 			},
 			"schedule_frequency_minutes": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:        schema.TypeInt,
+				Optional:    true,
+			},
+			"last_disco_class_scan_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ID of the last disco class scan",
 			},
 			"schedule_start_at": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 		},
 	}

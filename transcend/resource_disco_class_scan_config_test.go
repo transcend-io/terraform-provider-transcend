@@ -35,10 +35,12 @@ func deployDiscoClassScanConfig(t *testing.T, terraformOptions *terraform.Option
 
 func TestCanUseSeparateDiscoClassScanConfigResource(t *testing.T) {
 	options := prepareDiscoClassScanConfigOptions(t, map[string]interface{}{
-		"enabled":                    true,
-		"schedule_frequency_minutes": 120,
-		// Schedule far in the future so that the test works for a long time
-		"schedule_start_at": "2122-09-06T17:51:13.000Z",
+		"disco_class_scan_config_vars": map[string]interface{}{
+			"enabled":                    true,
+			"schedule_frequency_minutes": 120,
+			// Schedule far in the future so that the test works for a long time
+			"schedule_start_at": "2122-09-06T17:51:13.000Z",
+		},
 	})
 	defer terraform.Destroy(t, options)
 	silo, _ := deployDiscoClassScanConfig(t, options)

@@ -12,7 +12,7 @@ provider "transcend" {
 }
 
 variable "title" {}
-variable "disco_class_scan_config" {
+variable "disco_class_scan_config_vars" {
   type = object({
     enabled                    = bool
     schedule_frequency_minutes = number
@@ -54,9 +54,9 @@ resource "transcend_data_silo_connection" "connection" {
 resource "transcend_disco_class_scan_config" "disco_class_scan_config" {
   data_silo_id = transcend_data_silo.silo.id
 
-  enabled                    = var.disco_class_scan_config["enabled"]
-  schedule_frequency_minutes = var.disco_class_scan_config["schedule_frequency_minutes"]
-  schedule_start_at          = var.disco_class_scan_config["schedule_start_at"]
+  enabled                    = var.disco_class_scan_config_vars["enabled"]
+  schedule_frequency_minutes = var.disco_class_scan_config_vars["schedule_frequency_minutes"]
+  schedule_start_at          = var.disco_class_scan_config_vars["schedule_start_at"]
 
   depends_on = [transcend_data_silo_connection.connection]
 }
