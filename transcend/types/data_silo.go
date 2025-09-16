@@ -168,7 +168,7 @@ type DiscoClassScanConfig struct {
 	DataSiloID               graphql.String     `json:"dataSiloId"`
 	Type                     DiscoClassScanType `json:"type"`
 	Enabled                  graphql.Boolean    `json:"enabled"`
-	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
+	ScheduleFrequency graphql.Int        `json:"scheduleFrequency"`
 	LastDiscoClassScanId     graphql.String     `json:"lastDiscoClassScanId"`
 	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
 	LastDiscoClassScan       struct {
@@ -181,12 +181,11 @@ type DiscoClassScanConfig struct {
 }
 
 type UpdateDiscoClassScanConfigInput struct {
-	DataSiloID               graphql.ID     	`json:"dataSiloId"`
-	DiscoClassScanConfigID   graphql.ID         `json:"id"`
-	Enabled                  graphql.Boolean    `json:"enabled"`
-	Type                     DiscoClassScanType `json:"type"`
-	ScheduleFrequencyMinutes graphql.String     `json:"scheduleFrequency"`
-	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
+	ID                graphql.ID         `json:"id"`
+	Enabled           graphql.Boolean    `json:"enabled"`
+	Type              *DiscoClassScanType `json:"type"`
+	ScheduleFrequencyMinutes graphql.Int        `json:"scheduleFrequency"`
+	ScheduleStartAt   graphql.String    `json:"scheduleStartAt"`
 	// FIXME remove or add TODO: Omitting scanPluginConfigs for now
 }
 
@@ -217,23 +216,45 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 }
 
 func MakeStandaloneUpdateDiscoClassScanConfigInput(d *schema.ResourceData) UpdateDiscoClassScanConfigInput {
-	return UpdateDiscoClassScanConfigInput{
-		DiscoClassScanConfigID:   graphql.String(d.Get("id").(string)),
-		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
-		Type:                     DiscoClassScanType(d.Get("type").(string)),
-		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(d.Get("schedule_frequency_minutes").(int) * 1000 * 60)),
-		ScheduleStartAt:          graphql.String(d.Get("schedule_start_at").(string)),
+	input := UpdateDiscoClassScanConfigInput{
+		ID:                graphql.String(d.Get("id").(string)),
+		Enabled:           graphql.Boolean(d.Get("enabled").(bool)),
+		ScheduleFrequencyMinutes: graphql.Int(d.Get("schedule_frequency_minutes").(int) * 1000 * 60),
 	}
+	
+	// Only set type if it's provided and not empty
+	if typeVal, ok := d.Get("type").(string); ok && typeVal != "" {
+		discoType := DiscoClassScanType(typeVal)
+		input.Type = &discoType
+	}
+	
+	// Only set scheduleStartAt if it's provided and not empty
+	if startAtVal, ok := d.Get("schedule_start_at").(string); ok && startAtVal != "" {
+		input.ScheduleStartAt = graphql.String(startAtVal)
+	}
+	
+	return input
 }
 
 func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.String) UpdateDiscoClassScanConfigInput {
-	return UpdateDiscoClassScanConfigInput{
-		DiscoClassScanConfigID:   discoClassScanConfigId,
-		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
-		Type:                     DiscoClassScanType(configuration["type"].(string)),
-		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
-		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
+	input := UpdateDiscoClassScanConfigInput{
+		ID:                discoClassScanConfigId,
+		Enabled:           graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequencyMinutes: graphql.Int(configuration["schedule_frequency_minutes"].(int) * 1000 * 60),
 	}
+	
+	// Only set type if it's provided and not empty
+	if typeVal, ok := d.Get("type").(string); ok && typeVal != "" {
+		discoType := DiscoClassScanType(typeVal)
+		input.Type = &discoType
+	}
+	
+	// Only set scheduleStartAt if it's provided and not empty
+	if startAtVal, ok := configuration["schedule_start_at"].(string); ok && startAtVal != "" {
+		input.ScheduleStartAt = graphql.String(startAtVal)
+	}
+	
+	return input
 }
 
 func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {

@@ -62,10 +62,10 @@ func resourceDiscoClassScanConfigRead(ctx context.Context, d *schema.ResourceDat
 	var diags diag.Diagnostics
 
 	var discoClassScanConfigQuery struct {
-		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(id: $id)"`
+		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
 	}
 	discoClassScanConfigVars := map[string]interface{}{
-		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
+		"dataSiloId": graphql.ID(d.Get("data_silo_id").(string)),
 	}
 	err := client.graphql.Query(context.Background(), &discoClassScanConfigQuery, discoClassScanConfigVars, graphql.OperationName("DiscoClassScanConfig"))
 	if err != nil {
@@ -85,10 +85,10 @@ func resourceDiscoClassScanConfigUpdate(ctx context.Context, d *schema.ResourceD
 	// So here we fetch the ID / settings on the existing discoClassScanConfig
 	// Read the data silo discoClassScanConfig information
 	var discoClassScanConfigQuery struct {
-		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(id: $id)"`
+		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
 	}
 	discoClassScanConfigVars := map[string]interface{}{
-		"dataSiloId": graphql.String(d.Get("data_silo_id").(string)),
+		"dataSiloId": graphql.ID(d.Get("data_silo_id").(string)),
 	}
 	err := client.graphql.Query(context.Background(), &discoClassScanConfigQuery, discoClassScanConfigVars, graphql.OperationName("DiscoClassScanConfig"))
 	if err != nil {
