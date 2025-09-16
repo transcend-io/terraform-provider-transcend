@@ -69,12 +69,10 @@ func lookupDataSiloDiscoClassScanConfig(t *testing.T, id string) types.DiscoClas
 	client := getTestClient()
 
 	var query struct {
-		DiscoClassScanConfig struct {
-			DiscoClassScanConfig types.DiscoClassScanConfig
-		} `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
+		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
 	}
 	vars := map[string]interface{}{
-		"dataSiloId": graphql.String(id),
+		"dataSiloId": graphql.ID(id),
 	}
 
 	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DiscoClassScanConfig"))
@@ -82,7 +80,7 @@ func lookupDataSiloDiscoClassScanConfig(t *testing.T, id string) types.DiscoClas
 		return types.DiscoClassScanConfig{}
 	}
 
-	return query.DiscoClassScanConfig.DiscoClassScanConfig
+	return query.DiscoClassScanConfig
 }
 
 func lookupDataSilo(t *testing.T, id string) types.DataSilo {
