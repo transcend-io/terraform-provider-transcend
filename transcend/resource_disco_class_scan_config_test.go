@@ -44,7 +44,11 @@ func TestCanUseSeparateDiscoClassScanConfigResource(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDiscoClassScanConfig(t, options)
+	silo, discoClassScanConfig := deployDiscoClassScanConfig(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
+	assert.Equal(t, graphql.String("FULL_SCAN"), discoClassScanConfig.Type)
+	assert.Equal(t, graphql.Boolean(true), discoClassScanConfig.Enabled)
+	assert.Equal(t, graphql.Int(120), discoClassScanConfig.ScheduleFrequency)
+	assert.Equal(t, graphql.String("2122-09-06T17:51:13.000Z"), discoClassScanConfig.ScheduleStartAt)
 }

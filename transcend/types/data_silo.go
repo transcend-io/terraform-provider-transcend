@@ -181,12 +181,12 @@ type DiscoClassScanConfig struct {
 }
 
 type UpdateDiscoClassScanConfigInput struct {
-	ID                graphql.ID         `json:"id"`
-	Enabled           graphql.Boolean    `json:"enabled"`
-	Type              *DiscoClassScanType `json:"type"`
-	ScheduleFrequencyMinutes graphql.Int        `json:"scheduleFrequency"`
-	ScheduleStartAt   graphql.String    `json:"scheduleStartAt"`
-	// FIXME remove or add TODO: Omitting scanPluginConfigs for now
+	ID                			graphql.ID         	`json:"id"`
+	Enabled           			graphql.Boolean    	`json:"enabled"`
+	Type              			*DiscoClassScanType	`json:"type"`
+	ScheduleFrequencyMinutes	graphql.Int       	`json:"scheduleFrequency"`
+	ScheduleStartAt   			graphql.String    	`json:"scheduleStartAt"`
+	// Omitting scanPluginConfigs for now
 }
 
 type SombraOutput struct {
