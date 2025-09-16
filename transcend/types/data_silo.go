@@ -244,7 +244,7 @@ func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration m
 	}
 	
 	// Only set type if it's provided and not empty
-	if typeVal, ok := d.Get("type").(string); ok && typeVal != "" {
+	if typeVal, ok := configuration["type"].(string); ok && typeVal != "" {
 		discoType := DiscoClassScanType(typeVal)
 		input.Type = &discoType
 	}
@@ -255,6 +255,42 @@ func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration m
 	}
 	
 	return input
+}
+
+func ReadDiscoClassScanConfigIntoState(d *schema.ResourceData, config DiscoClassScanConfig) {
+	// Convert the disco class scan config to the nested block format
+	// Even though there's only one config per data silo, Terraform requires it as a list
+	
+	// Convert frequency from milliseconds back to minutes
+	frequencyMinutes := int(config.ScheduleFrequency) / (1000 * 60)
+	
+	// Handle optional fields safely
+	typeStr := ""
+	if config.Type != "" {
+		typeStr = string(config.Type)
+	}
+	
+	scheduleStartAt := ""
+	if config.ScheduleStartAt != "" {
+		scheduleStartAt = string(config.ScheduleStartAt)
+	}
+	
+	lastDiscoClassScanId := ""
+	if config.LastDiscoClassScanId != "" {
+		lastDiscoClassScanId = string(config.LastDiscoClassScanId)
+	}
+	
+	discoClassScanConfig := []interface{}{
+		map[string]interface{}{
+			"id":                       string(config.ID),
+			"enabled":                  bool(config.Enabled),
+			"type":                     typeStr,
+			"schedule_frequency_minutes": frequencyMinutes,
+			"schedule_start_at":        scheduleStartAt,
+			"last_disco_class_scan_id": lastDiscoClassScanId,
+		},
+	}
+	d.Set("disco_class_scan_config", discoClassScanConfig)
 }
 
 func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
