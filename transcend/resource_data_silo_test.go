@@ -172,6 +172,15 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
+		"disco_class_scan_config_vars": []map[string]interface{}{
+			{
+				"enabled":                    true,
+				"type":                       "FULL_SCAN",
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+			},
+		},
 		"schema_discovery_plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
@@ -190,9 +199,12 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, plugins, _ := deployDataSilo(t, options)
+	silo, plugins, discoClassScanConfig := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+	assert.True(t, bool(discoClassScanConfig.Enabled))
+	assert.NotEmpty(t, discoClassScanConfig.ID)
+	assert.Equal(t, types.DiscoClassScanType("FULL_SCAN"), discoClassScanConfig.Type)
 	assert.Len(t, plugins, 2)
 	for _, plugin := range plugins {
 		assert.True(t, bool(plugin.Enabled))

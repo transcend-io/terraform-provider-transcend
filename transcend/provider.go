@@ -45,7 +45,7 @@ func Provider() *schema.Provider {
 			"transcend_data_silo_connection":       resourceDataSiloConnection(),
 			"transcend_disco_class_scan_config":    resourceDiscoClassScanConfig(),
 			"transcend_data_silo_discovery_plugin": resourceDataSiloDiscoveryPlugin(),
-			// FIXME - remove:
+			// deprecated:
 			"transcend_schema_discovery_plugin":       resourceSchemaDiscoveryPlugin(),
 			"transcend_content_classification_plugin": resourceContentClassificationPlugin(),
 		},

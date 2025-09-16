@@ -56,6 +56,7 @@ resource "transcend_disco_class_scan_config" "disco_class_scan_config" {
   data_silo_id = transcend_data_silo.silo.id
 
   enabled                    = var.disco_class_scan_config_vars["enabled"]
+  type                       = var.disco_class_scan_config_vars["type"]
   schedule_frequency_minutes = var.disco_class_scan_config_vars["schedule_frequency_minutes"]
   schedule_start_at          = var.disco_class_scan_config_vars["schedule_start_at"]
 

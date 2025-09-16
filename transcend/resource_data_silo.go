@@ -165,6 +165,45 @@ func resourceDataSilo() *schema.Resource {
 					},
 				},
 			},
+			"disco_class_scan_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Configuration for the Disco Class Scan Config for data silos.",
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether or not scheduling is enabled",
+						},
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The type of disco class scan config",
+						},
+						"schedule_frequency_minutes": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The frequency with which we should schedule this disco class scan, in minutes",
+						},
+						"schedule_start_at": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The start time when we should start scheduling this disco class scan, in ISO format",
+						},
+						"last_disco_class_scan_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the last disco class scan",
+						},
+					},
+				},
+			},
 			"data_point_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -447,7 +486,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
 	// Read the data silo plugin information
-	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1) {
 		var pluginQuery struct {
 			Plugins struct {
 				Plugins []types.Plugin
@@ -464,6 +503,23 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 		if len(pluginQuery.Plugins.Plugins) > 0 {
 			types.ReadDataSiloPluginsIntoState(d, pluginQuery.Plugins.Plugins)
 		}
+	}
+
+	// Read the disco class scan config information
+	if d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1 {
+		var discoClassScanConfigQuery struct {
+			DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
+		}
+		discoClassScanConfigVars := map[string]interface{}{
+			"dataSiloId": graphql.ID(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &discoClassScanConfigQuery, discoClassScanConfigVars, graphql.OperationName("DiscoClassScanConfig"))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		// Read the disco class scan config into state
+		types.ReadDiscoClassScanConfigIntoState(d, discoClassScanConfigQuery.DiscoClassScanConfig)
 	}
 
 	return nil
@@ -711,7 +767,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	// Handle the plugin settings if defined
-	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) {
+	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1) {
 		// Read the data silo plugin information
 		var pluginQuery struct {
 			Plugins struct {
@@ -781,6 +837,47 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 		}
 
+	}
+
+	// Update disco class scan config if configured
+	if d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1 {
+		discoClassScanConfig := d.Get("disco_class_scan_config").([]interface{})[0].(map[string]interface{})
+		
+		// First, get the existing disco class scan config ID
+		var discoClassScanConfigQuery struct {
+			DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
+		}
+		discoClassScanConfigVars := map[string]interface{}{
+			"dataSiloId": graphql.ID(d.Get("id").(string)),
+		}
+		err = client.graphql.Query(context.Background(), &discoClassScanConfigQuery, discoClassScanConfigVars, graphql.OperationName("DiscoClassScanConfig"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error finding disco class scan config",
+				Detail:   "Error when reading disco class scan config: " + err.Error(),
+			})
+			return diags
+		}
+
+		// Update the disco class scan config
+		var updateMutation struct {
+			UpdateDiscoClassScanConfig struct {
+				DiscoClassScanConfig types.DiscoClassScanConfig
+			} `graphql:"updateDiscoClassScanConfig(input: $input)"`
+		}
+		updateVars := map[string]interface{}{
+			"input": types.MakeUpdateDiscoClassScanConfigInput(d, discoClassScanConfig, discoClassScanConfigQuery.DiscoClassScanConfig.ID),
+		}
+		err = client.graphql.Mutate(context.Background(), &updateMutation, updateVars, graphql.OperationName("UpdateDiscoClassScanConfig"))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error updating disco class scan config",
+				Detail:   "Error when updating disco class scan config: " + err.Error(),
+			})
+			return diags
+		}
 	}
 
 	return resourceDataSilosRead(ctx, d, m)
