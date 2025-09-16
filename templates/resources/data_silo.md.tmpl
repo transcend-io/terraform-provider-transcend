@@ -68,7 +68,7 @@ To do so, add a `data_silo_discovery_plugin` block inside any data silo that sup
 
 Sometimes when you connect a data silo, you don't know what data is inside that silo, and want Transcend to try to classify the data for you. This is called data point discovery, and can be performed by certain integrations such as Salesforce, Amazon S3/Dynamodb, Mongodb, Snowflake, and more.
 
-To do so, add the `schema_discovery_plugin` and `content_classification_plugin` blocks inside any data silo that supports data point discovery like so:
+To do so, add the `disco_class_scan_config` block inside any data silo that supports data point discovery like so:
 
 {{ tffile "examples/data_silo/schema_content_plugin.tf" }}
 

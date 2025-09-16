@@ -15,6 +15,7 @@ variable "title" {}
 variable "disco_class_scan_config_vars" {
   type = object({
     enabled                    = bool
+    type                       = string
     schedule_frequency_minutes = number
     schedule_start_at          = string
   })

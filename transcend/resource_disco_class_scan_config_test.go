@@ -37,6 +37,7 @@ func TestCanUseSeparateDiscoClassScanConfigResource(t *testing.T) {
 	options := prepareDiscoClassScanConfigOptions(t, map[string]interface{}{
 		"disco_class_scan_config_vars": map[string]interface{}{
 			"enabled":                    true,
+			"type":                       "FULL_SCAN",
 			"schedule_frequency_minutes": 120,
 			// Schedule far in the future so that the test works for a long time
 			"schedule_start_at": "2122-09-06T17:51:13.000Z",

@@ -98,12 +98,13 @@ resource "transcend_data_silo" "silo" {
   skip_connecting      = var.skip_connecting
   sombra_id            = var.sombra_id
 
-  dynamic "schema_discovery_plugin" {
-    for_each = var.schema_discovery_plugin_config
+  dynamic "disco_class_scan_config" {
+    for_each = var.disco_class_scan_config_vars
     content {
-      enabled                    = schema_discovery_plugin.value["enabled"]
-      schedule_frequency_minutes = schema_discovery_plugin.value["schedule_frequency_minutes"]
-      schedule_start_at          = schema_discovery_plugin.value["schedule_start_at"]
+      enabled                    = disco_class_scan_config_vars.value["enabled"]
+      type                       = disco_class_scan_config_vars.value["type"]
+      schedule_frequency_minutes = disco_class_scan_config_vars.value["schedule_frequency_minutes"]
+      schedule_start_at          = disco_class_scan_config_vars.value["schedule_start_at"]
     }
   }
 
@@ -113,15 +114,6 @@ resource "transcend_data_silo" "silo" {
       enabled                    = data_silo_discovery_plugin.value["enabled"]
       schedule_frequency_minutes = data_silo_discovery_plugin.value["schedule_frequency_minutes"]
       schedule_start_at          = data_silo_discovery_plugin.value["schedule_start_at"]
-    }
-  }
-
-  dynamic "content_classification_plugin" {
-    for_each = var.content_classification_plugin_config
-    content {
-      enabled                    = content_classification_plugin.value["enabled"]
-      schedule_frequency_minutes = content_classification_plugin.value["schedule_frequency_minutes"]
-      schedule_start_at          = content_classification_plugin.value["schedule_start_at"]
     }
   }
 
