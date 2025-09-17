@@ -20,7 +20,7 @@ func destroyDataSiloByTitle(t *testing.T, title string) {
 			Nodes []struct {
 				ID    graphql.String `json:"id"`
 				Title graphql.String `json:"title"`
-			}
+			}  
 		} `graphql:"dataSilos(filterBy: { titles: [$title] })"`
 	}
 	vars := map[string]interface{}{
@@ -173,7 +173,7 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 		"disco_class_scan_config_vars": []map[string]interface{}{
 			{
 				"enabled":                    true,
-				"type":                       "FULL_SCAN",
+				"type":                       "SCHEMA_ONLY",
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",
@@ -189,7 +189,7 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 		},
 		"content_classification_plugin_config": []map[string]interface{}{
 			{
-				"enabled":                    true,
+				"enabled":                    false,
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",
@@ -202,12 +202,23 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 	assert.True(t, bool(discoClassScanConfig.Enabled))
 	assert.NotEmpty(t, discoClassScanConfig.ID)
-	assert.Equal(t, types.DiscoClassScanType("FULL_SCAN"), discoClassScanConfig.Type)
+	assert.Equal(t, types.DiscoClassScanType("SCHEMA_ONLY"), discoClassScanConfig.Type)
 	assert.Len(t, plugins, 2)
+	hasSchemaDiscovery := false
+	hasContentClassification := false
 	for _, plugin := range plugins {
-		assert.True(t, bool(plugin.Enabled))
 		assert.NotEmpty(t, plugin.ID)
+		if plugin.Type == "SCHEMA_DISCOVERY" {
+			hasSchemaDiscovery = true
+			assert.True(t, bool(plugin.Enabled))
+		}
+		if plugin.Type == "CONTENT_CLASSIFICATION" {
+			hasContentClassification = true
+			assert.False(t, bool(plugin.Enabled))
+		}
 	}
+	assert.True(t, hasSchemaDiscovery)
+	assert.True(t, hasContentClassification)
 }
 
 func TestCanChangeTitle(t *testing.T) {

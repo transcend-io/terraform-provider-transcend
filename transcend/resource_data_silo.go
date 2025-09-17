@@ -485,8 +485,11 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	types.ReadDataSiloIntoState(d, query.DataSilo)
 
-	// Read the data silo plugin information
-	if (d.Get("schema_discovery_plugin") != nil && len(d.Get("schema_discovery_plugin").([]interface{})) == 1) || (d.Get("content_classification_plugin") != nil && len(d.Get("content_classification_plugin").([]interface{})) == 1) || (d.Get("data_silo_discovery_plugin") != nil && len(d.Get("data_silo_discovery_plugin").([]interface{})) == 1) || (d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1) {
+	// Read the data silo plugin information (only for explicitly configured plugins)
+	_, schemaOk := d.GetOk("schema_discovery_plugin")
+	_, contentOk := d.GetOk("content_classification_plugin")
+	_, dataSiloOk := d.GetOk("data_silo_discovery_plugin")
+	if schemaOk || contentOk || dataSiloOk {
 		var pluginQuery struct {
 			Plugins struct {
 				Plugins []types.Plugin
