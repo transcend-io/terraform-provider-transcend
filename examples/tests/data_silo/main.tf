@@ -127,21 +127,21 @@ resource "transcend_data_silo" "silo" {
     }
   }
 
-  dynamic "content_classification_plugin" {
-    for_each = var.content_classification_plugin_config
-    content {
-      enabled                    = content_classification_plugin.value["enabled"]
-      schedule_frequency_minutes = content_classification_plugin.value["schedule_frequency_minutes"]
-      schedule_start_at          = content_classification_plugin.value["schedule_start_at"]
-    }
-  }
-
   dynamic "data_silo_discovery_plugin" {
     for_each = var.data_silo_discovery_plugin_config
     content {
       enabled                    = data_silo_discovery_plugin.value["enabled"]
       schedule_frequency_minutes = data_silo_discovery_plugin.value["schedule_frequency_minutes"]
       schedule_start_at          = data_silo_discovery_plugin.value["schedule_start_at"]
+    }
+  }
+
+  dynamic "content_classification_plugin" {
+    for_each = var.content_classification_plugin_config
+    content {
+      enabled                    = content_classification_plugin.value["enabled"]
+      schedule_frequency_minutes = content_classification_plugin.value["schedule_frequency_minutes"]
+      schedule_start_at          = content_classification_plugin.value["schedule_start_at"]
     }
   }
 
