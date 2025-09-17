@@ -243,7 +243,7 @@ func resourceDataSilo() *schema.Resource {
 			"schema_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Configuration for the Schema Discovery plugin for data silos.",
+				Description: "[DEPRECATED - use disco_class_scan_config instead] Configuration for the Schema Discovery plugin for data silos.",
 				MinItems:    0,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -279,7 +279,7 @@ func resourceDataSilo() *schema.Resource {
 			"content_classification_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
+				Description: "[DEPRECATED - use disco_class_scan_config instead] Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
 				MinItems:    0,
 				MaxItems:    1,
 				Elem: &schema.Resource{
