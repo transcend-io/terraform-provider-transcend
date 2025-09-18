@@ -243,7 +243,7 @@ func resourceDataSilo() *schema.Resource {
 			"schema_discovery_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "[DEPRECATED - use disco_class_scan_config instead] Configuration for the Schema Discovery plugin for data silos.",
+				Description: "Configuration for the Schema Discovery plugin for data silos.",
 				MinItems:    0,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -279,7 +279,7 @@ func resourceDataSilo() *schema.Resource {
 			"content_classification_plugin": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "[DEPRECATED - use disco_class_scan_config instead] Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
+				Description: "Configuration for the Content Classification plugin for data silos. To be used in conjunction with the Schema Discovery plugin.",
 				MinItems:    0,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -845,7 +845,7 @@ func resourceDataSilosUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	// Update disco class scan config if configured
 	if d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1 {
 		discoClassScanConfig := d.Get("disco_class_scan_config").([]interface{})[0].(map[string]interface{})
-		
+
 		// First, get the existing disco class scan config ID
 		var discoClassScanConfigQuery struct {
 			DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
