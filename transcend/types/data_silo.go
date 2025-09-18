@@ -163,6 +163,24 @@ type UpdatePluginInput struct {
 	ScheduleNow              graphql.Boolean `json:"scheduleNow"`
 }
 
+type DiscoClassScanConfig struct {
+	ID                graphql.String     `json:"id"`
+	DataSiloID        graphql.String     `json:"dataSiloId"`
+	Type              DiscoClassScanType `json:"type"`
+	Enabled           graphql.Boolean    `json:"enabled"`
+	ScheduleFrequency graphql.Int        `json:"scheduleFrequency"`
+	ScheduleStartAt   graphql.String     `json:"scheduleStartAt"`
+}
+
+type UpdateDiscoClassScanConfigInput struct {
+	ID                       graphql.ID          `json:"id"`
+	Enabled                  graphql.Boolean     `json:"enabled"`
+	Type                     *DiscoClassScanType `json:"type"`
+	ScheduleFrequencyMinutes graphql.Int         `json:"scheduleFrequency"`
+	ScheduleStartAt          graphql.String      `json:"scheduleStartAt"`
+	// Omitting scanPluginConfigs for now
+}
+
 type SombraOutput struct {
 	CustomerUrl  graphql.String `graphql:"customerUrl"`
 	HostedMethod graphql.String `graphql:"hostedMethod"`
@@ -187,6 +205,78 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 		ScheduleFrequencyMinutes: graphql.String(strconv.Itoa(configuration["schedule_frequency_minutes"].(int) * 1000 * 60)),
 		ScheduleStartAt:          graphql.String(configuration["schedule_start_at"].(string)),
 	}
+}
+
+func MakeStandaloneUpdateDiscoClassScanConfigInput(d *schema.ResourceData) UpdateDiscoClassScanConfigInput {
+	input := UpdateDiscoClassScanConfigInput{
+		ID:                       graphql.String(d.Get("id").(string)),
+		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
+		ScheduleFrequencyMinutes: graphql.Int(d.Get("schedule_frequency_minutes").(int) * 1000 * 60),
+	}
+
+	// Only set type if it's provided and not empty
+	if typeVal, ok := d.Get("type").(string); ok && typeVal != "" {
+		discoType := DiscoClassScanType(typeVal)
+		input.Type = &discoType
+	}
+
+	// Only set scheduleStartAt if it's provided and not empty
+	if startAtVal, ok := d.Get("schedule_start_at").(string); ok && startAtVal != "" {
+		input.ScheduleStartAt = graphql.String(startAtVal)
+	}
+
+	return input
+}
+
+func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.String) UpdateDiscoClassScanConfigInput {
+	input := UpdateDiscoClassScanConfigInput{
+		ID:                       discoClassScanConfigId,
+		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
+		ScheduleFrequencyMinutes: graphql.Int(configuration["schedule_frequency_minutes"].(int) * 1000 * 60),
+	}
+
+	// Only set type if it's provided and not empty
+	if typeVal, ok := configuration["type"].(string); ok && typeVal != "" {
+		discoType := DiscoClassScanType(typeVal)
+		input.Type = &discoType
+	}
+
+	// Only set scheduleStartAt if it's provided and not empty
+	if startAtVal, ok := configuration["schedule_start_at"].(string); ok && startAtVal != "" {
+		input.ScheduleStartAt = graphql.String(startAtVal)
+	}
+
+	return input
+}
+
+func ReadDiscoClassScanConfigIntoState(d *schema.ResourceData, config DiscoClassScanConfig) {
+	// Convert the disco class scan config to the nested block format
+	// Even though there's only one config per data silo, Terraform requires it as a list
+
+	// Convert frequency from milliseconds back to minutes
+	frequencyMinutes := int(config.ScheduleFrequency) / (1000 * 60)
+
+	// Handle optional fields safely
+	typeStr := ""
+	if config.Type != "" {
+		typeStr = string(config.Type)
+	}
+
+	scheduleStartAt := ""
+	if config.ScheduleStartAt != "" {
+		scheduleStartAt = string(config.ScheduleStartAt)
+	}
+
+	discoClassScanConfig := []interface{}{
+		map[string]interface{}{
+			"id":                         string(config.ID),
+			"enabled":                    bool(config.Enabled),
+			"type":                       typeStr,
+			"schedule_frequency_minutes": frequencyMinutes,
+			"schedule_start_at":          scheduleStartAt,
+		},
+	}
+	d.Set("disco_class_scan_config", discoClassScanConfig)
 }
 
 func ReadStandaloneDataSiloPluginIntoState(d *schema.ResourceData, plugin Plugin) {
@@ -217,11 +307,20 @@ func ReadDataSiloPluginsIntoState(d *schema.ResourceData, plugins []Plugin) {
 
 			switch plugin.Type {
 			case "SCHEMA_DISCOVERY":
-				d.Set("schema_discovery_plugin", []interface{}{configuration})
+				// Only set if schema_discovery_plugin is configured in the original config
+				if _, ok := d.GetOk("schema_discovery_plugin"); ok {
+					d.Set("schema_discovery_plugin", []interface{}{configuration})
+				}
 			case "CONTENT_CLASSIFICATION":
-				d.Set("content_classification_plugin", []interface{}{configuration})
+				// Only set if content_classification_plugin is configured in the original config
+				if _, ok := d.GetOk("content_classification_plugin"); ok {
+					d.Set("content_classification_plugin", []interface{}{configuration})
+				}
 			case "DATA_SILO_DISCOVERY":
-				d.Set("data_silo_discovery_plugin", []interface{}{configuration})
+				// Only set if data_silo_discovery_plugin is configured in the original config
+				if _, ok := d.GetOk("data_silo_discovery_plugin"); ok {
+					d.Set("data_silo_discovery_plugin", []interface{}{configuration})
+				}
 			}
 		}
 	}

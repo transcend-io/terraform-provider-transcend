@@ -20,7 +20,7 @@ func destroyDataSiloByTitle(t *testing.T, title string) {
 			Nodes []struct {
 				ID    graphql.String `json:"id"`
 				Title graphql.String `json:"title"`
-			}
+			}  
 		} `graphql:"dataSilos(filterBy: { titles: [$title] })"`
 	}
 	vars := map[string]interface{}{
@@ -65,6 +65,24 @@ func lookupDataSiloPlugin(t *testing.T, id string) []types.Plugin {
 	return query.Plugins.Plugins
 }
 
+func lookupDataSiloDiscoClassScanConfig(t *testing.T, id string) types.DiscoClassScanConfig {
+	client := getTestClient()
+
+	var query struct {
+		DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
+	}
+	vars := map[string]interface{}{
+		"dataSiloId": graphql.ID(id),
+	}
+
+	err := client.graphql.Query(context.Background(), &query, vars, graphql.OperationName("DiscoClassScanConfig"))
+	if err != nil {
+		return types.DiscoClassScanConfig{}
+	}
+
+	return query.DiscoClassScanConfig
+}
+
 func lookupDataSilo(t *testing.T, id string) types.DataSilo {
 	client := getTestClient()
 
@@ -94,19 +112,20 @@ func prepareDataSiloOptions(t *testing.T, vars map[string]interface{}) *terrafor
 	return terraformOptions
 }
 
-func deployDataSilo(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin) {
+func deployDataSilo(t *testing.T, terraformOptions *terraform.Options) (types.DataSilo, []types.Plugin, types.DiscoClassScanConfig) {
 	terraform.InitAndApplyAndIdempotent(t, terraformOptions)
 	assert.NotEmpty(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	silo := lookupDataSilo(t, terraform.Output(t, terraformOptions, "dataSiloId"))
 	plugin := lookupDataSiloPlugin(t, terraform.Output(t, terraformOptions, "dataSiloId"))
-	return silo, plugin
+	discoClassScanConfig := lookupDataSiloDiscoClassScanConfig(t, terraform.Output(t, terraformOptions, "dataSiloId"))
+	return silo, plugin, discoClassScanConfig
 }
 
 func TestCanCreateAndDestroyDataSilo(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 }
@@ -115,7 +134,7 @@ func TestCanConnectAwsDataSilo(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"skip_connecting": false})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.NotEmpty(t, terraform.Output(t, options, "awsExternalId"))
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
@@ -142,7 +161,7 @@ func TestCanConnectDatadogDataSilo(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 }
@@ -151,6 +170,15 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
+		"disco_class_scan_config_vars": []map[string]interface{}{
+			{
+				"enabled":                    true,
+				"type":                       "SCHEMA_ONLY",
+				"schedule_frequency_minutes": 120,
+				// Schedule far in the future so that the test works for a long time
+				"schedule_start_at": "2122-09-06T17:51:13.000Z",
+			},
+		},
 		"schema_discovery_plugin_config": []map[string]interface{}{
 			{
 				"enabled":                    true,
@@ -161,7 +189,7 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 		},
 		"content_classification_plugin_config": []map[string]interface{}{
 			{
-				"enabled":                    true,
+				"enabled":                    false,
 				"schedule_frequency_minutes": 120,
 				// Schedule far in the future so that the test works for a long time
 				"schedule_start_at": "2122-09-06T17:51:13.000Z",
@@ -169,24 +197,38 @@ func TestCanConnectSchemaDiscoveryAndContentClassificationPlugin(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, plugins := deployDataSilo(t, options)
+	silo, plugins, discoClassScanConfig := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
+	assert.True(t, bool(discoClassScanConfig.Enabled))
+	assert.NotEmpty(t, discoClassScanConfig.ID)
+	assert.Equal(t, types.DiscoClassScanType("SCHEMA_ONLY"), discoClassScanConfig.Type)
 	assert.Len(t, plugins, 2)
+	hasSchemaDiscovery := false
+	hasContentClassification := false
 	for _, plugin := range plugins {
-		assert.True(t, bool(plugin.Enabled))
 		assert.NotEmpty(t, plugin.ID)
+		if plugin.Type == "SCHEMA_DISCOVERY" {
+			hasSchemaDiscovery = true
+			assert.True(t, bool(plugin.Enabled))
+		}
+		if plugin.Type == "CONTENT_CLASSIFICATION" {
+			hasContentClassification = true
+			assert.False(t, bool(plugin.Enabled))
+		}
 	}
+	assert.True(t, hasSchemaDiscovery)
+	assert.True(t, hasContentClassification)
 }
 
 func TestCanChangeTitle(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name()})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"title": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Title)
 }
 
@@ -194,10 +236,10 @@ func TestCanChangeDescription(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name()})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name() + "_2"}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"description": t.Name() + "_2"}))
 	assert.Equal(t, graphql.String(t.Name()+"_2"), silo.Description)
 }
 
@@ -222,11 +264,11 @@ func TestCanChangeSaasContext(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{
 		"skip_connecting": false,
 		"type":            "datadog",
 		"secret_context": []map[string]interface{}{
@@ -268,7 +310,7 @@ func TestThatChangingSaasContextToInvalidValueDoesNotDestroySilo(t *testing.T) {
 		},
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String(t.Name()), silo.Title)
 	assert.Equal(t, types.DataSiloConnectionState("CONNECTED"), silo.ConnectionState)
 
@@ -300,10 +342,10 @@ func TestCanChangeUrl(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.webhook", "type": "server"})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("https://some.webhook"), silo.URL)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"url": "https://some.other.webhook", "type": "server"}))
 	assert.Equal(t, graphql.String("https://some.other.webhook"), silo.URL)
 }
 
@@ -311,10 +353,10 @@ func TestCanChangeNotifyEmailAddress(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "david@transcend.io"})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("david@transcend.io"), silo.NotifyEmailAddress)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "mike@transcend.io"}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"notify_email_address": "mike@transcend.io"}))
 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.NotifyEmailAddress)
 }
 
@@ -322,13 +364,13 @@ func TestCanChangeIsLive(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"is_live": false})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": true}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": true}))
 	assert.Equal(t, graphql.Boolean(true), silo.IsLive)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": false}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"is_live": false}))
 	assert.Equal(t, graphql.Boolean(false), silo.IsLive)
 }
 
@@ -336,10 +378,10 @@ func TestCanChangeOwners(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"david@transcend.io"}})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("david@transcend.io"), silo.Owners[0].Email)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_emails": []string{"mike@transcend.io"}}))
 	assert.Equal(t, graphql.String("mike@transcend.io"), silo.Owners[0].Email)
 }
 
@@ -347,10 +389,10 @@ func TestCanChangeOwnerTeams(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Engineers"}})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("Engineers"), silo.Teams[0].Name)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Legal"}}))
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"owner_teams": []string{"Legal"}}))
 	assert.Equal(t, graphql.String("Legal"), silo.Teams[0].Name)
 }
 
@@ -364,11 +406,11 @@ func TestCanChangeHeaders(t *testing.T) {
 		},
 	}})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("someHeader"), silo.Headers[0].Name)
 	assert.Equal(t, graphql.String("someHeaderValue"), silo.Headers[0].Value)
 
-	silo, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
+	silo, _, _ = deployDataSilo(t, prepareDataSiloOptions(t, map[string]interface{}{"headers": []map[string]interface{}{
 		{
 			"name":      "someOtherHeader",
 			"value":     "someOtherHeaderValue",
@@ -386,7 +428,7 @@ func TestCanCreatePromptAPersonSilo(t *testing.T) {
 		"outer_type": "coupa",
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("coupa"), silo.OuterType)
 	assert.Equal(t, graphql.String("promptAPerson"), silo.Type)
 	assert.Equal(t, graphql.Boolean(true), silo.Catalog.HasAvcFunctionality)
@@ -400,7 +442,7 @@ func TestCanSetPromptAPersonNotifyEmailAddress(t *testing.T) {
 		"notify_email_address": "not.real.email@transcend.io",
 	})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("promptAPerson"), silo.Type)
 	assert.Equal(t, graphql.Boolean(true), silo.Catalog.HasAvcFunctionality)
 	assert.Equal(t, graphql.String("not.real.email@transcend.io"), silo.NotifyEmailAddress)
@@ -411,7 +453,7 @@ func TestCanAddSombraId(t *testing.T) {
 	destroyDataSiloByTitle(t, t.Name())
 	options := prepareDataSiloOptions(t, map[string]interface{}{"sombra_id": "c29ba149-b7b4-4ff1-a93f-b24641271ea7"})
 	defer terraform.Destroy(t, options)
-	silo, _ := deployDataSilo(t, options)
+	silo, _, _ := deployDataSilo(t, options)
 	assert.Equal(t, graphql.String("c29ba149-b7b4-4ff1-a93f-b24641271ea7"), silo.SombraId)
 }
 
@@ -435,8 +477,8 @@ func TestOwnerEmailsOrderIndependence(t *testing.T) {
 	defer terraform.Destroy(t, optionsA)
 	defer terraform.Destroy(t, optionsB)
 
-	siloA, _ := deployDataSilo(t, optionsA)
-	siloB, _ := deployDataSilo(t, optionsB)
+	siloA, _, _ := deployDataSilo(t, optionsA)
+	siloB, _, _ := deployDataSilo(t, optionsB)
 
 	// Both silos should have the same owner emails in state, regardless of input order
 	var outputA, outputB []string

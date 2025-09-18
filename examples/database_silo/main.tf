@@ -153,8 +153,9 @@ module "postgresDb" {
 resource "transcend_data_silo" "database" {
   type = "database"
 
-  schema_discovery_plugin {
+  disco_class_scan_config {
     enabled                    = true
+    type                       = "SCHEMA_ONLY"
     schedule_frequency_minutes = 1440 # 1 day
     schedule_start_at          = "2022-09-06T17:51:13.000Z"
   }

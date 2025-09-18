@@ -85,6 +85,16 @@ variable "sombra_id" {
   default = null
 }
 
+variable "disco_class_scan_config_vars" {
+  type = list(object({
+    enabled                    = bool
+    type                       = string
+    schedule_frequency_minutes = number
+    schedule_start_at          = string
+  }))
+  default = []
+}
+
 resource "transcend_data_silo" "silo" {
   type                 = var.type
   title                = var.title
@@ -97,6 +107,16 @@ resource "transcend_data_silo" "silo" {
   outer_type           = var.outer_type
   skip_connecting      = var.skip_connecting
   sombra_id            = var.sombra_id
+
+  dynamic "disco_class_scan_config" {
+    for_each = var.disco_class_scan_config_vars
+    content {
+      enabled                    = disco_class_scan_config.value["enabled"]
+      type                       = disco_class_scan_config.value["type"]
+      schedule_frequency_minutes = disco_class_scan_config.value["schedule_frequency_minutes"]
+      schedule_start_at          = disco_class_scan_config.value["schedule_start_at"]
+    }
+  }
 
   dynamic "schema_discovery_plugin" {
     for_each = var.schema_discovery_plugin_config
