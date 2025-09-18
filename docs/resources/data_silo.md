@@ -525,7 +525,6 @@ Optional:
 Read-Only:
 
 - `id` (String) The ID of this resource.
-- `last_disco_class_scan_id` (String) The ID of the last disco class scan
 
 
 <a id="nestedblock--headers"></a>

@@ -164,28 +164,20 @@ type UpdatePluginInput struct {
 }
 
 type DiscoClassScanConfig struct {
-	ID                       graphql.String     `json:"id"`
-	DataSiloID               graphql.String     `json:"dataSiloId"`
-	Type                     DiscoClassScanType `json:"type"`
-	Enabled                  graphql.Boolean    `json:"enabled"`
+	ID                graphql.String     `json:"id"`
+	DataSiloID        graphql.String     `json:"dataSiloId"`
+	Type              DiscoClassScanType `json:"type"`
+	Enabled           graphql.Boolean    `json:"enabled"`
 	ScheduleFrequency graphql.Int        `json:"scheduleFrequency"`
-	LastDiscoClassScanId     graphql.String     `json:"lastDiscoClassScanId"`
-	ScheduleStartAt          graphql.String     `json:"scheduleStartAt"`
-	LastDiscoClassScan       struct {
-		Type        DiscoClassScanType   `json:"type"`
-		Status      DiscoClassScanStatus `json:"status"`
-		StartedAt   graphql.String       `json:"startedAt"`
-		CompletedAt graphql.String       `json:"completedAt"`
-		AvgDuration graphql.Float        `json:"avgDuration"`
-	} `json:"lastDiscoClassScan"`
+	ScheduleStartAt   graphql.String     `json:"scheduleStartAt"`
 }
 
 type UpdateDiscoClassScanConfigInput struct {
-	ID                			graphql.ID         	`json:"id"`
-	Enabled           			graphql.Boolean    	`json:"enabled"`
-	Type              			*DiscoClassScanType	`json:"type"`
-	ScheduleFrequencyMinutes	graphql.Int       	`json:"scheduleFrequency"`
-	ScheduleStartAt   			graphql.String    	`json:"scheduleStartAt"`
+	ID                       graphql.ID          `json:"id"`
+	Enabled                  graphql.Boolean     `json:"enabled"`
+	Type                     *DiscoClassScanType `json:"type"`
+	ScheduleFrequencyMinutes graphql.Int         `json:"scheduleFrequency"`
+	ScheduleStartAt          graphql.String      `json:"scheduleStartAt"`
 	// Omitting scanPluginConfigs for now
 }
 
@@ -217,77 +209,71 @@ func MakeUpdatePluginInput(d *schema.ResourceData, configuration map[string]inte
 
 func MakeStandaloneUpdateDiscoClassScanConfigInput(d *schema.ResourceData) UpdateDiscoClassScanConfigInput {
 	input := UpdateDiscoClassScanConfigInput{
-		ID:                graphql.String(d.Get("id").(string)),
-		Enabled:           graphql.Boolean(d.Get("enabled").(bool)),
+		ID:                       graphql.String(d.Get("id").(string)),
+		Enabled:                  graphql.Boolean(d.Get("enabled").(bool)),
 		ScheduleFrequencyMinutes: graphql.Int(d.Get("schedule_frequency_minutes").(int) * 1000 * 60),
 	}
-	
+
 	// Only set type if it's provided and not empty
 	if typeVal, ok := d.Get("type").(string); ok && typeVal != "" {
 		discoType := DiscoClassScanType(typeVal)
 		input.Type = &discoType
 	}
-	
+
 	// Only set scheduleStartAt if it's provided and not empty
 	if startAtVal, ok := d.Get("schedule_start_at").(string); ok && startAtVal != "" {
 		input.ScheduleStartAt = graphql.String(startAtVal)
 	}
-	
+
 	return input
 }
 
 func MakeUpdateDiscoClassScanConfigInput(d *schema.ResourceData, configuration map[string]interface{}, discoClassScanConfigId graphql.String) UpdateDiscoClassScanConfigInput {
 	input := UpdateDiscoClassScanConfigInput{
-		ID:                discoClassScanConfigId,
-		Enabled:           graphql.Boolean(configuration["enabled"].(bool)),
+		ID:                       discoClassScanConfigId,
+		Enabled:                  graphql.Boolean(configuration["enabled"].(bool)),
 		ScheduleFrequencyMinutes: graphql.Int(configuration["schedule_frequency_minutes"].(int) * 1000 * 60),
 	}
-	
+
 	// Only set type if it's provided and not empty
 	if typeVal, ok := configuration["type"].(string); ok && typeVal != "" {
 		discoType := DiscoClassScanType(typeVal)
 		input.Type = &discoType
 	}
-	
+
 	// Only set scheduleStartAt if it's provided and not empty
 	if startAtVal, ok := configuration["schedule_start_at"].(string); ok && startAtVal != "" {
 		input.ScheduleStartAt = graphql.String(startAtVal)
 	}
-	
+
 	return input
 }
 
 func ReadDiscoClassScanConfigIntoState(d *schema.ResourceData, config DiscoClassScanConfig) {
 	// Convert the disco class scan config to the nested block format
 	// Even though there's only one config per data silo, Terraform requires it as a list
-	
+
 	// Convert frequency from milliseconds back to minutes
 	frequencyMinutes := int(config.ScheduleFrequency) / (1000 * 60)
-	
+
 	// Handle optional fields safely
 	typeStr := ""
 	if config.Type != "" {
 		typeStr = string(config.Type)
 	}
-	
+
 	scheduleStartAt := ""
 	if config.ScheduleStartAt != "" {
 		scheduleStartAt = string(config.ScheduleStartAt)
 	}
-	
-	lastDiscoClassScanId := ""
-	if config.LastDiscoClassScanId != "" {
-		lastDiscoClassScanId = string(config.LastDiscoClassScanId)
-	}
-	
+
 	discoClassScanConfig := []interface{}{
 		map[string]interface{}{
-			"id":                       string(config.ID),
-			"enabled":                  bool(config.Enabled),
-			"type":                     typeStr,
+			"id":                         string(config.ID),
+			"enabled":                    bool(config.Enabled),
+			"type":                       typeStr,
 			"schedule_frequency_minutes": frequencyMinutes,
-			"schedule_start_at":        scheduleStartAt,
-			"last_disco_class_scan_id": lastDiscoClassScanId,
+			"schedule_start_at":          scheduleStartAt,
 		},
 	}
 	d.Set("disco_class_scan_config", discoClassScanConfig)

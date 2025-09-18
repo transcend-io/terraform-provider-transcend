@@ -37,13 +37,8 @@ func resourceDiscoClassScanConfig() *schema.Resource {
 				Description: "Whether or not scheduling is enabled",
 			},
 			"schedule_frequency_minutes": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-			},
-			"last_disco_class_scan_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of the last disco class scan",
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 			"schedule_start_at": {
 				Type:     schema.TypeString,
@@ -76,15 +71,14 @@ func resourceDiscoClassScanConfigRead(ctx context.Context, d *schema.ResourceDat
 
 	// Set the other fields in the state
 	config := discoClassScanConfigQuery.DiscoClassScanConfig
-	
+
 	// Convert frequency from milliseconds back to minutes
 	frequencyMinutes := int(config.ScheduleFrequency) / (1000 * 60)
-	
+
 	d.Set("enabled", bool(config.Enabled))
 	d.Set("type", string(config.Type))
 	d.Set("schedule_frequency_minutes", frequencyMinutes)
 	d.Set("schedule_start_at", string(config.ScheduleStartAt))
-	d.Set("last_disco_class_scan_id", string(config.LastDiscoClassScanId))
 
 	return diags
 }
