@@ -196,11 +196,6 @@ func resourceDataSilo() *schema.Resource {
 							Optional:    true,
 							Description: "The start time when we should start scheduling this disco class scan, in ISO format",
 						},
-						"last_disco_class_scan_id": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The ID of the last disco class scan",
-						},
 					},
 				},
 			},
@@ -509,7 +504,7 @@ func resourceDataSilosRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// Read the disco class scan config information
-	if d.Get("disco_class_scan_config") != nil && len(d.Get("disco_class_scan_config").([]interface{})) == 1 {
+	if _, ok := d.GetOk("disco_class_scan_config"); ok {
 		var discoClassScanConfigQuery struct {
 			DiscoClassScanConfig types.DiscoClassScanConfig `graphql:"discoClassScanConfig(input: { dataSiloId: $dataSiloId })"`
 		}
